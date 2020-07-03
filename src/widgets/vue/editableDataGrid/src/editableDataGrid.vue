@@ -1,19 +1,19 @@
 <template>
-
     <div class='container'>
         <HeaderRow v-if="userHasHeaders" :headers="virtualColumns"></HeaderRow>
-        <div style="width:100%">
-            <DataRow v-for="(row,index) in gridConfig.Rows" :key="index" :rowIndex="index" :rowData="row" :virtualColumns="virtualColumns"></DataRow>            
-
+        <div ref='dataRow' class="dataRow" @scroll="debounceScroll" style="width:100%">
+            <DataRow  v-for="(row,index) in gridData" :key="index" :rowIndex="index" :rowData="row" :virtualColumns="virtualColumns"></DataRow>            
         </div>
     </div>
-
 </template>
 <script>
 
 import HeaderRow from './components/HeaderRow'
 import DataRow from './components/DataRow'
+import debounce from 'lodash.debounce'
 import { colors } from '../../../../assets/shiftTwo'
+import axios from 'axios'
+
 export default {
     name:"EditableDataGrid",
     components: {
@@ -25,6 +25,7 @@ export default {
             headers:{
                 hasHeaders:false
             },
+            gridData:[],
             userHasHeaders:false,
             virtualColumns:[],
             defaultValues:{
@@ -36,7 +37,7 @@ export default {
                     borderColor:'',
                     textColor:'',
                     alignment:'',
-                    dataAllignment:''
+                    dataAlignment:''
                 }
             }
         };
@@ -45,6 +46,7 @@ export default {
     },
     methods: {
         deriveHeaders(){
+            console.log("TICKTOCK - DERIVING HEADERS", new Date())
             let hasHeader=false
             for (let i = 0; i < this.gridConfig.Columns.length; i++) {
                 let tmp ={}
@@ -60,7 +62,7 @@ export default {
                     tmp.borderWidth=this.gridConfig.Columns[i].header.borderWidth?this.gridConfig.Columns[i].header.borderWidth:this.defaultValues.columnValues.borderWidth
                     tmp.borderColor=this.gridConfig.Columns[i].header.borderColor?this.gridConfig.Columns[i].header.borderColor:this.defaultValues.columnValues.borderColor     
                     tmp.dataProperty=this.gridConfig.Columns[i].dataProperty?this.gridConfig.Columns[i].dataProperty:''
-                    tmp.dataAllignment=this.gridConfig.Columns[i].dataAllignment?this.translateAlignment(this.gridConfig.Columns[i].dataAllignment):this.defaultValues.columnValues.dataAllignment
+                    tmp.dataAlignment=this.gridConfig.Columns[i].dataAlignment?this.translateAlignment(this.gridConfig.Columns[i].dataAlignment):this.defaultValues.columnValues.dataAlignment
                 } else {
                     tmp.columnIndex = i;
                     tmp.text=''
@@ -72,11 +74,12 @@ export default {
                     tmp.borderWidth=''
                     tmp.borderColor=''
                     tmp.dataProperty=''
-                    tmp.dataAllignment=''
+                    tmp.dataAlignment=''
                 }
                 this.userHasHeaders=hasHeader
                 this.virtualColumns.push(tmp)
             }
+            console.log("TICKTOCK - DONE", new Date())
         },
         setDefaultValues(){
            this.defaultValues.columnValues.backgroundColor = colors.editableDataGrid.defaultHeaderColor
@@ -86,7 +89,7 @@ export default {
            this.defaultValues.columnValues.width = Math.round((100/this.gridConfig.Columns.length),1)+'%'
            this.defaultValues.columnValues.borderWidth = '1px'
            this.defaultValues.columnValues.alignment = 'center'
-           this.defaultValues.columnValues.dataAllignment = 'center'
+           this.defaultValues.columnValues.dataAlignment = 'center'
         },
         translateAlignment(val){
            switch (val) {
@@ -97,7 +100,25 @@ export default {
             default:
                 return 'center'
            }
-        }
+        },
+        async getTestData(){
+            console.log("TICKTOCK - GETTING DATA", new Date())
+            await axios.get('http://localhost:5003/client/741/client-lists/1/list-data/1')
+            .then(results=>{
+                this.gridData = results.data.slice(1,1000)
+                this.fullDS = results.data
+                console.log("TICKTOCK - DONE", new Date())
+            })
+        },
+        debounceScroll: debounce(function (event){
+            let numToAdd = 5;
+            if((event.srcElement.scrollHeight - event.srcElement.scrollTop)<=4000){
+                numToAdd = 700;
+            }
+            const currentlyViewing=this.gridData
+            const nextBatch = this.fullDS.slice(currentlyViewing.length,currentlyViewing.length+numToAdd)
+            this.gridData = [...currentlyViewing, ...nextBatch]
+        },300)
     },
     props:{
         gridConfig:{
@@ -105,13 +126,21 @@ export default {
             required: true
         }
     },        
-    
-    mounted(){
+    async mounted(){
+        await this.getTestData()
         this.setDefaultValues()
         this.deriveHeaders()
+
   }
 };
 </script>
-<style>
+<style scoped>
+.dataRow{
+    max-height: 600px;
+    overflow: auto;
+}
+.dataRow :hover{
+    background-color: #E8E8E8;
+}
 
 </style>

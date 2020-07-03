@@ -47,12 +47,15 @@ export default {
         display:flex;
         flex-direction:row;
         align-items: center;
+        border-bottom: 1px solid #C8C8C8;
     }
     .headerCell{
         display:flex; 
         flex-direction:row; 
         align-items:center; 
-        justify-content:center;       
+        justify-content:center; 
+        font-size: 15px; 
+        font-family:Arial, Helvetica, sans-serif;
         padding-left:5px;
         padding-right:5px;
     }

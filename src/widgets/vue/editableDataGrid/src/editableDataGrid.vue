@@ -2,8 +2,9 @@
 
     <div class='container'>
         <HeaderRow v-if="userHasHeaders" :headers="virtualColumns"></HeaderRow>
-        <div>
-            <DataRow v-for="(row,index) in gridConfig.Rows" :key="index" :rowData="row" :virtualColumns="virtualColumns"></DataRow>            
+        <div style="width:100%">
+            <DataRow v-for="(row,index) in gridConfig.Rows" :key="index" :rowIndex="index" :rowData="row" :virtualColumns="virtualColumns"></DataRow>            
+
         </div>
     </div>
 
@@ -35,6 +36,7 @@ export default {
                     borderColor:'',
                     textColor:'',
                     alignment:'',
+                    dataAllignment:''
                 }
             }
         };
@@ -58,6 +60,7 @@ export default {
                     tmp.borderWidth=this.gridConfig.Columns[i].header.borderWidth?this.gridConfig.Columns[i].header.borderWidth:this.defaultValues.columnValues.borderWidth
                     tmp.borderColor=this.gridConfig.Columns[i].header.borderColor?this.gridConfig.Columns[i].header.borderColor:this.defaultValues.columnValues.borderColor     
                     tmp.dataProperty=this.gridConfig.Columns[i].dataProperty?this.gridConfig.Columns[i].dataProperty:''
+                    tmp.dataAllignment=this.gridConfig.Columns[i].dataAllignment?this.translateAlignment(this.gridConfig.Columns[i].dataAllignment):this.defaultValues.columnValues.dataAllignment
                 } else {
                     tmp.columnIndex = i;
                     tmp.text=''
@@ -69,6 +72,7 @@ export default {
                     tmp.borderWidth=''
                     tmp.borderColor=''
                     tmp.dataProperty=''
+                    tmp.dataAllignment=''
                 }
                 this.userHasHeaders=hasHeader
                 this.virtualColumns.push(tmp)
@@ -82,6 +86,7 @@ export default {
            this.defaultValues.columnValues.width = Math.round((100/this.gridConfig.Columns.length),1)+'%'
            this.defaultValues.columnValues.borderWidth = '1px'
            this.defaultValues.columnValues.alignment = 'center'
+           this.defaultValues.columnValues.dataAllignment = 'center'
         },
         translateAlignment(val){
            switch (val) {

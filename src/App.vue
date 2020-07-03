@@ -1,17 +1,25 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <EditableDataGrid :gridConfig="localData"></EditableDataGrid>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import EditableDataGrid from './widgets/vue/editableDataGrid/src/EditableDataGrid'
+import gridData from './widgets/vue/editableDataGrid/data/data.js'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    EditableDataGrid
+  },
+  data(){
+    return {
+        localData:gridData
+    }
+  },
+  mounted(){
+    console.log('data', gridData)
   }
 }
 </script>

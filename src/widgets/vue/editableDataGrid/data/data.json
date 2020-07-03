@@ -1,0 +1,53 @@
+
+{
+    "Headers":[
+        {
+            "text":"Header 1",
+            "width":"20%",
+            "height":"30px;", 
+            "backgroundColor":"",
+            "textColor":"",
+            "borderWidth":"",
+            "borderColor":""
+        },
+        {
+            "text":"Header 2",
+            "width":"20%",
+            "height":"30px;", 
+            "backgroundColor":"",
+            "textColor":"",
+            "borderWidth":"",
+            "borderColor":""
+        },
+        {
+            "text":"Header 3",
+            "width":"20%",
+            "height":"30px;", 
+            "backgroundColor":"",
+            "textColor":"",
+            "borderWidth":"",
+            "borderColor":""
+        },
+        {
+            "text":"Header 4",
+            "width":"20%",
+            "height":"30px;", 
+            "backgroundColor":"",
+            "textColor":"",
+            "borderWidth":"",
+            "borderColor":""
+        },
+        {
+            "text":"Header 5",
+            "width":"20%",
+            "height":"30px;", 
+            "backgroundColor":"",
+            "textColor":"",
+            "borderWidth":"",
+            "borderColor":""
+        }
+    ],
+    "Columns":[{},{}],
+    "Rows":[{},{}],
+    "PagingConfiguration":"" 
+}

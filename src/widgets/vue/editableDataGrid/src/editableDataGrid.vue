@@ -1,7 +1,9 @@
 <template>
     <div class='container'>
-        <HeaderRow v-if="userHasHeaders" :headers="virtualColumns"></HeaderRow>
-        <div ref='dataRow' class="dataRow" @scroll="debounceScroll" style="width:100%">
+        <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1].backgroundColor}`">
+            <HeaderRow v-if="userHasHeaders" :gridWillScroll="gridWillScroll()" :headers="virtualColumns"></HeaderRow>
+        </div>
+        <div ref='dataRow' class="dataRow" @scroll="debounceScroll" :style="`max-height:${gridConfig.Height}; overflow: auto; width:100%;`">
             <DataRow  v-for="(row,index) in gridData" :key="index" :rowIndex="index" :rowData="row" :virtualColumns="virtualColumns"></DataRow>            
         </div>
     </div>
@@ -79,7 +81,23 @@ export default {
                 this.userHasHeaders=hasHeader
                 this.virtualColumns.push(tmp)
             }
+            
             console.log("TICKTOCK - DONE", new Date())
+        },
+        gridWillScroll(){
+            let height = 600
+            let retVal = false
+            if(this.gridConfig.Height){
+                //should come in as ###px but users are users 
+                if(this.gridConfig.Height.includes('px')){
+                    height = this.gridConfig.Height.split('p')[0]
+                }
+            }
+            if (this.fullDS.length*30>height)
+            {
+                retVal=true
+            }
+            return retVal
         },
         setDefaultValues(){
            this.defaultValues.columnValues.backgroundColor = colors.editableDataGrid.defaultHeaderColor
@@ -107,18 +125,25 @@ export default {
             .then(results=>{
                 this.gridData = results.data.slice(1,1000)
                 this.fullDS = results.data
+                this.workingDS = results.data
                 console.log("TICKTOCK - DONE", new Date())
             })
         },
         debounceScroll: debounce(function (event){
+            console.log(this.$refs.dataRow.scrollHeight, this.$refs.dataRow.clientHeight)
             let numToAdd = 5;
             if((event.srcElement.scrollHeight - event.srcElement.scrollTop)<=4000){
-                numToAdd = 700;
+                numToAdd = 1000;
             }
             const currentlyViewing=this.gridData
-            const nextBatch = this.fullDS.slice(currentlyViewing.length,currentlyViewing.length+numToAdd)
+            let nextBatch = []
+            for (let i = currentlyViewing.length; i < currentlyViewing.length+numToAdd; i++) {  
+                if(this.fullDS[i] && Object.keys(this.fullDS[i]>0)){
+                    nextBatch.push(this.fullDS[i])
+                }
+            }
             this.gridData = [...currentlyViewing, ...nextBatch]
-        },300)
+        },50)
     },
     props:{
         gridConfig:{
@@ -131,13 +156,14 @@ export default {
         this.setDefaultValues()
         this.deriveHeaders()
 
+        
+
   }
 };
 </script>
 <style scoped>
 .dataRow{
-    max-height: 600px;
-    overflow: auto;
+    
 }
 .dataRow :hover{
     background-color: #E8E8E8;

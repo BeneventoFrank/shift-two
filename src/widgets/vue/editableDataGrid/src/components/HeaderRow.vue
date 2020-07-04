@@ -1,5 +1,5 @@
 <template>
-    <div class='headerRow'>
+    <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
         <span 
             class="headerCell"
             v-for="(header) in headers" 
@@ -26,9 +26,13 @@ export default {
     },
     computed: {
     },
+    
     props:{
         headers:{
             type:Array
+        },
+        gridWillScroll:{
+            type:Boolean
         }
     },        
     methods: {
@@ -43,7 +47,6 @@ export default {
 </script>
 <style scoped>
     .headerRow{
-        width:100%;
         display:flex;
         flex-direction:row;
         align-items: center;

@@ -1,7 +1,7 @@
 <template>
     <div v-if="virtualColumns.length>0"  :class="rowIndex%2===0?'evenRow':'oddRow'" class='data'>
-        <span :ref="`dataRow${index}`" class="cell" v-for="(data,index) in Object.keys(rowData)" :key="index" :style="`width:${virtualColumns[index].width}; background-color:${virtualColumns[index].hoverBackgroundColor}; color:${virtualColumns[index].textColor}; justify-content:${virtualColumns[index].dataAlignment}; `">
-            {{rowData[data]}} {{rowIndex}}
+        <span :ref="`dataRow${index}`" class="cell" v-for="(data,index) in Object.keys(rowData)" :key="index" :style="`width:${virtualColumns[index].width};   background-color:${virtualColumns[index].hoverBackgroundColor}; color:${virtualColumns[index].textColor}; justify-content:${virtualColumns[index].dataAlignment}; `">
+            {{rowData[data]}}
         </span>
     </div>
 </template>

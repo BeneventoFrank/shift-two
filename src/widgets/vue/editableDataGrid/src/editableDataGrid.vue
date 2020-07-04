@@ -1,6 +1,6 @@
 <template>
     <div class='container'>
-        <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1].backgroundColor}`">
+        <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" :gridWillScroll="gridWillScroll()" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class="dataRow" @scroll="debounceScroll" :style="`max-height:${gridConfig.Height}; overflow: auto; width:100%;`">
@@ -27,6 +27,7 @@ export default {
             headers:{
                 hasHeaders:false
             },
+            highestScrollPosition:0,
             gridData:[],
             userHasHeaders:false,
             virtualColumns:[],
@@ -130,19 +131,24 @@ export default {
             })
         },
         debounceScroll: debounce(function (event){
-            console.log(this.$refs.dataRow.scrollHeight, this.$refs.dataRow.clientHeight)
-            let numToAdd = 5;
-            if((event.srcElement.scrollHeight - event.srcElement.scrollTop)<=4000){
-                numToAdd = 1000;
-            }
-            const currentlyViewing=this.gridData
-            let nextBatch = []
-            for (let i = currentlyViewing.length; i < currentlyViewing.length+numToAdd; i++) {  
-                if(this.fullDS[i] && Object.keys(this.fullDS[i]>0)){
-                    nextBatch.push(this.fullDS[i])
+            //we only want to add records if they are scrolling down. 
+            //so we need to keep track of the scrollHeight.
+            //if its going up, add some  if its <= the highest its been. then don't add any
+            if(this.highestScrollPosition<event.srcElement.scrollTop){
+                let numToAdd = 5;
+                if((event.srcElement.scrollHeight - event.srcElement.scrollTop)<=4000){
+                    numToAdd = 1000;
                 }
+                const currentlyViewing=this.gridData
+                let nextBatch = []
+                for (let i = currentlyViewing.length; i < currentlyViewing.length+numToAdd; i++) {  
+                    if(this.fullDS[i] && Object.keys(this.fullDS[i]>0)){
+                        nextBatch.push(this.fullDS[i])
+                    }
+                }
+                this.gridData = [...currentlyViewing, ...nextBatch]
+                this.highestScrollPosition = event.srcElement.scrollTop
             }
-            this.gridData = [...currentlyViewing, ...nextBatch]
         },50)
     },
     props:{

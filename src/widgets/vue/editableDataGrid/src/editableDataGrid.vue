@@ -1,7 +1,7 @@
 <template>
-    <div class='container'>
+    <div ref="grid" style='width:100%;' class='container'>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" :gridWillScroll="gridWillScroll()" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" :gridWillScroll="gridWillScroll()" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class="dataRow" @scroll="debounceScroll" :style="`max-height:${gridConfig.Height}; overflow: auto; width:100%;`">
             <DataRow  v-for="(row,index) in gridData" :key="index" :rowIndex="index" :rowData="row" :virtualColumns="virtualColumns"></DataRow>            
@@ -27,10 +27,17 @@ export default {
             headers:{
                 hasHeaders:false
             },
+            gridWidth:0,
             highestScrollPosition:0,
             gridData:[],
+            fullDS:[],
+            initialSlice:[],
             userHasHeaders:false,
             virtualColumns:[],
+            filterStrategy:{
+                isCurrentlyFiltering:false,
+                filters:{}
+            },
             defaultValues:{
                 columnValues:{
                     width:'',
@@ -48,6 +55,9 @@ export default {
     computed: {
     },
     methods: {
+        getWidthOfGrid(){
+            return this.$refs.grid.offsetWidth
+        },
         deriveHeaders(){
             console.log("TICKTOCK - DERIVING HEADERS", new Date())
             let hasHeader=false
@@ -100,6 +110,9 @@ export default {
             }
             return retVal
         },
+        handleResizeGrid(){
+            debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()
+        },
         setDefaultValues(){
            this.defaultValues.columnValues.backgroundColor = colors.editableDataGrid.defaultHeaderColor
            this.defaultValues.columnValues.borderColor = colors.editableDataGrid.defaultBorderColor
@@ -125,6 +138,7 @@ export default {
             await axios.get('http://localhost:5003/client/741/client-lists/1/list-data/1')
             .then(results=>{
                 this.gridData = results.data.slice(1,1000)
+                this.initialSlice = this.gridData //this is the initial slice that went to the screen. if you clear filter.. return it so its faster, then lazy load again
                 this.fullDS = results.data
                 this.workingDS = results.data
                 console.log("TICKTOCK - DONE", new Date())
@@ -133,7 +147,7 @@ export default {
         debounceScroll: debounce(function (event){
             //we only want to add records if they are scrolling down. 
             //so we need to keep track of the scrollHeight.
-            //if its going up, add some  if its <= the highest its been. then don't add any
+            //if its going up, add some, if its <= the highest its been, then don't add any
             if(this.highestScrollPosition<event.srcElement.scrollTop){
                 let numToAdd = 5;
                 if((event.srcElement.scrollHeight - event.srcElement.scrollTop)<=4000){
@@ -149,7 +163,78 @@ export default {
                 this.gridData = [...currentlyViewing, ...nextBatch]
                 this.highestScrollPosition = event.srcElement.scrollTop
             }
-        },50)
+        },50),
+        applyOtherFilters(){
+            let tmp = this.fullDS;
+            for (let i = 0; i < this.filterStrategy.filters.length; i++) {
+                if(this.filterStrategy.filters[i]){
+                    tmp = this.applyFilterToADataset(tmp,this.filterStrategy.filters[i])
+                }
+            }
+            return tmp
+        },
+        applyFilterToADataset(dataset,strategy){
+            const strat = strategy.split('^^')
+            const col = strat[0]
+            const keyword = strat[1]
+            let filteredData = []
+            for (let i = 0; i < dataset.length; i++) {
+                if(dataset[i][this.virtualColumns[col].dataProperty].includes(keyword)){
+                    filteredData.push(dataset[i])
+                }   
+            }
+            return filteredData
+        },
+        handleApplyFilter(strategy){
+            const isChangingAFilter = (column)=> {return this.filterStrategy.isCurrentlyFiltering&&this.filterStrategy.filters[column]&&this.filterStrategy.filters[column].length>0}
+            const otherFiltersAreSet = (column)=>{
+                let retVal = false
+                for (let i = 0; i < this.filterStrategy.length; i++) {
+                    if(i!==column&&Object.keys(this.filterStrategy.filters[i]).length>0){
+                        retVal = true;
+                        break;
+                    }
+                }
+                return retVal
+             }
+
+            try {
+                console.log("what is the strategy", strategy)
+                const strat = strategy.split('^^')
+                const col = strat[0]
+                let tmp = []
+
+                if(strat[1].length>0){
+                    //then we have a filter to apply
+                    if(this.filterStrategy.isCurrentlyFiltering)
+                    {
+                        if(isChangingAFilter(col)){
+                            tmp = this.fullDS //then start over 
+                        } else {
+                            tmp = this.gridData //if we are already filtering, use the grid as the datasource
+                        }
+                    } else {
+                        tmp = this.fullDS //else we have no current filters so use the full dataset to filter
+                    }
+                    this.gridData = this.applyFilterToADataset(tmp,strategy)
+                    this.filterStrategy.isCurrentlyFiltering=true
+                    this.filterStrategy.filters[col]=strategy
+                } else { 
+                    //we are clearing a filter so we'll need to apply the other filters to the dataset again if there are any
+                    this.filterStrategy.filters[col]=null//wipe out the one we are about to replace, or it messes with the filtering.
+                    if(otherFiltersAreSet(col)){
+                        tmp = this.applyOtherFilters()
+                    } else { //else, means we have no current filter, and no other filters. return the orignal slice of data and reset the scroll position
+                        tmp = this.initialSlice
+                    }
+                    this.gridData = tmp
+                }
+            } catch (error) {
+                console.log("awe snap son.. something happened.", strategy, error)
+            }
+        },
+
+
     },
     props:{
         gridConfig:{
@@ -161,9 +246,11 @@ export default {
         await this.getTestData()
         this.setDefaultValues()
         this.deriveHeaders()
-
-        
-
+        this.gridWidth = this.$refs.grid.offsetWidth //set initial size of grid used for calculating where to put the filter flyouts
+        window.addEventListener('resize',this.handleResizeGrid)
+  },
+  beforeDestroy(){
+    window.removeEventListener('resize',this.handleResizeGrid)
   }
 };
 </script>

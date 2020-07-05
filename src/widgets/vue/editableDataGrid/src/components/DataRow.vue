@@ -54,6 +54,7 @@ export default {
     padding:5px;
     font-size:small;
     cursor:zoom-in;
+    overflow: hidden;
 }
 
 

@@ -9,7 +9,7 @@
                     <td :style="`width:${column.width}`" v-for="column in virtualColumns" :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
                 </tr>
             </table>
-            <div :style="`position: relative; top:0px; left:0px; width: 1px; height: 1e+06px;`">
+            <div :style="`position: relative; top:0px; left:0px; width: 1px; height:${virtualHeight}px;`">
             </div>
         </div>
     </div>
@@ -37,6 +37,7 @@ export default {
             gridData:[],
             fullDS:[],
             tableTop:0,
+            skip:20,
             dataSlice:[],
             initialSlice:[],
             userHasHeaders:false,
@@ -150,32 +151,30 @@ export default {
             console.log("TICKTOCK - GETTING DATA", new Date())
             await axios.get('http://localhost:5003/client/741/client-lists/1/list-data/1')
             .then(results=>{
-                this.virtualHeight = 30 * results.data.length
-                this.dataSlice = results.data.slice(1,100)
+                this.virtualHeight = results.data.length+600-19
+                this.dataSlice = results.data.slice(1,50)
                 // this.initialSlice = this.gridData //this is the initial slice that went to the screen. if you clear filter.. return it so its faster, then lazy load again
                 this.fullDS = results.data
                 // this.workingDS = results.data
                 console.log("TICKTOCK - DONE", new Date())
             })
         },
-        parseData(skip){
+        parseData(top){
             let tmp = []
-            for (let i = skip; i < skip+200; i++) {
-                tmp.push(this.fullDS[i])
+            console.log("what is the top", top)
+            for (let i = top; i < top+21; i++) {
+                if(this.fullDS[i]&&Object.keys(this.fullDS[i]).length>0)
+                {
+                    tmp.push(this.fullDS[i])
+                }
             }
             this.dataSlice = []
-            console.log('what did you get on temp', tmp)
             this.dataSlice = tmp
 
         },
         debounceScroll: debounce(function (event){
-                let skip  = 0
-                skip = Math.ceil(event.srcElement.scrollTop/2)
-                
-                console.log(event.srcElement.scrollTop)
                 this.tableTop = event.srcElement.scrollTop
-                console.log('i should be feeding that with ', skip)
-                this.parseData(skip)            
+                this.parseData(this.tableTop)            
         },50),
         applyOtherFilters(){
             let tmp = this.fullDS;

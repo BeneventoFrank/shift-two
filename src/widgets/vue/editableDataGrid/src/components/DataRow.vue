@@ -45,9 +45,6 @@ export default {
     height:28px;
     border-bottom: 1px solid #DCDCDC;
 }
-.oddRow{
-    background-color: #F8F8F8;
-}
 .cell{
     display:flex; 
     flex-direction:row;

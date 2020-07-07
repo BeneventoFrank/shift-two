@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import EditableDataGrid from './widgets/vue/editableDataGrid/src/EditableDataGrid'
+import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
 import gridData from './widgets/vue/editableDataGrid/data/data.js'
 
 export default {

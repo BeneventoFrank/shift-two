@@ -1,17 +1,23 @@
 <template>
     <div ref="grid" style='width:100%;' class='container'>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" :gridWillScroll="gridWillScroll()" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
-        <div ref='dataRow' class="dataRow" @scroll="debounceScroll" :style="`max-height:${gridConfig.Height}; overflow: auto; width:100%;`">
-            <DataRow  v-for="(row,index) in gridData" :key="index" :rowIndex="index" :rowData="row" :virtualColumns="virtualColumns"></DataRow>            
+        <div ref='dataRow' @scroll="debounceScroll" :style="`width:100%; overflow-y:scroll; max-height:600px`">
+            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; position:fixed; height:600px;`">
+                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing: 0px; border-collapse: collapse; line-height:30px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+                    <td :style="`width:${column.width}`" v-for="column in virtualColumns" :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
+                </tr>
+            </table>
+            <div :style="`height:${virtualHeight}px`">
+            </div>
         </div>
     </div>
 </template>
 <script>
 
+
 import HeaderRow from './components/HeaderRow'
-import DataRow from './components/DataRow'
 import debounce from 'lodash.debounce'
 import { colors } from '../../../../assets/shiftTwo'
 import axios from 'axios'
@@ -19,8 +25,7 @@ import axios from 'axios'
 export default {
     name:"EditableDataGrid",
     components: {
-        HeaderRow,
-        DataRow
+        HeaderRow
     },
     data() {
         return {
@@ -31,9 +36,11 @@ export default {
             highestScrollPosition:0,
             gridData:[],
             fullDS:[],
+            dataSlice:[],
             initialSlice:[],
             userHasHeaders:false,
             virtualColumns:[],
+            virtualHeight:0,
             filterStrategy:{
                 isCurrentlyFiltering:false,
                 filters:{}
@@ -114,11 +121,16 @@ export default {
             debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()
         },
         setDefaultValues(){
+           const numColumns = Object.keys(this.fullDS[0]).length
+           const widthOfGrid = this.$refs.dataRow.offsetWidth
+           const eachColumn = Math.round(widthOfGrid/numColumns)
+            console.log(numColumns , ' ', eachColumn, ' ', widthOfGrid)
+
            this.defaultValues.columnValues.backgroundColor = colors.editableDataGrid.defaultHeaderColor
            this.defaultValues.columnValues.borderColor = colors.editableDataGrid.defaultBorderColor
            this.defaultValues.columnValues.textColor = colors.editableDataGrid.defaultTextColor
            this.defaultValues.columnValues.height = '35px';
-           this.defaultValues.columnValues.width = Math.round((100/this.gridConfig.Columns.length),1)+'%'
+           this.defaultValues.columnValues.width = `${eachColumn-50}px`
            this.defaultValues.columnValues.borderWidth = '1px'
            this.defaultValues.columnValues.alignment = 'center'
            this.defaultValues.columnValues.dataAlignment = 'center'
@@ -137,32 +149,31 @@ export default {
             console.log("TICKTOCK - GETTING DATA", new Date())
             await axios.get('http://localhost:5003/client/741/client-lists/1/list-data/1')
             .then(results=>{
-                this.gridData = results.data.slice(1,1000)
-                this.initialSlice = this.gridData //this is the initial slice that went to the screen. if you clear filter.. return it so its faster, then lazy load again
+                this.virtualHeight = 30 * results.data.length
+                this.dataSlice = results.data.slice(1,20)
+                // this.initialSlice = this.gridData //this is the initial slice that went to the screen. if you clear filter.. return it so its faster, then lazy load again
                 this.fullDS = results.data
-                this.workingDS = results.data
+                // this.workingDS = results.data
                 console.log("TICKTOCK - DONE", new Date())
             })
         },
-        debounceScroll: debounce(function (event){
-            //we only want to add records if they are scrolling down. 
-            //so we need to keep track of the scrollHeight.
-            //if its going up, add some, if its <= the highest its been, then don't add any
-            if(this.highestScrollPosition<event.srcElement.scrollTop){
-                let numToAdd = 5;
-                if((event.srcElement.scrollHeight - event.srcElement.scrollTop)<=4000){
-                    numToAdd = 1000;
-                }
-                const currentlyViewing=this.gridData
-                let nextBatch = []
-                for (let i = currentlyViewing.length; i < currentlyViewing.length+numToAdd; i++) {  
-                    if(this.fullDS[i] && Object.keys(this.fullDS[i]>0)){
-                        nextBatch.push(this.fullDS[i])
-                    }
-                }
-                this.gridData = [...currentlyViewing, ...nextBatch]
-                this.highestScrollPosition = event.srcElement.scrollTop
+        parseData(skip){
+            let tmp = []
+            for (let i = skip; i < skip+20; i++) {
+                tmp.push(this.fullDS[i])
             }
+            this.dataSlice = []
+            console.log('what did you get on temp', tmp)
+            this.dataSlice = tmp
+
+        },
+        debounceScroll: debounce(function (event){
+                let skip  = 0
+                let take  = 0
+                skip = Math.ceil(event.srcElement.scrollTop/30)
+                take = Math.ceil((event.srcElement.scrollTop + 600)/30)
+                console.log('i should be feeding that with ', skip,take)
+                this.parseData(skip)            
         },50),
         applyOtherFilters(){
             let tmp = this.fullDS;
@@ -255,11 +266,59 @@ export default {
 };
 </script>
 <style scoped>
-.dataRow{
-    
+.cell{
+    width:20%;
 }
-.dataRow :hover{
+.oddRow{
+    border-top: 1px solid #DCDCDC;    
+    background-color: #F8F8F8;
+}
+.dataRow{
+    width:100%; 
+    display:flex; 
+    flex-direction:row;
+    height:28px;
+    border-bottom: 1px solid #DCDCDC;    
+}
+
+.dataGrid{
+
+}
+.dataGrid tr:hover{
     background-color: #E8E8E8;
 }
+td, th {
+  padding: 10px;
+  position: relative;
+  outline: 0;
+}
+
+body:not(.nohover) tbody tr:hover {
+  background-color: #E8E8E8 !important;
+}
+
+td:hover::after,
+thead th:not(:empty):hover::after,
+td:focus::after,
+thead th:not(:empty):focus::after { 
+  content: '';  
+  height: 1000px;
+  left: 0;
+  position: absolute;  
+  top: 0px;
+  width: 100%;
+  z-index: -9999;
+}
+
+td:hover::after,
+th:hover::after {
+  background-color: #E8E8E8 !important;
+}
+
+td:focus::after,
+th:focus::after {
+  background-color: lightblue;
+}
+
 
 </style>

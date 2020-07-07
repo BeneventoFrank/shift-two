@@ -3,13 +3,13 @@
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
-        <div ref='dataRow' @scroll="debounceScroll" :style="`width:100%; overflow-y:scroll; max-height:600px`">
-            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; position:fixed; height:600px;`">
-                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing: 0px; border-collapse: collapse; line-height:30px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+        <div ref='dataRow' @scroll="debounceScroll" :style="`width:100%; overflow-y:scroll; position:relative; max-height:600px`">
+            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
+                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; width:100%; border-collapse: collapse; line-height:10px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <td :style="`width:${column.width}`" v-for="column in virtualColumns" :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
                 </tr>
             </table>
-            <div :style="`height:${virtualHeight}px`">
+            <div :style="`position: relative; top:0px; left:0px; width: 1px; height: 1e+06px;`">
             </div>
         </div>
     </div>
@@ -36,6 +36,7 @@ export default {
             highestScrollPosition:0,
             gridData:[],
             fullDS:[],
+            tableTop:0,
             dataSlice:[],
             initialSlice:[],
             userHasHeaders:false,
@@ -130,7 +131,7 @@ export default {
            this.defaultValues.columnValues.borderColor = colors.editableDataGrid.defaultBorderColor
            this.defaultValues.columnValues.textColor = colors.editableDataGrid.defaultTextColor
            this.defaultValues.columnValues.height = '35px';
-           this.defaultValues.columnValues.width = `${eachColumn-50}px`
+           this.defaultValues.columnValues.width = `${eachColumn-23}px`
            this.defaultValues.columnValues.borderWidth = '1px'
            this.defaultValues.columnValues.alignment = 'center'
            this.defaultValues.columnValues.dataAlignment = 'center'
@@ -150,7 +151,7 @@ export default {
             await axios.get('http://localhost:5003/client/741/client-lists/1/list-data/1')
             .then(results=>{
                 this.virtualHeight = 30 * results.data.length
-                this.dataSlice = results.data.slice(1,20)
+                this.dataSlice = results.data.slice(1,100)
                 // this.initialSlice = this.gridData //this is the initial slice that went to the screen. if you clear filter.. return it so its faster, then lazy load again
                 this.fullDS = results.data
                 // this.workingDS = results.data
@@ -159,7 +160,7 @@ export default {
         },
         parseData(skip){
             let tmp = []
-            for (let i = skip; i < skip+20; i++) {
+            for (let i = skip; i < skip+200; i++) {
                 tmp.push(this.fullDS[i])
             }
             this.dataSlice = []
@@ -169,10 +170,11 @@ export default {
         },
         debounceScroll: debounce(function (event){
                 let skip  = 0
-                let take  = 0
-                skip = Math.ceil(event.srcElement.scrollTop/30)
-                take = Math.ceil((event.srcElement.scrollTop + 600)/30)
-                console.log('i should be feeding that with ', skip,take)
+                skip = Math.ceil(event.srcElement.scrollTop/2)
+                
+                console.log(event.srcElement.scrollTop)
+                this.tableTop = event.srcElement.scrollTop
+                console.log('i should be feeding that with ', skip)
                 this.parseData(skip)            
         },50),
         applyOtherFilters(){
@@ -293,32 +295,22 @@ td, th {
   outline: 0;
 }
 
-body:not(.nohover) tbody tr:hover {
-  background-color: #E8E8E8 !important;
-}
 
-td:hover::after,
-thead th:not(:empty):hover::after,
-td:focus::after,
-thead th:not(:empty):focus::after { 
+td:hover::after{ 
   content: '';  
   height: 1000px;
   left: 0;
   position: absolute;  
-  top: 0px;
+  top: 30px;
   width: 100%;
-  z-index: -9999;
+  z-index: 0;
 }
 
-td:hover::after,
-th:hover::after {
+td:hover::after {
   background-color: #E8E8E8 !important;
 }
 
-td:focus::after,
-th:focus::after {
-  background-color: lightblue;
-}
+
 
 
 </style>

@@ -37,12 +37,17 @@ export default {
             gridData:[],
             fullDS:[],
             tableTop:0,
+            scrollCount:0,
+            multiple:10,
+            addToTop:74,
+            highestCountLoaded:150,
             skip:20,
             dataSlice:[],
             initialSlice:[],
             userHasHeaders:false,
             virtualColumns:[],
             virtualHeight:0,
+            lastPosition:0,
             filterStrategy:{
                 isCurrentlyFiltering:false,
                 filters:{}
@@ -148,34 +153,49 @@ export default {
            }
         },
         async getTestData(){
-            console.log("TICKTOCK - GETTING DATA", new Date())
             await axios.get('http://localhost:5003/client/741/client-lists/1/list-data/1')
             .then(results=>{
-                this.virtualHeight = results.data.length+600-19
-                this.dataSlice = results.data.slice(1,50)
-                // this.initialSlice = this.gridData //this is the initial slice that went to the screen. if you clear filter.. return it so its faster, then lazy load again
+                this.virtualHeight = results.data.length*29-950
+                this.dataSlice = results.data.slice(1,this.highestCountLoaded)
+                this.highestCountLoaded = this.highestCountLoaded + 1
                 this.fullDS = results.data
-                // this.workingDS = results.data
-                console.log("TICKTOCK - DONE", new Date())
             })
         },
-        parseData(top){
+        parseData(startingPoint){
             let tmp = []
-            console.log("what is the top", top)
-            for (let i = top; i < top+21; i++) {
+            for (let i = startingPoint+1; i < startingPoint+150; i++) {
                 if(this.fullDS[i]&&Object.keys(this.fullDS[i]).length>0)
                 {
                     tmp.push(this.fullDS[i])
                 }
             }
-            this.dataSlice = []
             this.dataSlice = tmp
-
         },
-        debounceScroll: debounce(function (event){
-                this.tableTop = event.srcElement.scrollTop
-                this.parseData(this.tableTop)            
-        },50),
+        debounceScroll: debounce(function (){
+                let scrollHeight
+                if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
+
+                    if (this.$refs.dataRow.scrollTop>1000) {
+                    this.tableTop = this.$refs.dataRow.scrollTop -1000    
+                    }
+
+                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)
+                    
+                    this.parseData(scrollHeight)
+
+                } else {
+                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-300
+                    if(scrollHeight<950){
+                        scrollHeight = 0
+                    }
+                    
+                    this.tableTop = this.$refs.dataRow.scrollTop
+                    this.parseData(scrollHeight)
+                }
+
+                this.highestScrollPosition = scrollHeight
+
+        },100),
         applyOtherFilters(){
             let tmp = this.fullDS;
             for (let i = 0; i < this.filterStrategy.filters.length; i++) {
@@ -297,7 +317,7 @@ td, th {
 
 td:hover::after{ 
   content: '';  
-  height: 1000px;
+  height: 30px;
   left: 0;
   position: absolute;  
   top: 30px;

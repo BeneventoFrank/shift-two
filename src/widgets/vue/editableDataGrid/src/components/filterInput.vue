@@ -1,5 +1,5 @@
 <template>
-    <input ref="filterInput" id='filterInput' @input="handleInputChanged" type='text' class="filterInput">
+    <input ref="filterInput" :value="defaultValue" id='filterInput' @input="handleInputChanged" type='text' class="filterInput">
 </template>
 
 <script>
@@ -20,6 +20,9 @@ export default {
     props:{
         columnIndex:{
             type:Number
+        },
+        defaultValue:{
+            type:String
         }
     },        
     methods: {

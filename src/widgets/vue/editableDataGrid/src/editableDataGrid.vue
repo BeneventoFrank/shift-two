@@ -1,7 +1,7 @@
 <template>
     <div ref="grid" style='width:100%;' class='container'>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" :defaultValues="defaultValues" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
@@ -34,7 +34,6 @@ export default {
             },
             gridWidth:0,
             highestScrollPosition:0,
-            gridData:[],
             fullDS:[],
             tableTop:0,
             scrollCount:0,
@@ -137,7 +136,7 @@ export default {
            this.defaultValues.columnValues.borderColor = colors.editableDataGrid.defaultBorderColor
            this.defaultValues.columnValues.textColor = colors.editableDataGrid.defaultTextColor
            this.defaultValues.columnValues.height = '35px';
-           this.defaultValues.columnValues.width = `${eachColumn-23}px`
+           this.defaultValues.columnValues.width = `${eachColumn}px`
            this.defaultValues.columnValues.borderWidth = '1px'
            this.defaultValues.columnValues.alignment = 'center'
            this.defaultValues.columnValues.dataAlignment = 'center'
@@ -157,6 +156,7 @@ export default {
             .then(results=>{
                 this.virtualHeight = results.data.length*29-950
                 this.dataSlice = results.data.slice(1,this.highestCountLoaded)
+                this.initialSlice = this.dataSlice
                 this.highestCountLoaded = this.highestCountLoaded + 1
                 this.fullDS = results.data
             })
@@ -200,9 +200,12 @@ export default {
         },
         applyOtherFilters(){
             let tmp = this.fullDS;
-            for (let i = 0; i < this.filterStrategy.filters.length; i++) {
-                if(this.filterStrategy.filters[i]){
-                    tmp = this.applyFilterToADataset(tmp,this.filterStrategy.filters[i])
+            let filters = Object.entries(this.filterStrategy.filters)
+            console.log('filters', filters)
+            for (let i = 0; i < filters.length; i++) {
+                console.log('looking for ',filters[i])
+                if(filters[i][1] && filters[i][1].length>0){
+                    tmp = this.applyFilterToADataset(tmp,filters[i][1])
                 }
             }
             return tmp
@@ -220,11 +223,14 @@ export default {
             return filteredData
         },
         handleApplyFilter(strategy){
-            const isChangingAFilter = (column)=> {return this.filterStrategy.isCurrentlyFiltering&&this.filterStrategy.filters[column]&&this.filterStrategy.filters[column].length>0}
+            const isChangingAFilter = (column)=> {return this.filterStrategy.filters[column]&&this.filterStrategy.filters[column].length>0}
             const otherFiltersAreSet = (column)=>{
                 let retVal = false
-                for (let i = 0; i < this.filterStrategy.length; i++) {
-                    if(i!==column&&Object.keys(this.filterStrategy.filters[i]).length>0){
+                console.log(this.filterStrategy)
+                let split = Object.entries(this.filterStrategy)
+                for (let i = 0; i < split.length; i++) {
+                    console.log('checking ', column, ' vs ', i, ' vs ', split)
+                    if(i!==column&&split[1]&&split[1].length>0){
                         retVal = true;
                         break;
                     }
@@ -233,34 +239,46 @@ export default {
              }
 
             try {
+                console.log('strategy = ', strategy)
                 const strat = strategy.split('^^')
                 const col = strat[0]
                 let tmp = []
-
+                    console.log('strat and col', strat, ' and ', col)
                 if(strat[1].length>0){
+                    console.log("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000lets rock")
                     //then we have a filter to apply
                     if(this.filterStrategy.isCurrentlyFiltering)
                     {
+                        console.log("we are filtering already!")
                         if(isChangingAFilter(col)){
+                            console.log('we are changing a filter')
                             tmp = this.fullDS //then start over 
                         } else {
-                            tmp = this.gridData //if we are already filtering, use the grid as the datasource
+                            console.log('we are using the dataslice')
+                            tmp = this.dataSlice //if we are already filtering, use the grid as the datasource
                         }
                     } else {
+                        console.log("new filter yo")
                         tmp = this.fullDS //else we have no current filters so use the full dataset to filter
                     }
-                    this.gridData = this.applyFilterToADataset(tmp,strategy)
+                    
+                    
+                    this.dataSlice = this.applyFilterToADataset(tmp,strategy)
+                    this.virtualHeight = this.dataSlice.length*29-950
                     this.filterStrategy.isCurrentlyFiltering=true
                     this.filterStrategy.filters[col]=strategy
                 } else { 
                     //we are clearing a filter so we'll need to apply the other filters to the dataset again if there are any
                     this.filterStrategy.filters[col]=null//wipe out the one we are about to replace, or it messes with the filtering.
                     if(otherFiltersAreSet(col)){
+                        console.log('we found other filters')
                         tmp = this.applyOtherFilters()
                     } else { //else, means we have no current filter, and no other filters. return the orignal slice of data and reset the scroll position
+                        console.log('no ohter filters..')
                         tmp = this.initialSlice
                     }
-                    this.gridData = tmp
+                    this.virtualHeight = tmp.length*29-950
+                    this.dataSlice = tmp
                 }
             } catch (error) {
                 console.log("awe snap son.. something happened.", strategy, error)

@@ -10,7 +10,7 @@
                 <div class='innerDiv' :style="`background-color:${bgColor}`">
                     <label class='filterHeader'>Filter {{header.text}}</label>
                     <br>
-                    <FilterInput :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
+                    <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
                 </div>
             </div>
         </div>
@@ -34,7 +34,6 @@ export default {
     },
     computed: {
     },
-    
     props:{
         headers:{
             type:Array
@@ -42,10 +41,12 @@ export default {
         gridWillScroll:{
             type:Boolean
         },
+        currentFilters:{
+            type:Object
+        },
         gridWidth:{
             type:Number
         }
-
     },        
     methods: {
        wouldCauseAScroll(index){
@@ -55,6 +56,13 @@ export default {
                 retVal = '350px'
             }
             return retVal
+       },
+       cmpFilter:function(columnIndex){
+            let tmp = ['','']
+            if (this.currentFilters.filters[columnIndex]){
+                tmp = this.currentFilters.filters[columnIndex].split('^^')
+            }
+            return tmp[1]
        },
        handleFlyout(index,value){
         this.showAFilter=value
@@ -69,7 +77,7 @@ export default {
            {
                this.$refs[`header-${index}`][0].classList.remove('activeFilter')
            }
-       }, 50),
+       }, 100),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
            if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 
            return usersBorderWidth?`${usersBorderWidth} solid ${usersBorderColor}`:`${this.defaultValues.borderWidth} solid ${this.defaultValues.borderColor}`

@@ -1,0 +1,11 @@
+
+
+so i guess this is my first entry. i just got your email.  it took me almost two hours to type that response. lol. 
+the truth is there were so many things i wanted to say, but i didn't want to throw to much shock at you.. I have been
+meaning to write these and now i have a reason.  
+
+so lets start with the first thing... what is shift two?  
+
+Shift two is meant to be the best of myself, given to you. i am planning on creating widgets and packaging them up as npm packages. 
+the first widget i am building for you is the Editable Data Grid.  this has been a painful development experience so far. i'll add tons more 
+details later. I have to work for a while, deadline in the morning. i'll be up all night tonight so i will write more. 

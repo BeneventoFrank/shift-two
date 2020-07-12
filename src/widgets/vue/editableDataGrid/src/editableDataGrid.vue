@@ -175,6 +175,11 @@ export default {
                 let scrollHeight
 
                 window.requestAnimationFrame(()=>{
+                    console.log('this.isCurrentlyFiltering',this.filterStrategy.isCurrentlyFiltering)
+                    if(this.filterStrategy.isCurrentlyFiltering) {
+                        //idk
+                    } else {
+
                     if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
 
                         if (this.$refs.dataRow.scrollTop>1000) {
@@ -194,8 +199,9 @@ export default {
                         this.tableTop = this.$refs.dataRow.scrollTop
                         this.parseData(scrollHeight)
                     }
-
                     this.highestScrollPosition = scrollHeight
+                    }
+
                 })
         },
         applyOtherFilters(){
@@ -264,7 +270,8 @@ export default {
                     
                     
                     this.dataSlice = this.applyFilterToADataset(tmp,strategy)
-                    this.virtualHeight = this.dataSlice.length*29-950
+                    let h = this.dataSlice.length*29-950
+                    this.virtualHeight = h<0?600:h
                     this.filterStrategy.isCurrentlyFiltering=true
                     this.filterStrategy.filters[col]=strategy
                 } else { 
@@ -277,7 +284,8 @@ export default {
                         console.log('no ohter filters..')
                         tmp = this.initialSlice
                     }
-                    this.virtualHeight = tmp.length*29-950
+                    let h = this.dataSlice.length*29-950
+                    this.virtualHeight = h<0?600:h                    
                     this.dataSlice = tmp
                 }
             } catch (error) {

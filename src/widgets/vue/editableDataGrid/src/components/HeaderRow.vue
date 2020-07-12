@@ -77,7 +77,7 @@ export default {
            {
                this.$refs[`header-${index}`][0].classList.remove('activeFilter')
            }
-       }, 100),
+       }, 150),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
            if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 
            return usersBorderWidth?`${usersBorderWidth} solid ${usersBorderColor}`:`${this.defaultValues.borderWidth} solid ${this.defaultValues.borderColor}`

@@ -1,31 +1,25 @@
 
 let gridData =  {
-    Height:'300px',
     Columns:[
             {
-                header:{text:"Make", height:"35px", alignment:"", backgroundColor:"", textColor:"", borderWidth:"", borderColor:""},//all optional
-                dataProperty:"make", //required to tie a column to a piece of data in the dataset
-                dataAlignment:"left"
+                header:{text:"Make"},
+                dataProperty:"make"
             },
             {
-                header:{text:"Model", height:"35px", alignment:"", backgroundColor:"", textColor:"", borderWidth:"", borderColor:""},
-                dataProperty:"model", //required to tie a column to a piece of data in the dataset
-                dataAlignment:"left"
+                header:{text:"Model"},
+                dataProperty:"model"
             },
             {
-                header:{text:"Year", height:"35px", alignment:"", backgroundColor:"", textColor:"", borderWidth:"", borderColor:""},
-                dataProperty:"year", //required to tie a column to a piece of data in the dataset
-                dataAlignment:"center"
+                header:{text:"Year"},
+                dataProperty:"year"
             },
             {
-                header:{text:"Color", height:"35px", alignment:"", backgroundColor:"", textColor:"", borderWidth:"", borderColor:""},
-                dataProperty:"color", //required to tie a column to a piece of data in the dataset
-                dataAlignment:"left"
+                header:{text:"Color"},
+                dataProperty:"color"
             },
             {
-                header:{text:"Trim", height:"35px", alignment:"", backgroundColor:"", textColor:"", borderWidth:"", borderColor:""},            
-                dataProperty:"trim", //required to tie a column to a piece of data in the dataset
-                dataAlignment:"center"
+                header:{text:"Trim"},            
+                dataProperty:"trim"
             },
             {
                 header:{text:"Mileage"},            
@@ -34,20 +28,36 @@ let gridData =  {
             {
                 header:{text:"Damage"},            
                 dataProperty:"damage", 
-            }
-            ,
+            },
             {
                 header:{text:"Number Of Owners"},            
                 dataProperty:"numOwners", 
-            }
-            ,
+            },
             {
                 header:{text:"AC Blows Cold"},            
                 dataProperty:"ac", 
-            }
-
-        ],
-    PagingConfiguration:""
+            },
+            {
+                header:{text:"Year"},
+                dataProperty:"year"
+            },
+            {
+                header:{text:"Color"},
+                dataProperty:"color"
+            },
+            {
+                header:{text:"Trim"},            
+                dataProperty:"trim"
+            },
+            {
+                header:{text:"Mileage"},            
+                dataProperty:"mileage", 
+            },
+            {
+                header:{text:"Damage"},            
+                dataProperty:"damage", 
+            }            
+        ]
 }
 
 export default gridData;

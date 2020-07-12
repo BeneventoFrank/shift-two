@@ -3,7 +3,7 @@
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
-        <div ref='dataRow' @scroll="debounceScroll" :style="`width:100%; overflow-y:scroll; position:relative; max-height:600px`">
+        <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; width:100%; border-collapse: collapse; line-height:10px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <td :style="`width:${column.width}`" v-for="column in virtualColumns" :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
@@ -171,31 +171,33 @@ export default {
             }
             this.dataSlice = tmp
         },
-        debounceScroll: debounce(function (){
+        handleScroll(){
                 let scrollHeight
-                if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
 
-                    if (this.$refs.dataRow.scrollTop>1000) {
-                    this.tableTop = this.$refs.dataRow.scrollTop -1000    
+                window.requestAnimationFrame(()=>{
+                    if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
+
+                        if (this.$refs.dataRow.scrollTop>1000) {
+                        this.tableTop = this.$refs.dataRow.scrollTop -1000    
+                        }
+
+                        scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)
+                        
+                        this.parseData(scrollHeight)
+
+                    } else {
+                        scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-450
+                        if(scrollHeight<950){
+                            scrollHeight = 0
+                        }
+                        
+                        this.tableTop = this.$refs.dataRow.scrollTop
+                        this.parseData(scrollHeight)
                     }
 
-                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)
-                    
-                    this.parseData(scrollHeight)
-
-                } else {
-                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-450
-                    if(scrollHeight<950){
-                        scrollHeight = 0
-                    }
-                    
-                    this.tableTop = this.$refs.dataRow.scrollTop
-                    this.parseData(scrollHeight)
-                }
-
-                this.highestScrollPosition = scrollHeight
-
-        },100),
+                    this.highestScrollPosition = scrollHeight
+                })
+        },
         applyOtherFilters(){
             let tmp = this.fullDS;
             for (let i = 0; i < this.filterStrategy.filters.length; i++) {
@@ -285,7 +287,10 @@ export default {
   }
 };
 </script>
-<style scoped>
+<style >
+html {
+  scroll-behavior: smooth;
+}
 .cell{
     width:20%;
 }
@@ -297,7 +302,7 @@ export default {
     width:100%; 
     display:flex; 
     flex-direction:row;
-    height:28px;
+    scroll-behavior: smooth;
     border-bottom: 1px solid #DCDCDC;    
 }
 
@@ -314,14 +319,9 @@ td, th {
 }
 
 
-td:hover::after{ 
-  content: '';  
-  height: 3000px;
-  left: 0;
-  position: absolute;  
-  top: 30px;
-  width: 100%;
-  z-index: 0;
+td:hover {
+    background-color: #DCDCDC;
+
 }
 
 td:hover::after {

@@ -26,7 +26,26 @@ let gridData =  {
                 header:{text:"Trim", height:"35px", alignment:"", backgroundColor:"", textColor:"", borderWidth:"", borderColor:""},            
                 dataProperty:"trim", //required to tie a column to a piece of data in the dataset
                 dataAlignment:"center"
+            },
+            {
+                header:{text:"Mileage"},            
+                dataProperty:"mileage", 
+            },
+            {
+                header:{text:"Damage"},            
+                dataProperty:"damage", 
             }
+            ,
+            {
+                header:{text:"Number Of Owners"},            
+                dataProperty:"numOwners", 
+            }
+            ,
+            {
+                header:{text:"AC Blows Cold"},            
+                dataProperty:"ac", 
+            }
+
         ],
     PagingConfiguration:""
 }

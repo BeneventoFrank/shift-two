@@ -184,7 +184,7 @@ export default {
                     this.parseData(scrollHeight)
 
                 } else {
-                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-300
+                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-450
                     if(scrollHeight<950){
                         scrollHeight = 0
                     }
@@ -231,7 +231,6 @@ export default {
              }
 
             try {
-                console.log("what is the strategy", strategy)
                 const strat = strategy.split('^^')
                 const col = strat[0]
                 let tmp = []
@@ -317,7 +316,7 @@ td, th {
 
 td:hover::after{ 
   content: '';  
-  height: 30px;
+  height: 3000px;
   left: 0;
   position: absolute;  
   top: 30px;

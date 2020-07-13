@@ -1,6 +1,6 @@
 <template>
     <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
-        <div :ref="`header-${header.columnIndex}`" class="headerCell" @mouseenter="()=>{handleFlyout(header.columnIndex,true)}" @mouseleave="()=>{handleFlyout(header.columnIndex,false)}" v-for="(header) in headers" :key="header.columnIndex" 
+        <div :ref="`header-${header.columnIndex}`" class="headerCell" @mouseenter="()=>{handleFlyout(header.columnIndex,true)}" @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  v-for="(header) in headers" :key="header.columnIndex" 
             :style="`width:${header.width}; height:${header.height};  backgroundColor:${header.backgroundColor}; color:${header.textColor}; 
                      border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`">
             <span> 
@@ -11,6 +11,12 @@
                     <label class='filterHeader'>Filter {{header.text}}</label>
                     <br>
                     <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
+                    <br>
+                    <div v-if="filterCount>0">
+                        <span>Results: {{filterCount}}, Specify More Characters. </span>
+                        <br>
+                        <span @click="handleShowTheDataAnyway" style="text-decoration:underline; cursor:pointer; font-size:small;">Just give me the data</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -44,6 +50,9 @@ export default {
         currentFilters:{
             type:Object
         },
+        filterCount:{
+            type:Number
+        },
         gridWidth:{
             type:Number
         }
@@ -64,6 +73,9 @@ export default {
             }
             return tmp[1]
        },
+       handleShowTheDataAnyway(){
+           this.$emit('showDataAnyway')
+       },
        handleFlyout(index,value){
         this.showAFilter=value
         this.showFilter[index] = value
@@ -77,7 +89,7 @@ export default {
            {
                this.$refs[`header-${index}`][0].classList.remove('activeFilter')
            }
-       }, 150),
+       }, 50),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
            if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 
            return usersBorderWidth?`${usersBorderWidth} solid ${usersBorderColor}`:`${this.defaultValues.borderWidth} solid ${this.defaultValues.borderColor}`
@@ -121,7 +133,7 @@ export default {
         display:flex;
         flex-direction: column;
         align-items: center;
-        height:150px;
+        height:250px;
         width:300px;
         padding:10px;
     }

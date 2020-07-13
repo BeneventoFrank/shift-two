@@ -1,5 +1,5 @@
 <template>
-    <input ref="filterInput" :value="defaultValue" id='filterInput' @input="handleInputChanged" type='text' class="filterInput">
+    <input ref="filterInput" autocomplete="off" :value="defaultValue" id='filterInput' @input="handleInputChanged" type='text' class="filterInput">
 </template>
 
 <script>

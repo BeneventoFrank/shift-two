@@ -1,7 +1,7 @@
 <template>
     <div ref="grid" style='width:100%;' class='container'>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" :defaultValues="defaultValues" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
@@ -21,6 +21,8 @@ import HeaderRow from './components/HeaderRow'
 import debounce from 'lodash.debounce'
 import { colors } from '../../../../assets/shiftTwo'
 import axios from 'axios'
+import worker from './webWorker/filterWorker'
+import WebWorker from './webWorker/filterServiceWorkerSetup'
 
 export default {
     name:"EditableDataGrid",
@@ -35,6 +37,7 @@ export default {
             gridWidth:0,
             highestScrollPosition:0,
             fullDS:[],
+            filterCount:0,
             tableTop:0,
             scrollCount:0,
             multiple:10,
@@ -43,6 +46,7 @@ export default {
             skip:20,
             dataSlice:[],
             initialSlice:[],
+            filteredData:[],
             userHasHeaders:false,
             virtualColumns:[],
             virtualHeight:0,
@@ -51,6 +55,7 @@ export default {
                 isCurrentlyFiltering:false,
                 filters:{}
             },
+            backgroundWorker:null,
             defaultValues:{
                 columnValues:{
                     width:'',
@@ -72,7 +77,6 @@ export default {
             return this.$refs.grid.offsetWidth
         },
         deriveHeaders(){
-            console.log("TICKTOCK - DERIVING HEADERS", new Date())
             let hasHeader=false
             for (let i = 0; i < this.gridConfig.Columns.length; i++) {
                 let tmp ={}
@@ -105,8 +109,6 @@ export default {
                 this.userHasHeaders=hasHeader
                 this.virtualColumns.push(tmp)
             }
-            
-            console.log("TICKTOCK - DONE", new Date())
         },
         gridWillScroll(){
             let height = 600
@@ -163,137 +165,54 @@ export default {
         },
         parseData(startingPoint){
             let tmp = []
+            let ds = this.filteredData.length>0?this.filteredData:this.fullDS
             for (let i = startingPoint+1; i < startingPoint+150; i++) {
-                if(this.fullDS[i]&&Object.keys(this.fullDS[i]).length>0)
+                if(ds[i]&&Object.keys(ds[i]).length>0)
                 {
-                    tmp.push(this.fullDS[i])
+                    tmp.push(ds[i])
                 }
             }
             this.dataSlice = tmp
         },
         handleScroll(){
-                let scrollHeight
-
-                window.requestAnimationFrame(()=>{
-                    console.log('this.isCurrentlyFiltering',this.filterStrategy.isCurrentlyFiltering)
-                    if(this.filterStrategy.isCurrentlyFiltering) {
-                        //idk
-                    } else {
-
-                    if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
-
-                        if (this.$refs.dataRow.scrollTop>1000) {
-                        this.tableTop = this.$refs.dataRow.scrollTop -1000    
-                        }
-
-                        scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)
-                        
-                        this.parseData(scrollHeight)
-
-                    } else {
-                        scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-450
-                        if(scrollHeight<950){
-                            scrollHeight = 0
-                        }
-                        
-                        this.tableTop = this.$refs.dataRow.scrollTop
-                        this.parseData(scrollHeight)
+            let scrollHeight
+            window.requestAnimationFrame(()=>{
+                if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
+                    if (this.$refs.dataRow.scrollTop>1000) {
+                    this.tableTop = this.$refs.dataRow.scrollTop -1000    
                     }
-                    this.highestScrollPosition = scrollHeight
-                    }
+                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)
+                    this.parseData(scrollHeight)
 
-                })
-        },
-        applyOtherFilters(){
-            let tmp = this.fullDS;
-            let filters = Object.entries(this.filterStrategy.filters)
-            console.log('filters', filters)
-            for (let i = 0; i < filters.length; i++) {
-                console.log('looking for ',filters[i])
-                if(filters[i][1] && filters[i][1].length>0){
-                    tmp = this.applyFilterToADataset(tmp,filters[i][1])
+                } else {
+                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-450
+                    if(scrollHeight<950){
+                        scrollHeight = 0
+                    }
+                    this.tableTop = this.$refs.dataRow.scrollTop
+                    this.parseData(scrollHeight)
                 }
-            }
-            return tmp
+                this.highestScrollPosition = scrollHeight
+            })
         },
-        applyFilterToADataset(dataset,strategy){
-            const strat = strategy.split('^^')
-            const col = strat[0]
-            const keyword = strat[1]
-            let filteredData = []
-            for (let i = 0; i < dataset.length; i++) {
-                if(dataset[i][this.virtualColumns[col].dataProperty].includes(keyword)){
-                    filteredData.push(dataset[i])
-                }   
-            }
-            return filteredData
+        handleMessage(message){
+            console.log('message', message)
+            // if(message.data.MessageType==='filterToShort'){
+            //     this.filterCount = message.data.Count
+            //     this.filteredData = message.data.Data
+            // } else if(message.data.MessageType ==='filterResults'){
+            //     this.dataSlice = message.data.Data
+            //     this.filterCount = 0
+            // }
+        },
+        handleShowDataAnyway(){
+            this.highestCountLoaded = 150
+            this.virtualHeight = this.filteredData.length*29-950
+            this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
         },
         handleApplyFilter(strategy){
-            const isChangingAFilter = (column)=> {return this.filterStrategy.filters[column]&&this.filterStrategy.filters[column].length>0}
-            const otherFiltersAreSet = (column)=>{
-                let retVal = false
-                console.log(this.filterStrategy)
-                let split = Object.entries(this.filterStrategy)
-                for (let i = 0; i < split.length; i++) {
-                    console.log('checking ', column, ' vs ', i, ' vs ', split)
-                    if(i!==column&&split[1]&&split[1].length>0){
-                        retVal = true;
-                        break;
-                    }
-                }
-                return retVal
-             }
-
-            try {
-                console.log('strategy = ', strategy)
-                const strat = strategy.split('^^')
-                const col = strat[0]
-                let tmp = []
-                    console.log('strat and col', strat, ' and ', col)
-                if(strat[1].length>0){
-                    console.log("00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000lets rock")
-                    //then we have a filter to apply
-                    if(this.filterStrategy.isCurrentlyFiltering)
-                    {
-                        console.log("we are filtering already!")
-                        if(isChangingAFilter(col)){
-                            console.log('we are changing a filter')
-                            tmp = this.fullDS //then start over 
-                        } else {
-                            console.log('we are using the dataslice')
-                            tmp = this.dataSlice //if we are already filtering, use the grid as the datasource
-                        }
-                    } else {
-                        console.log("new filter yo")
-                        tmp = this.fullDS //else we have no current filters so use the full dataset to filter
-                    }
-                    
-                    
-                    this.dataSlice = this.applyFilterToADataset(tmp,strategy)
-                    let h = this.dataSlice.length*29-950
-                    this.virtualHeight = h<0?600:h
-                    this.filterStrategy.isCurrentlyFiltering=true
-                    this.filterStrategy.filters[col]=strategy
-                } else { 
-                    //we are clearing a filter so we'll need to apply the other filters to the dataset again if there are any
-                    this.filterStrategy.filters[col]=null//wipe out the one we are about to replace, or it messes with the filtering.
-                    if(otherFiltersAreSet(col)){
-                        console.log('we found other filters')
-                        tmp = this.applyOtherFilters()
-                    } else { //else, means we have no current filter, and no other filters. return the orignal slice of data and reset the scroll position
-                        console.log('no ohter filters..')
-                        tmp = this.initialSlice
-                    }
-                    let h = this.dataSlice.length*29-950
-                    this.virtualHeight = h<0?600:h                    
-                    this.dataSlice = tmp
-                }
-            } catch (error) {
-                console.log("awe snap son.. something happened.", strategy, error)
-            }
-        },
-
-
+            this.backgroundWorker.postMessage({'MessageType':'filter','Strategy':strategy})
+        }
     },
     props:{
         gridConfig:{
@@ -307,6 +226,12 @@ export default {
         this.deriveHeaders()
         this.gridWidth = this.$refs.grid.offsetWidth //set initial size of grid used for calculating where to put the filter flyouts
         window.addEventListener('resize',this.handleResizeGrid)
+        
+        this.backgroundWorker = new WebWorker(worker)
+        this.backgroundWorker.addEventListener('message',event =>{this.handleMessage(event)})
+        this.backgroundWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
+        
+
   },
   beforeDestroy(){
     window.removeEventListener('resize',this.handleResizeGrid)

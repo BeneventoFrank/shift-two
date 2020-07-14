@@ -1,9 +1,7 @@
 <template>
-    
     <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
-        <div :ref="`header-${header.columnIndex}`" class="headerCell" @mouseenter="()=>{handleFlyout(header.columnIndex,true)}" @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  v-for="(header) in headers" :key="header.columnIndex" 
-            :style="`width:${header.width}; height:${header.height};  backgroundColor:${header.backgroundColor}; color:${header.textColor}; 
-                     border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`">
+        <div :ref="`header-${header.columnIndex}`" :class="`headerCell ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null}`" @mouseenter="()=>{handleFlyout(header.columnIndex,true)}" @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  v-for="(header) in headers" :key="header.columnIndex" 
+             :style="`width:${header.width}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`">
             <span> 
                 {{header.text}}
             </span>
@@ -16,7 +14,6 @@
                     <div v-if="filterCount>0">
                         <span>Results: {{filterCount}}, Specify More Characters. </span>
                         <br>
-                        {{cmpFilters}}
                         <br>
                     </div>
                     <div v-if="dataReceived&&filterCount>0">
@@ -56,6 +53,9 @@ export default {
         dataReceived:{
             type:Boolean
         },
+        currentFilterColumns:{
+            type:Array
+        },
         currentFilters:{
             type:Object
         },
@@ -77,17 +77,28 @@ export default {
        },
        cmpFilter:function(columnIndex){
             let tmp = ['','']
-            if (this.currentFilters.filters[columnIndex]){
-                tmp = this.currentFilters.filters[columnIndex].split('^^')
+            let split = []
+            if(this.currentFilters.filters){
+                for (let i = 0; i < this.currentFilters.filters.length; i++) {
+                    split = this.currentFilters.filters[i].split('^^')
+                    if(split[0] === columnIndex.toString() && split[1].length>0){
+                        tmp = split
+                    }
+                    
+                }
             }
             return tmp[1]
        },
-       handleShowTheDataAnyway(){
-           this.$emit('showDataAnyway')
+       handleShowTheDataAnyway(columnIndex){
+           this.$emit('showDataAnyway',columnIndex)
        },
        handleFlyout(index,value){
         this.showAFilter=value
         this.showFilter[index] = value
+        if(value===false)
+        {
+            this.$emit('filterClosed')
+        }
        },
        debounceInput: debounce(function(evt, index){
            const strategy = `${index}^^${evt.target.value}`

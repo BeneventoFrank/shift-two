@@ -1,7 +1,7 @@
 <template>
     <div ref="grid" style='width:100%;' class='container'>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" @filterClosed="handleFilterClosed" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
@@ -54,7 +54,8 @@ export default {
             lastPosition:0,
             filterStrategy:{
                 isCurrentlyFiltering:false,
-                filters:[]
+                filters:[],
+                columnsBeingFiltered:[]
             },
             backgroundWorker:null,
             defaultValues:{
@@ -129,12 +130,14 @@ export default {
         handleResizeGrid(){
             debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()
         },
+        handleFilterClosed(){
+            console.log('here??')
+            this.filterCount = 0
+        },
         setDefaultValues(){
            const numColumns = Object.keys(this.fullDS[0]).length
            const widthOfGrid = this.$refs.dataRow.offsetWidth
            const eachColumn = Math.round(widthOfGrid/numColumns)
-            console.log(numColumns , ' ', eachColumn, ' ', widthOfGrid)
-
            this.defaultValues.columnValues.backgroundColor = colors.editableDataGrid.defaultHeaderColor
            this.defaultValues.columnValues.borderColor = colors.editableDataGrid.defaultBorderColor
            this.defaultValues.columnValues.textColor = colors.editableDataGrid.defaultTextColor
@@ -198,7 +201,6 @@ export default {
         },
         handleMessage(message){
             console.log('message', message)
-
             switch (message.data.MessageType) {
                 case 'countUpdate':
                     this.filterCount = message.data.Count
@@ -210,7 +212,7 @@ export default {
                     this.filteredData = message.data.Data
                     break;
                 case 'filterResults':
-                    this.columnBeingFiltered = message.data.Column
+                    this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, message.data.Column]
                     this.highestCountLoaded = 150
                     this.filteredData = message.data.Data
                     this.virtualHeight = this.filteredData.length*29-950
@@ -221,11 +223,11 @@ export default {
                     break;
             }
         },
-        handleShowDataAnyway(){
+        handleShowDataAnyway(column){
             this.highestCountLoaded = 150
             this.virtualHeight = this.filteredData.length*29-950
             this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
-
+            this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, column.toString()]
         },
         handleApplyFilter(strategy){
             let previouslyFiltering = this.filterStrategy.isCurrentlyFiltering
@@ -242,7 +244,7 @@ export default {
             let split = strategy.split('^^')
             let col = split[0]
             let strat = split[1]
-            if (strat.length>0) {
+            if (strat.length>0) {3
                 this.filterStrategy.filters = [...this.filterStrategy.filters, strategy]
             } else {
                 let filteredArray = this.filterStrategy.filters.filter(element =>{
@@ -253,7 +255,7 @@ export default {
                 })
                 this.filterStrategy.filters = filteredArray
             }
-            this.filterStrategy.filters.length>0?this.filterStrategy.isCurrentlyFiltering=true:this.filterStrategy.filters.isCurrentlyFiltering=false
+            this.filterCount<1000?this.filterStrategy.isCurrentlyFiltering=true:this.filterStrategy.filters.isCurrentlyFiltering=false
         }
 
     },

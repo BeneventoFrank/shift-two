@@ -1,4 +1,5 @@
 <template>
+    
     <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
         <div :ref="`header-${header.columnIndex}`" class="headerCell" @mouseenter="()=>{handleFlyout(header.columnIndex,true)}" @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  v-for="(header) in headers" :key="header.columnIndex" 
             :style="`width:${header.width}; height:${header.height};  backgroundColor:${header.backgroundColor}; color:${header.textColor}; 
@@ -15,8 +16,13 @@
                     <div v-if="filterCount>0">
                         <span>Results: {{filterCount}}, Specify More Characters. </span>
                         <br>
-                        <span @click="handleShowTheDataAnyway" style="text-decoration:underline; cursor:pointer; font-size:small;">Just give me the data</span>
+                        {{cmpFilters}}
+                        <br>
                     </div>
+                    <div v-if="dataReceived&&filterCount>0">
+                        <span @click="()=>{handleShowTheDataAnyway(header.columnIndex)}" style="text-decoration:underline; cursor:pointer; font-size:small;">Just give me the data</span>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -45,6 +51,9 @@ export default {
             type:Array
         },
         gridWillScroll:{
+            type:Boolean
+        },
+        dataReceived:{
             type:Boolean
         },
         currentFilters:{
@@ -83,13 +92,7 @@ export default {
        debounceInput: debounce(function(evt, index){
            const strategy = `${index}^^${evt.target.value}`
            this.$emit('filterApplied',strategy)
-           if(evt.target.value){
-               this.$refs[`header-${index}`][0].classList.add('activeFilter')
-           } else 
-           {
-               this.$refs[`header-${index}`][0].classList.remove('activeFilter')
-           }
-       }, 50),
+       }, 300),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
            if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 
            return usersBorderWidth?`${usersBorderWidth} solid ${usersBorderColor}`:`${this.defaultValues.borderWidth} solid ${this.defaultValues.borderColor}`

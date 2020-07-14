@@ -1,7 +1,7 @@
 <template>
     <div ref="grid" style='width:100%;' class='container'>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
@@ -38,6 +38,7 @@ export default {
             highestScrollPosition:0,
             fullDS:[],
             filterCount:0,
+            dataReceived:false,
             tableTop:0,
             scrollCount:0,
             multiple:10,
@@ -53,7 +54,7 @@ export default {
             lastPosition:0,
             filterStrategy:{
                 isCurrentlyFiltering:false,
-                filters:{}
+                filters:[]
             },
             backgroundWorker:null,
             defaultValues:{
@@ -197,22 +198,64 @@ export default {
         },
         handleMessage(message){
             console.log('message', message)
-            // if(message.data.MessageType==='filterToShort'){
-            //     this.filterCount = message.data.Count
-            //     this.filteredData = message.data.Data
-            // } else if(message.data.MessageType ==='filterResults'){
-            //     this.dataSlice = message.data.Data
-            //     this.filterCount = 0
-            // }
+
+            switch (message.data.MessageType) {
+                case 'countUpdate':
+                    this.filterCount = message.data.Count
+                    break;
+                case 'filterToShort':
+                    this.columnBeingFiltered = message.data.Column
+                    this.filterCount = message.data.Count
+                    this.dataReceived = true
+                    this.filteredData = message.data.Data
+                    break;
+                case 'filterResults':
+                    this.columnBeingFiltered = message.data.Column
+                    this.highestCountLoaded = 150
+                    this.filteredData = message.data.Data
+                    this.virtualHeight = this.filteredData.length*29-950
+                    this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
+                    this.filterCount = 0
+                    break;                                
+                default:
+                    break;
+            }
         },
         handleShowDataAnyway(){
             this.highestCountLoaded = 150
             this.virtualHeight = this.filteredData.length*29-950
             this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
+
         },
         handleApplyFilter(strategy){
-            this.backgroundWorker.postMessage({'MessageType':'filter','Strategy':strategy})
+            let previouslyFiltering = this.filterStrategy.isCurrentlyFiltering
+            let isFiltering = true
+            this.SetFilterStrategy(strategy)
+            //if this is the first filter applied then you need to use the full DS in the WW
+            if(previouslyFiltering===false&&this.filterStrategy.isCurrentlyFiltering){
+                isFiltering = false
+            }
+            this.backgroundWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})
+
+        },
+        SetFilterStrategy(strategy){
+            let split = strategy.split('^^')
+            let col = split[0]
+            let strat = split[1]
+            if (strat.length>0) {
+                this.filterStrategy.filters = [...this.filterStrategy.filters, strategy]
+            } else {
+                let filteredArray = this.filterStrategy.filters.filter(element =>{
+                    let tmpSplit = element.split('^^')
+                    if(tmpSplit[0]!==col){
+                        return element
+                    }
+                })
+                this.filterStrategy.filters = filteredArray
+            }
+            this.filterStrategy.filters.length>0?this.filterStrategy.isCurrentlyFiltering=true:this.filterStrategy.filters.isCurrentlyFiltering=false
         }
+
     },
     props:{
         gridConfig:{

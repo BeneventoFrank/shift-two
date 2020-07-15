@@ -84,7 +84,6 @@ export default {
                     if(split[0] === columnIndex.toString() && split[1].length>0){
                         tmp = split
                     }
-                    
                 }
             }
             return tmp[1]

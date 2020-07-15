@@ -215,10 +215,24 @@ export default {
                     this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, message.data.Column]
                     this.highestCountLoaded = 150
                     this.filteredData = message.data.Data
-                    this.virtualHeight = this.filteredData.length*29-950
+                    this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
                     this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
                     this.filterCount = 0
+                    break;
+                case 'allFiltersApplied':
+                    this.highestCountLoaded = 150
+                    this.filteredData = message.data.Data
+                    this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                    this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
+                    this.filterCount = 0                    
                     break;                                
+                case 'originalData':
+                    this.highestCountLoaded = 150
+                    this.filteredData = message.data.Data
+                    this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                    this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
+                    this.filterCount = 0                    
+                    break;                      
                 default:
                     break;
             }
@@ -230,30 +244,66 @@ export default {
             this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, column.toString()]
         },
         handleApplyFilter(strategy){
-            let previouslyFiltering = this.filterStrategy.isCurrentlyFiltering
-            let isFiltering = true
-            this.SetFilterStrategy(strategy)
-            //if this is the first filter applied then you need to use the full DS in the WW
-            if(previouslyFiltering===false&&this.filterStrategy.isCurrentlyFiltering){
-                isFiltering = false
-            }
-            this.backgroundWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})
+            let isFilterchange = false
+            let split = strategy.split('^^')
+            let hasOtherFiltersToApply = false
+            const previouslyFiltering = this.filterStrategy.isCurrentlyFiltering
 
+            for (let i = 0; i < this.filterStrategy.filters.length; i++) {
+                let tmpSplit = this.filterStrategy.filters[i].split('^^')
+                if(tmpSplit[0] === split[0]){
+
+                    if (tmpSplit[1].length > split[1].length) {
+                        isFilterchange = true
+                    } else {
+                        isFilterchange = false
+                    }
+                } else {
+                    //else we are in here b/c there is a filter and its not the one we are on right now.
+                    //need to make sure we have one thats not ''
+                    if(tmpSplit[1].length > 0){
+                        hasOtherFiltersToApply = true
+                    }
+                } 
+            }
+            let isClearingTheOnlyFilter = false
+            console.log(hasOtherFiltersToApply,split[1],split[1].length)
+            if(hasOtherFiltersToApply===false&&split[1]===''){
+                isClearingTheOnlyFilter = true
+            }
+            console.log("is",isClearingTheOnlyFilter)
+            this.SetFilterStrategy(strategy)
+
+            if (hasOtherFiltersToApply&&split[1] === '') {
+                this.backgroundWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+            } else if(isClearingTheOnlyFilter) {
+                this.backgroundWorker.postMessage({'MessageType':'returnInitialData'})
+            } else {
+                const isInitialFilter = previouslyFiltering===false&&this.filterStrategy.isCurrentlyFiltering===true
+                let isFiltering = true
+                if(isInitialFilter||isFilterchange){
+                    isFiltering = false
+                }
+                this.backgroundWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})                
+            }
         },
         SetFilterStrategy(strategy){
             let split = strategy.split('^^')
             let col = split[0]
             let strat = split[1]
-            if (strat.length>0) {3
+            let columnsBeingFiltered = []
+            if (strat.length>0) {
                 this.filterStrategy.filters = [...this.filterStrategy.filters, strategy]
             } else {
                 let filteredArray = this.filterStrategy.filters.filter(element =>{
                     let tmpSplit = element.split('^^')
                     if(tmpSplit[0]!==col){
+                        columnsBeingFiltered.push(tmpSplit[0])
                         return element
                     }
                 })
                 this.filterStrategy.filters = filteredArray
+                this.filterStrategy.columnsBeingFiltered = columnsBeingFiltered
             }
             this.filterCount<1000?this.filterStrategy.isCurrentlyFiltering=true:this.filterStrategy.filters.isCurrentlyFiltering=false
         }

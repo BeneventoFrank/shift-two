@@ -3,10 +3,14 @@ export default () => {
     let originalData = []
     let filteredData = []
     let virtualColumns = null
+    let filterStrategy = {}
 
 
 
-    const filterDS = (ds,strategy)=>{
+    
+
+
+    const filterDS = (ds,strategy,runningMode)=>{
         const strat = strategy.split('^^')
         const col = strat[0]
         const keyword = strat[1]
@@ -21,24 +25,31 @@ export default () => {
             } 
             updateCount++
             if(updateCount > 4000){
-                postMessage({'MessageType':'countUpdate','Count':count})
+                if(runningMode!='silent'){
+                    postMessage({'MessageType':'countUpdate','Count':count})
+                }
                 updateCount = 0
             }
         }
-        filteredData = []
-        filteredData = tmp
+        
 
-        if(count>1000)
-        {
-            postMessage({'MessageType':'filterToShort', 'Column':col, 'Count':count,'Data':filteredData })
+        if(runningMode!='silent'){
+            filteredData = []
+            filteredData = tmp
+            if(count>1000)
+            {
+                postMessage({'MessageType':'filterToShort', 'Column':col, 'Count':count,'Data':filteredData })
+            } else {
+                postMessage({'MessageType':'filterResults', 'Column':col, 'Data':filteredData})
+            }
         } else {
-            postMessage({'MessageType':'filterResults', 'Column':col, 'Data':filteredData})
+            return tmp
         }
     }
 
     onmessage = (event)=>{ 
         message = event.data 
-        let tmp 
+        let tmp = []
         console.log("received a message ", message)
         switch (message.MessageType) {
             case 'data':
@@ -54,6 +65,18 @@ export default () => {
                     tmp = originalData
                 }
                 filterDS(tmp, message.Strategy)
+                break;
+            case 'applyAllFilters':
+                filterStrategy = message.Strategy
+                tmp = originalData
+                for (let i = 0; i < filterStrategy.filters.length; i++) {
+                    tmp = filterDS(tmp,filterStrategy.filters[i],'silent')
+                }
+                filteredData = tmp
+                postMessage({'MessageType':'allFiltersApplied', 'Data':tmp})
+                break;
+            case 'returnInitialData':
+                postMessage({'MessageType':'originalData', 'Data':originalData})
                 break;
             default:
                 break;

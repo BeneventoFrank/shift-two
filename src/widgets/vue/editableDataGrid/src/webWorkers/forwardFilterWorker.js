@@ -17,8 +17,8 @@ export default () => {
         let tmp = []
         let count = 0
         let updateCount = 1
-
-        for (let i = 0; i < ds.length; i++) {
+        let firstHalf = (Math.ceil(ds.length/2)-1)
+        for (let i = 0; i < firstHalf; i++) {
             if(ds[i][virtualColumns[col].dataProperty].includes(keyword)){
                 count++
                 tmp.push(ds[i])
@@ -26,6 +26,7 @@ export default () => {
             updateCount++
             if(updateCount > 4000){
                 if(runningMode!='silent'){
+                    console.log('FOOOOOOOOORWARD')
                     postMessage({'MessageType':'countUpdate','Count':count})
                 }
                 updateCount = 0
@@ -50,7 +51,7 @@ export default () => {
     onmessage = (event)=>{ 
         message = event.data 
         let tmp = []
-        console.log("received a message ", message)
+        console.log("forward filter received a message ", message)
         switch (message.MessageType) {
             case 'data':
                 originalData = message.Data

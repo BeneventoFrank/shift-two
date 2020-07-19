@@ -14,48 +14,8 @@ let gridData =  {
                 dataProperty:"year"
             },
             {
-                header:{text:"Color"},
-                dataProperty:"color"
-            },
-            {
                 header:{text:"Trim"},            
                 dataProperty:"trim"
-            },
-            {
-                header:{text:"Mileage"},            
-                dataProperty:"mileage", 
-            },
-            {
-                header:{text:"Damage"},            
-                dataProperty:"damage", 
-            },
-            {
-                header:{text:"Number Of Owners"},            
-                dataProperty:"numOwners", 
-            },
-            {
-                header:{text:"AC Blows Cold"},            
-                dataProperty:"ac", 
-            },
-            {
-                header:{text:"Year"},
-                dataProperty:"year"
-            },
-            {
-                header:{text:"Color"},
-                dataProperty:"color"
-            },
-            {
-                header:{text:"Trim"},            
-                dataProperty:"trim"
-            },
-            {
-                header:{text:"Mileage"},            
-                dataProperty:"mileage", 
-            },
-            {
-                header:{text:"Damage"},            
-                dataProperty:"damage", 
             }            
         ]
 }

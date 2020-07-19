@@ -20,9 +20,12 @@
 import HeaderRow from './components/HeaderRow'
 import debounce from 'lodash.debounce'
 import { colors } from '../../../../assets/shiftTwo'
-import axios from 'axios'
-import worker from './webWorker/filterWorker'
-import WebWorker from './webWorker/filterServiceWorkerSetup'
+
+import forwardWorker from './webWorkers/forwardFilterWorker'
+import reverseWorker from './webWorkers/reverseFilterWorker'
+
+import forwardWorkerSetup from './webWorkers/forwardFilterServiceWorkerSetup'
+import reverseWorkerSetup from './webWorkers/reverseFilterServiceWorkerSetup'
 
 export default {
     name:"EditableDataGrid",
@@ -57,7 +60,8 @@ export default {
                 filters:[],
                 columnsBeingFiltered:[]
             },
-            backgroundWorker:null,
+            ww_forwardWorker:null,
+            ww_reverseWorker:null,
             defaultValues:{
                 columnValues:{
                     width:'',
@@ -157,15 +161,16 @@ export default {
                 return 'center'
            }
         },
-        async getTestData(){
-            await axios.get('http://localhost:5003/client/741/client-lists/1/list-data/1')
-            .then(results=>{
-                this.virtualHeight = results.data.length*29-950
-                this.dataSlice = results.data.slice(1,this.highestCountLoaded)
-                this.initialSlice = this.dataSlice
-                this.highestCountLoaded = this.highestCountLoaded + 1
-                this.fullDS = results.data
-            })
+         getTestData(){
+            let b = []
+            for (let i = 0; i < 100000; i++) {
+                b.push({trim:Math.ceil(Math.random()*i*98765).toString(), make:Math.ceil(Math.random()*i*98765).toString(), model:Math.ceil(Math.random()*i*98765).toString(), year:Math.ceil(Math.random()*i*98765).toString() })
+            }   
+            this.virtualHeight = b.length*29-950
+            this.dataSlice = b.slice(1,this.highestCountLoaded)
+            this.initialSlice = this.dataSlice
+            this.highestCountLoaded = this.highestCountLoaded + 1
+            this.fullDS = b
         },
         parseData(startingPoint){
             let tmp = []
@@ -200,7 +205,6 @@ export default {
             })
         },
         handleMessage(message){
-            console.log('message', message)
             switch (message.data.MessageType) {
                 case 'countUpdate':
                     this.filterCount = message.data.Count
@@ -267,24 +271,27 @@ export default {
                 } 
             }
             let isClearingTheOnlyFilter = false
-            console.log(hasOtherFiltersToApply,split[1],split[1].length)
             if(hasOtherFiltersToApply===false&&split[1]===''){
                 isClearingTheOnlyFilter = true
             }
-            console.log("is",isClearingTheOnlyFilter)
             this.SetFilterStrategy(strategy)
 
             if (hasOtherFiltersToApply&&split[1] === '') {
-                this.backgroundWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+
             } else if(isClearingTheOnlyFilter) {
-                this.backgroundWorker.postMessage({'MessageType':'returnInitialData'})
+                this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
+                this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
             } else {
                 const isInitialFilter = previouslyFiltering===false&&this.filterStrategy.isCurrentlyFiltering===true
                 let isFiltering = true
                 if(isInitialFilter||isFilterchange){
                     isFiltering = false
                 }
-                this.backgroundWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})                
+                console.log('do you see me')
+                this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})  
+                this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})                
             }
         },
         SetFilterStrategy(strategy){
@@ -322,10 +329,12 @@ export default {
         this.gridWidth = this.$refs.grid.offsetWidth //set initial size of grid used for calculating where to put the filter flyouts
         window.addEventListener('resize',this.handleResizeGrid)
         
-        this.backgroundWorker = new WebWorker(worker)
-        this.backgroundWorker.addEventListener('message',event =>{this.handleMessage(event)})
-        this.backgroundWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
-        
+        this.ww_forwardWorker = new forwardWorkerSetup(forwardWorker)
+        this.ww_forwardWorker.addEventListener('message',event =>{this.handleMessage(event)})
+        this.ww_forwardWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
+        this.ww_reverseWorker = new reverseWorkerSetup(reverseWorker)
+        this.ww_reverseWorker.addEventListener('message',event =>{this.handleMessage(event)})
+        this.ww_reverseWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
 
   },
   beforeDestroy(){

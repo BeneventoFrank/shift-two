@@ -49,6 +49,7 @@ export default {
             highestCountLoaded:150,
             skip:20,
             dataSlice:[],
+            showDataAnyway:false,
             initialSlice:[],
             filteredData:[],
             userHasHeaders:false,
@@ -84,6 +85,7 @@ export default {
         },
         deriveHeaders(){
             let hasHeader=false
+            console.log('and this', this.gridConfig)
             for (let i = 0; i < this.gridConfig.Columns.length; i++) {
                 let tmp ={}
                 if(Object.keys(this.gridConfig.Columns[i].header).length>0){
@@ -135,7 +137,6 @@ export default {
             debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()
         },
         handleFilterClosed(){
-            console.log('here??')
             this.filterCount = 0
         },
         setDefaultValues(){
@@ -163,11 +164,11 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 0; i < 100000; i++) {
+            for (let i = 1; i <= 5; i++) {
                 b.push({trim:Math.ceil(Math.random()*i*98765).toString(), make:Math.ceil(Math.random()*i*98765).toString(), model:Math.ceil(Math.random()*i*98765).toString(), year:Math.ceil(Math.random()*i*98765).toString() })
             }   
-            this.virtualHeight = b.length*29-950
-            this.dataSlice = b.slice(1,this.highestCountLoaded)
+            this.virtualHeight = b.length*29-950>0?b.length*29-950:600
+            this.dataSlice = b.slice(0,this.highestCountLoaded)
             this.initialSlice = this.dataSlice
             this.highestCountLoaded = this.highestCountLoaded + 1
             this.fullDS = b
@@ -220,21 +221,21 @@ export default {
                     this.highestCountLoaded = 150
                     this.filteredData = message.data.Data
                     this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-                    this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
+                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                     this.filterCount = 0
                     break;
                 case 'allFiltersApplied':
                     this.highestCountLoaded = 150
                     this.filteredData = message.data.Data
                     this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-                    this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
+                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                     this.filterCount = 0                    
                     break;                                
                 case 'originalData':
                     this.highestCountLoaded = 150
                     this.filteredData = message.data.Data
                     this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-                    this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
+                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                     this.filterCount = 0                    
                     break;                      
                 default:
@@ -242,6 +243,7 @@ export default {
             }
         },
         handleShowDataAnyway(column){
+            this.showDataAnyway = true
             this.highestCountLoaded = 150
             this.virtualHeight = this.filteredData.length*29-950
             this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
@@ -273,15 +275,17 @@ export default {
             let isClearingTheOnlyFilter = false
             if(hasOtherFiltersToApply===false&&split[1]===''){
                 isClearingTheOnlyFilter = true
+                this.clearFilters()
             }
             this.SetFilterStrategy(strategy)
 
             if (hasOtherFiltersToApply&&split[1] === '') {
-                this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                //this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                 this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
 
             } else if(isClearingTheOnlyFilter) {
-                this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
+                this.clearFilters()
+                //this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
                 this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
             } else {
                 const isInitialFilter = previouslyFiltering===false&&this.filterStrategy.isCurrentlyFiltering===true
@@ -289,10 +293,16 @@ export default {
                 if(isInitialFilter||isFilterchange){
                     isFiltering = false
                 }
-                console.log('do you see me')
-                this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})  
+                //this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})  
                 this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})                
             }
+        },
+        clearFilters(){
+            this.filterStrategy = {
+                                    isCurrentlyFiltering:false,
+                                    filters:[],
+                                    columnsBeingFiltered:[]
+                                  }
         },
         SetFilterStrategy(strategy){
             let split = strategy.split('^^')
@@ -312,9 +322,12 @@ export default {
                 this.filterStrategy.filters = filteredArray
                 this.filterStrategy.columnsBeingFiltered = columnsBeingFiltered
             }
-            this.filterCount<1000?this.filterStrategy.isCurrentlyFiltering=true:this.filterStrategy.filters.isCurrentlyFiltering=false
+            
+            if(this.filterCount < 1000 || this.showDataAnyway)   
+            {
+                this.filterStrategy.isCurrentlyFiltering=true
+            }
         }
-
     },
     props:{
         gridConfig:{

@@ -14,8 +14,9 @@ export default () => {
         let count = 0
         let updateCount = 1
         let secondhHalf = Math.ceil(ds.length/2)
-       
+       console.log('runnig in reverse ', ds.length, secondhHalf)
         for (let i = ds.length-1; i >= secondhHalf ; i--) {
+            console.log(ds[i][virtualColumns[col].dataProperty] )
             if(ds[i][virtualColumns[col].dataProperty].includes(keyword)){
                 count++
                 tmp.push(ds[i])

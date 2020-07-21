@@ -18,8 +18,11 @@ export default () => {
         let count = 0
         let updateCount = 1
         let firstHalf = (Math.ceil(ds.length/2)-1)
-        for (let i = 0; i < firstHalf; i++) {
+        console.log('running forward ', 0, firstHalf)
+        for (let i = 0; i <= firstHalf; i++) {
+            console.log('comparing', ds[i][virtualColumns[col].dataProperty], keyword)
             if(ds[i][virtualColumns[col].dataProperty].includes(keyword)){
+                console.log('found it')
                 count++
                 tmp.push(ds[i])
             } 
@@ -77,6 +80,7 @@ export default () => {
                 postMessage({'MessageType':'allFiltersApplied', 'Data':tmp})
                 break;
             case 'returnInitialData':
+                console.log('returning ',originalData)
                 postMessage({'MessageType':'originalData', 'Data':originalData})
                 break;
             default:

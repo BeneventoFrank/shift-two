@@ -7,7 +7,7 @@
             </span>
             <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null}`">
                 <div class='innerDiv' :style="`background-color:${bgColor}`">
-                    <label class='filterHeader'>Filter {{header.text}}</label>
+                    <label class='filterHeader'>{{header.text}}</label>
                     <br>
                     <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
                     <br>

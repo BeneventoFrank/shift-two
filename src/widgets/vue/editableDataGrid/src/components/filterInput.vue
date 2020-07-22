@@ -1,5 +1,5 @@
 <template>
-    <input ref="filterInput" autocomplete="off" :value="defaultValue" id='filterInput' @input="handleInputChanged" type='text' class="filterInput">
+    <input ref="filterInput" autocomplete="off" placeholder="Filter" :value="defaultValue" id='filterInput' @input="handleInputChanged" type='text' class="filterInput">
 </template>
 
 <script>
@@ -59,4 +59,16 @@ export default {
         padding:5px;
         font-size:16px;
     }
+    ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #c3c3c3;
+    opacity: 1; /* Firefox */
+    }
+
+    :-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: #c3c3c3;
+    }
+
+    ::-ms-input-placeholder { /* Microsoft Edge */
+    color: #c3c3c3  ;
+    }    
 </style>

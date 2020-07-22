@@ -296,7 +296,7 @@ export default {
                 this.showReturning = true
                 setTimeout(() => {
                     this.showReturning = false    
-                }, 2000);
+                }, 1500);
                 this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
                 this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
             } else {

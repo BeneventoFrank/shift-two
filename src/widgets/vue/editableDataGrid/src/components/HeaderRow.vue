@@ -1,13 +1,26 @@
 <template>
     <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
-        <div :ref="`header-${header.columnIndex}`" :class="`headerCell ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null}`" @mouseenter="()=>{handleFlyout(header.columnIndex,true)}" @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  v-for="(header) in headers" :key="header.columnIndex" 
+        <div :ref="`header-${header.columnIndex}`" :class="`headerCell ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null}`" @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  v-for="(header) in headers" :key="header.columnIndex" 
              :style="`width:${header.width}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`">
             <span> 
                 {{header.text}}
             </span>
             <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null}`">
                 <div class='innerDiv' :style="`background-color:${bgColor}`">
-                    <label class='filterHeader'>{{header.text}}</label>
+                    <div class='flyoutHeader'>
+                        <div class='headerItem sort'> 
+                            <UpArrow class="sortButton" :height='15'/>
+                            <DownArrow class="sortButton rightButton" :height='15'/>                            
+                        </div>
+                        <div class='headerItem'>
+                            <label class='filterHeader'>{{header.text}}</label>
+                        </div>
+                        <div class='headerItem'>
+                            &nbsp;
+                        </div>
+                    </div>
+
+                    
                     <br>
                     <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
                     <br>
@@ -22,7 +35,7 @@
                         <br>
                     </div>                    
                 </div>
-            </div>
+            </div> 
         </div>
     </div>
 </template>
@@ -30,10 +43,17 @@
 import {colors} from '../../../../../assets/shiftTwo'
 import debounce from 'lodash.debounce'
 import FilterInput from '../components/filterInput'
+import UpArrow from '../images/UpArrow'
+import DownArrow from '../images/DownArrow'
+
 export default {
+
+
     name:"HeaderRow",
     components: {
-        FilterInput
+        FilterInput,
+        UpArrow,
+        DownArrow
     },
     data() {
         return {
@@ -150,7 +170,7 @@ export default {
         display:flex;
         flex-direction: column;
         align-items: center;
-        height:200px;
+        height:150px;
         width:300px;
         padding:10px;
     }
@@ -163,13 +183,33 @@ export default {
     }
     .filterInput {
         height:30px;
-        width: 250px;
+        width: 93%;
         border-radius: 4px;
         outline: none;
         border: 1px solid rgb(176, 176, 176);
         line-height: 25px;
         padding:5px;
         font-size:16px;
-
+    }
+    .flyoutHeader {
+        width:100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-evenly
+    }
+    .headerItem{
+        width:30%;
+    }
+    .sort{
+        display: flex;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+    .sortButton{
+        margin-top: 4px;
+        cursor: pointer;
+    }
+    .rightButton{
+        margin-left: 10px
     }
 </style>

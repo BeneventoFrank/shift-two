@@ -4,6 +4,12 @@ export default () => {
     let filteredData = []
     let virtualColumns = null
     let filterStrategy = {}
+
+
+
+    
+
+
     const filterDS = (ds,strategy,runningMode)=>{
         const strat = strategy.split('^^')
         const col = strat[0]
@@ -11,36 +17,44 @@ export default () => {
         let tmp = []
         let count = 0
         let updateCount = 1
-        for (let i = 0; i <= ds.length-1; i++) {
+
+        for (let i = 0; i < ds.length; i++) {
             if(ds[i][virtualColumns[col].dataProperty].includes(keyword)){
                 count++
                 tmp.push(ds[i])
             } 
             updateCount++
-            if(updateCount > 2500){
+            if(updateCount > 4000){
                 if(runningMode!='silent'){
                     postMessage({'MessageType':'countUpdate','Count':count})
                 }
                 updateCount = 0
             }
         }
+        
+
         if(runningMode!='silent'){
             filteredData = []
             filteredData = tmp
-            postMessage({'MessageType':'filterResults', 'Column':col, 'Data':filteredData})
+            if(count>1000)
+            {
+                postMessage({'MessageType':'filterToShort', 'Column':col, 'Count':count,'Data':filteredData })
+            } else {
+                postMessage({'MessageType':'filterResults', 'Column':col, 'Data':filteredData})
+            }
         } else {
             return tmp
         }
+        postMessage({'MessageType':'filterTerminated'})
     }
 
     onmessage = (event)=>{ 
         message = event.data 
         let tmp = []
-        console.log("forward filter received a message ", message)
+        console.log("received a message ", message)
         switch (message.MessageType) {
             case 'data':
-                originalData = message.Data.splice(0,(Math.ceil(message.Data.length/2)))
-                console.log('forward filter will handle ', originalData.length)
+                originalData = message.Data
                 virtualColumns = message.Columns
                 break;
             case 'filter':
@@ -51,9 +65,7 @@ export default () => {
                     console.log("using original data")
                     tmp = originalData
                 }
-                postMessage({'MessageType':'countUpdate','Count':0})
                 filterDS(tmp, message.Strategy)
-                postMessage({'MessageType':'filterTerminated'})
                 break;
             case 'applyAllFilters':
                 filterStrategy = message.Strategy
@@ -63,11 +75,9 @@ export default () => {
                 }
                 filteredData = tmp
                 postMessage({'MessageType':'allFiltersApplied', 'Data':tmp})
-                postMessage({'MessageType':'filterTerminated'})
                 break;
             case 'returnInitialData':
                 postMessage({'MessageType':'originalData', 'Data':originalData})
-                postMessage({'MessageType':'filterTerminated'})
                 break;
             default:
                 break;

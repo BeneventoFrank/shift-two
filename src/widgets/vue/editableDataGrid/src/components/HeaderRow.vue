@@ -16,10 +16,11 @@
                         <br>
                         <br>
                     </div>
-                    <div v-if="dataReceived&&filterCount>0">
-                        <span @click="()=>{handleShowTheDataAnyway(header.columnIndex)}" style="text-decoration:underline; cursor:pointer; font-size:small;">Just give me the data</span>
-                    </div>
-
+                    <div v-show="showReturning">
+                        <span>Fetching Original Data... </span>
+                        <br>
+                        <br>
+                    </div>                    
                 </div>
             </div>
         </div>
@@ -62,6 +63,9 @@ export default {
         filterCount:{
             type:Number
         },
+        showReturning:{
+            type:Boolean
+        },
         gridWidth:{
             type:Number
         }
@@ -100,8 +104,8 @@ export default {
         }
        },
        debounceInput: debounce(function(evt, index){
-           const strategy = `${index}^^${evt.target.value}`
-           this.$emit('filterApplied',strategy)
+            const strategy = `${index}^^${evt.target.value}`
+            this.$emit('filterApplied',strategy)
        }, 300),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
            if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 
@@ -146,7 +150,7 @@ export default {
         display:flex;
         flex-direction: column;
         align-items: center;
-        height:250px;
+        height:200px;
         width:300px;
         padding:10px;
     }

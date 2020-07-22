@@ -1,7 +1,7 @@
 <template>
     <div ref="grid" style='width:100%;' class='container'>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" @filterClosed="handleFilterClosed" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
@@ -46,7 +46,9 @@ export default {
             scrollCount:0,
             multiple:10,
             addToTop:74,
+            tmpResults:[],
             highestCountLoaded:150,
+            numberOfTerminatedFilters:0,
             skip:20,
             dataSlice:[],
             showDataAnyway:false,
@@ -55,6 +57,7 @@ export default {
             userHasHeaders:false,
             virtualColumns:[],
             virtualHeight:0,
+            showReturning:false,
             lastPosition:0,
             filterStrategy:{
                 isCurrentlyFiltering:false,
@@ -85,7 +88,6 @@ export default {
         },
         deriveHeaders(){
             let hasHeader=false
-            console.log('and this', this.gridConfig)
             for (let i = 0; i < this.gridConfig.Columns.length; i++) {
                 let tmp ={}
                 if(Object.keys(this.gridConfig.Columns[i].header).length>0){
@@ -164,8 +166,8 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 5; i++) {
-                b.push({trim:Math.ceil(Math.random()*i*98765).toString(), make:Math.ceil(Math.random()*i*98765).toString(), model:Math.ceil(Math.random()*i*98765).toString(), year:Math.ceil(Math.random()*i*98765).toString() })
+            for (let i = 1; i <= 1000; i++) {
+                b.push({trim:Math.ceil(Math.random()*i*98765).toString(), make:Math.ceil(Math.random()*i*98765).toString(), model:Math.ceil(Math.random()*i*98765).toString(), year:Math.ceil(Math.random()*i*98765).toString(),trim2:Math.ceil(Math.random()*i*98765).toString(), make2:Math.ceil(Math.random()*i*98765).toString(), model2:Math.ceil(Math.random()*i*98765).toString(), year2:Math.ceil(Math.random()*i*98765).toString(),trim3:Math.ceil(Math.random()*i*98765).toString(), make3:Math.ceil(Math.random()*i*98765).toString(), model3:Math.ceil(Math.random()*i*98765).toString(), year3:Math.ceil(Math.random()*i*98765).toString() })
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600
             this.dataSlice = b.slice(0,this.highestCountLoaded)
@@ -206,38 +208,48 @@ export default {
             })
         },
         handleMessage(message){
+            let tmp = []
             switch (message.data.MessageType) {
                 case 'countUpdate':
                     this.filterCount = message.data.Count
                     break;
-                case 'filterToShort':
-                    this.columnBeingFiltered = message.data.Column
-                    this.filterCount = message.data.Count
-                    this.dataReceived = true
-                    this.filteredData = message.data.Data
-                    break;
                 case 'filterResults':
                     this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, message.data.Column]
-                    this.highestCountLoaded = 150
-                    this.filteredData = message.data.Data
-                    this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                    this.filterCount = 0
+                    if (message.data.Data.length>0) {
+                        tmp = [...this.tmpResults, ...message.data.Data]
+                        this.tmpResults = tmp
+                    }
+                    this.filterStrategy.isCurrentlyFiltering=true
                     break;
                 case 'allFiltersApplied':
-                    this.highestCountLoaded = 150
-                    this.filteredData = message.data.Data
-                    this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                    this.filterCount = 0                    
+                    tmp = [...this.tmpResults, message.data.Data]
+                    if (message.data.Data.length>0) {
+                        tmp = [...this.tmpResults, ...message.data.Data]
+                        this.tmpResults = tmp
+                    }
+                    this.filterStrategy.isCurrentlyFiltering=true
                     break;                                
-                case 'originalData':
-                    this.highestCountLoaded = 150
-                    this.filteredData = message.data.Data
-                    this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                    this.filterCount = 0                    
-                    break;                      
+                case 'originalData': 
+                    tmp = [...this.tmpResults, message.data.Data]
+                    if (message.data.Data.length>0) {
+                        tmp = [...this.tmpResults, ...message.data.Data]
+                        this.tmpResults = tmp
+                    }
+                    this.clearFilters()
+                    break;
+                case 'filterTerminated':
+                    this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
+                    if(this.numberOfTerminatedFilters===2)    
+                    {
+                        this.highestCountLoaded = 150
+                        this.filteredData = this.tmpResults
+                        this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                        this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                        this.filterCount = 0
+                        this.numberOfTerminatedFilters = 0
+                        this.tmpResults = []
+                    }
+                    break;
                 default:
                     break;
             }
@@ -253,7 +265,6 @@ export default {
             let isFilterchange = false
             let split = strategy.split('^^')
             let hasOtherFiltersToApply = false
-            const previouslyFiltering = this.filterStrategy.isCurrentlyFiltering
 
             for (let i = 0; i < this.filterStrategy.filters.length; i++) {
                 let tmpSplit = this.filterStrategy.filters[i].split('^^')
@@ -273,28 +284,30 @@ export default {
                 } 
             }
             let isClearingTheOnlyFilter = false
-            if(hasOtherFiltersToApply===false&&split[1]===''){
+            if(split[1].length < 2 && hasOtherFiltersToApply===false&& this.filterStrategy.isCurrentlyFiltering){
                 isClearingTheOnlyFilter = true
-                this.clearFilters()
             }
             this.SetFilterStrategy(strategy)
-
-            if (hasOtherFiltersToApply&&split[1] === '') {
-                //this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+            this.showReturning = false
+            if (hasOtherFiltersToApply&&split[1].length<2) {
+                this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                 this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-
             } else if(isClearingTheOnlyFilter) {
-                this.clearFilters()
-                //this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
+                this.showReturning = true
+                setTimeout(() => {
+                    this.showReturning = false    
+                }, 2000);
+                this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
                 this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
             } else {
-                const isInitialFilter = previouslyFiltering===false&&this.filterStrategy.isCurrentlyFiltering===true
                 let isFiltering = true
-                if(isInitialFilter||isFilterchange){
+                if((!hasOtherFiltersToApply||isFilterchange)){
                     isFiltering = false
                 }
-                //this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})  
-                this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})                
+                if(split[1].length > 1){
+                    this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})  
+                    this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})                
+                }
             }
         },
         clearFilters(){
@@ -321,11 +334,6 @@ export default {
                 })
                 this.filterStrategy.filters = filteredArray
                 this.filterStrategy.columnsBeingFiltered = columnsBeingFiltered
-            }
-            
-            if(this.filterCount < 1000 || this.showDataAnyway)   
-            {
-                this.filterStrategy.isCurrentlyFiltering=true
             }
         }
     },

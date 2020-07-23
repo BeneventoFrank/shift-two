@@ -1,7 +1,7 @@
 <template>
     <div ref="grid" style='width:100%;' class='container'>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" @columnSort="handleColumnSort" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
@@ -59,6 +59,8 @@ export default {
             virtualHeight:0,
             showReturning:false,
             lastPosition:0,
+            isCurrentlySorting:false,
+            sortStrategy:'',
             filterStrategy:{
                 isCurrentlyFiltering:false,
                 filters:[],
@@ -134,6 +136,30 @@ export default {
                 retVal=true
             }
             return retVal
+        },
+        sortDataset(strategy, dataset) {
+            const setValue = (value)=>{return value?value:''}
+
+            let sort = strategy.split('^^')
+            let column = sort[0]
+            let sortDirection = sort[1]
+            console.log('what did you get ', sort)
+            let tmp = []
+            if(sortDirection==="asc")
+            {
+                tmp = dataset.sort(function (a, b) {return ('' + setValue(a[column]).toLowerCase()).localeCompare(setValue(b[column]).toLowerCase());})
+            } else {
+                tmp = dataset.sort(function (a, b) {return ('' + setValue(b[column]).toLowerCase()).localeCompare(setValue(a[column]).toLowerCase());})
+            }
+            this.isCurrentlySorting = true;
+            this.sortStrategy = strategy
+            console.log('returning ', tmp)
+            return tmp
+        },
+        handleColumnSort(sortStrategy){
+            //sort strategy will either be index^^asc, index^^desc, or index^^none
+            console.log('calling it')
+            this.dataSlice = this.sortDataset(sortStrategy, this.dataSlice)
         },
         handleResizeGrid(){
             debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()

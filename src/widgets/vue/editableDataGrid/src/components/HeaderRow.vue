@@ -9,8 +9,8 @@
                 <div class='innerDiv' :style="`background-color:${bgColor}`">
                     <div class='flyoutHeader'>
                         <div class='headerItem sort'> 
-                            <UpArrow class="sortButton" :height='15'/>
-                            <DownArrow class="sortButton rightButton" :height='15'/>                            
+                            <span @click="()=>{handleSortClick(header.columnIndex,'asc')}"><UpArrow class="sortButton" :height='15'/></span>
+                            <span @click="()=>{handleSortClick(header.columnIndex,'desc')}"><DownArrow class="sortButton rightButton" :height='15'/></span>
                         </div>
                         <div class='headerItem'>
                             <label class='filterHeader'>{{header.text}}</label>
@@ -19,8 +19,6 @@
                             &nbsp;
                         </div>
                     </div>
-
-                    
                     <br>
                     <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
                     <br>
@@ -31,7 +29,7 @@
                     </div>
                     <div v-show="showReturning">
                         <span>Fetching Original Data... </span>
-                        <br>
+                        <br>    
                         <br>
                     </div>                    
                 </div>
@@ -91,6 +89,10 @@ export default {
         }
     },        
     methods: {
+       handleSortClick(column, direction){
+           console.log('here')
+           this.$emit('columnSort',`${column}^^${direction}`)
+       },
        wouldCauseAScroll(index){
             let retVal = '50px'
             let y = this.$refs[`header-${index}`]
@@ -99,7 +101,7 @@ export default {
             }
             return retVal
        },
-       cmpFilter:function(columnIndex){
+       cmpFilter(columnIndex){
             let tmp = ['','']
             let split = []
             if(this.currentFilters.filters){

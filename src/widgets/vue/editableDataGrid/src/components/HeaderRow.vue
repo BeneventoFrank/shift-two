@@ -9,8 +9,8 @@
                 <div class='innerDiv' :style="`background-color:${bgColor}`">
                     <div class='flyoutHeader'>
                         <div class='headerItem sort'> 
-                            <span @click="()=>{handleSortClick(header.columnIndex,'asc')}"><UpArrow class="sortButton" :height='15'/></span>
-                            <span @click="()=>{handleSortClick(header.columnIndex,'desc')}"><DownArrow class="sortButton rightButton" :height='15'/></span>
+                            <span @click="()=>{handleSortClick(header.dataProperty,'asc')}"><UpArrow class="sortButton" :height='15'/></span>
+                            <span @click="()=>{handleSortClick(header.dataProperty,'desc')}"><DownArrow class="sortButton rightButton" :height='15'/></span>
                         </div>
                         <div class='headerItem'>
                             <label class='filterHeader'>{{header.text}}</label>
@@ -135,6 +135,7 @@ export default {
        },
     },
     mounted(){
+        console.log("what do you receive ', ", this.headers)
         let tmp = {}
          for (let i = 0; i < this.headers.length; i++) {
              tmp[i]=false

@@ -140,13 +140,14 @@ export default {
         sortDataset(strategy, dataset) {
             const setValue = (value)=>{return value?value:''}
 
-            let sort = strategy.split('^^')
-            let column = sort[0]
-            let sortDirection = sort[1]
+            let sort = strategy.split('^^')                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+            let column = sort[0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+            let sortDirection = sort[1]                                                                                                                                                                                                                                                                                                                                                                                                   
             console.log('what did you get ', sort)
             let tmp = []
             if(sortDirection==="asc")
             {
+
                 tmp = dataset.sort(function (a, b) {return ('' + setValue(a[column]).toLowerCase()).localeCompare(setValue(b[column]).toLowerCase());})
             } else {
                 tmp = dataset.sort(function (a, b) {return ('' + setValue(b[column]).toLowerCase()).localeCompare(setValue(a[column]).toLowerCase());})
@@ -159,7 +160,10 @@ export default {
         handleColumnSort(sortStrategy){
             //sort strategy will either be index^^asc, index^^desc, or index^^none
             console.log('calling it')
-            this.dataSlice = this.sortDataset(sortStrategy, this.dataSlice)
+            this.filteredData = this.sortDataset(sortStrategy, this.fullDS)
+            this.highestCountLoaded = 150     
+            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
         },
         handleResizeGrid(){
             debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()
@@ -192,7 +196,7 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 10000; i++) {
+            for (let i = 1; i <= 100000; i++) {
                 b.push({trim:Math.ceil(Math.random()*i*98765).toString(), make:Math.ceil(Math.random()*i*98765).toString(), model:Math.ceil(Math.random()*i*98765).toString(), year:Math.ceil(Math.random()*i*98765).toString(),trim2:Math.ceil(Math.random()*i*98765).toString(), make2:Math.ceil(Math.random()*i*98765).toString(), model2:Math.ceil(Math.random()*i*98765).toString(), year2:Math.ceil(Math.random()*i*98765).toString(),trim3:Math.ceil(Math.random()*i*98765).toString(), make3:Math.ceil(Math.random()*i*98765).toString(), model3:Math.ceil(Math.random()*i*98765).toString(), year3:Math.ceil(Math.random()*i*98765).toString() })
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600

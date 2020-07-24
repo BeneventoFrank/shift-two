@@ -1,12 +1,15 @@
 <template>
     <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
+        
         <div :ref="`header-${header.columnIndex}`" 
+             :style="`width:${header.width}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
              :class="`headerCell 
                       ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
                       ${(currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.columnIndex.toString())?'activeFilter':null} 
                     `" 
-             @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  v-for="(header) in headers" :key="header.columnIndex" 
-             :style="`width:${header.width}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`">
+             @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
+             @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
+             v-for="(header) in headers" :key="header.columnIndex">
             <span> 
                 {{header.text}}
             </span>
@@ -37,10 +40,10 @@
                         <br>    
                         <br>
                     </div>                    
-
                 </div>
             </div> 
         </div>
+
     </div>
 </template>
 <script>

@@ -278,7 +278,12 @@ export default {
                     if(this.numberOfTerminatedFilters===2)    
                     {
                         this.highestCountLoaded = 150
-                        this.filteredData = this.tmpResults
+                        
+                        if(this.sortStrategy.isCurrentlySorting===true){
+                            this.filteredData = this.sortDataset(this.sortStrategy.strategy,this.tmpResults)
+                        } else {
+                            this.filteredData = this.tmpResults
+                        }
                         this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
                         this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                         this.filterCount = 0

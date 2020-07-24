@@ -1,6 +1,11 @@
 <template>
     <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
-        <div :ref="`header-${header.columnIndex}`" :class="`headerCell ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null}`" @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  v-for="(header) in headers" :key="header.columnIndex" 
+        <div :ref="`header-${header.columnIndex}`" 
+             :class="`headerCell 
+                      ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
+                      ${(currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.columnIndex.toString())?'activeFilter':null} 
+                    `" 
+             @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  v-for="(header) in headers" :key="header.columnIndex" 
              :style="`width:${header.width}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`">
             <span> 
                 {{header.text}}
@@ -9,8 +14,8 @@
                 <div class='innerDiv' :style="`background-color:${bgColor}`">
                     <div class='flyoutHeader'>
                         <div class='headerItem sort'> 
-                            <span @click="()=>{handleSortClick(header.dataProperty,'asc')}"><UpArrow class="sortButton" :height='15'/></span>
-                            <span @click="()=>{handleSortClick(header.dataProperty,'desc')}"><DownArrow class="sortButton rightButton" :height='15'/></span>
+                            <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'asc')}"><UpArrow :isActiveSort="isActiveSort" class="sortButton" :height='15'/></span>
+                            <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'desc')}"><DownArrow :isActiveSort="isActiveSort" class="sortButton rightButton" :height='15'/></span>
                         </div>
                         <div class='headerItem'>
                             <label class='filterHeader'>{{header.text}}</label>
@@ -27,11 +32,12 @@
                         <br>
                         <br>
                     </div>
-                    <div v-show="showReturning">
-                        <span>Fetching Original Data... </span>
+                    <div v-show="showReturning||isSorting">
+                        <span>{{message&&message.length>0?message:'Fetching Original Data...'}} </span>
                         <br>    
                         <br>
                     </div>                    
+
                 </div>
             </div> 
         </div>
@@ -56,8 +62,11 @@ export default {
     data() {
         return {
             showAFilter:false,
+            isSorting:false,
             showFilter:{},
-            bgColor:''
+            bgColor:'',
+            isActiveSort:'',
+            message:null
         };
     },
     computed: {
@@ -78,6 +87,12 @@ export default {
         currentFilters:{
             type:Object
         },
+        sortDesc:{
+            type:Boolean
+        },
+        sortAsc:{
+            type:Boolean
+        },
         filterCount:{
             type:Number
         },
@@ -86,12 +101,25 @@ export default {
         },
         gridWidth:{
             type:Number
+        },
+        currentSort:{
+            type:Object
         }
     },        
     methods: {
-       handleSortClick(column, direction){
-           console.log('here')
-           this.$emit('columnSort',`${column}^^${direction}`)
+       handleSortClick(column, index, direction){
+           if(this.isActiveSort === direction){
+               this.isSorting = true;
+               this.message = 'Returning Original Data...'
+               setTimeout(() => {this.$emit('columnSort','')},0);
+               this.isActiveSort = ''
+           } else {
+               this.isActiveSort=direction
+               this.isSorting = true;
+               this.message='Sorting...'
+               setTimeout(() => {this.$emit('columnSort',`${column}^^${direction}^^${index}`)},0);
+           }
+           setTimeout(() => {this.isSorting=false},1000);                          
        },
        wouldCauseAScroll(index){
             let retVal = '50px'
@@ -135,7 +163,6 @@ export default {
        },
     },
     mounted(){
-        console.log("what do you receive ', ", this.headers)
         let tmp = {}
          for (let i = 0; i < this.headers.length; i++) {
              tmp[i]=false

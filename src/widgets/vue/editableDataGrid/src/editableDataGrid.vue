@@ -1,12 +1,14 @@
 <template>
     <div ref="grid" style='width:100%;' class='container'>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" @columnSort="handleColumnSort" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" @columnSort="handleColumnSort" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" 
+            :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" 
+            :currentSort="sortStrategy" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; width:100%; border-collapse: collapse; line-height:10px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <td :style="`width:${column.width}`" v-for="column in virtualColumns" :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
+                    <td :style="`width:${column.width} `" v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
                 </tr>
             </table>
             <div :style="`position: relative; top:0px; left:0px; width: 1px; height:${virtualHeight}px;`">
@@ -52,15 +54,17 @@ export default {
             skip:20,
             dataSlice:[],
             showDataAnyway:false,
-            initialSlice:[],
             filteredData:[],
             userHasHeaders:false,
             virtualColumns:[],
             virtualHeight:0,
             showReturning:false,
             lastPosition:0,
-            isCurrentlySorting:false,
-            sortStrategy:'',
+            sortStrategy:{
+                isCurrentlySorting:false,
+                strategy:'',
+                columnBeingSorted:''
+            },
             filterStrategy:{
                 isCurrentlyFiltering:false,
                 filters:[],
@@ -140,27 +144,32 @@ export default {
         sortDataset(strategy, dataset) {
             const setValue = (value)=>{return value?value:''}
 
-            let sort = strategy.split('^^')                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-            let column = sort[0]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
-            let sortDirection = sort[1]                                                                                                                                                                                                                                                                                                                                                                                                   
-            console.log('what did you get ', sort)
-            let tmp = []
-            if(sortDirection==="asc")
-            {
+            let sort = strategy.split('^^')
+            if (sort[1]&&sort[1].length>0) {
+                let column = sort[0]             
+                let sortDirection = sort[1]   
+                let index = sort[2]             
 
-                tmp = dataset.sort(function (a, b) {return ('' + setValue(a[column]).toLowerCase()).localeCompare(setValue(b[column]).toLowerCase());})
+                this.sortStrategy.columnBeingSorted = index
+                let tmp = []
+                if(sortDirection==="asc")
+                {
+                    tmp = dataset.sort(function (a, b) {return ('' + setValue(a[column]).toLowerCase()).localeCompare(setValue(b[column]).toLowerCase());})
+                } else {
+                    tmp = dataset.sort(function (a, b) {return ('' + setValue(b[column]).toLowerCase()).localeCompare(setValue(a[column]).toLowerCase());})
+                }
+                this.sortStrategy.isCurrentlySorting = true;
+                this.sortStrategy.strategy = strategy
+                return tmp
             } else {
-                tmp = dataset.sort(function (a, b) {return ('' + setValue(b[column]).toLowerCase()).localeCompare(setValue(a[column]).toLowerCase());})
+                this.sortStrategy.columnBeingSorted = ''
+                this.sortStrategy.isCurrentlySorting = false;
+                this.sortStrategy.strategy = ''
+                return this.fullDS
             }
-            this.isCurrentlySorting = true;
-            this.sortStrategy = strategy
-            console.log('returning ', tmp)
-            return tmp
         },
         handleColumnSort(sortStrategy){
-            //sort strategy will either be index^^asc, index^^desc, or index^^none
-            console.log('calling it')
-            this.filteredData = this.sortDataset(sortStrategy, this.fullDS)
+            this.filteredData = this.sortDataset(sortStrategy, [...this.fullDS])
             this.highestCountLoaded = 150     
             this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
@@ -182,7 +191,7 @@ export default {
            this.defaultValues.columnValues.width = `${eachColumn}px`
            this.defaultValues.columnValues.borderWidth = '1px'
            this.defaultValues.columnValues.alignment = 'center'
-           this.defaultValues.columnValues.dataAlignment = 'center'
+           this.defaultValues.columnValues.dataAlignment = 'left'
         },
         translateAlignment(val){
            switch (val) {
@@ -201,7 +210,6 @@ export default {
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600
             this.dataSlice = b.slice(0,this.highestCountLoaded)
-            this.initialSlice = this.dataSlice
             this.highestCountLoaded = this.highestCountLoaded + 1
             this.fullDS = b
         },
@@ -252,7 +260,6 @@ export default {
                     this.filterStrategy.isCurrentlyFiltering=true
                     break;
                 case 'allFiltersApplied':
-                    tmp = [...this.tmpResults, message.data.Data]
                     if (message.data.Data.length>0) {
                         tmp = [...this.tmpResults, ...message.data.Data]
                         this.tmpResults = tmp
@@ -260,7 +267,6 @@ export default {
                     this.filterStrategy.isCurrentlyFiltering=true
                     break;                                
                 case 'originalData': 
-                    tmp = [...this.tmpResults, message.data.Data]
                     if (message.data.Data.length>0) {
                         tmp = [...this.tmpResults, ...message.data.Data]
                         this.tmpResults = tmp

@@ -1,17 +1,19 @@
 <template>
   <div id="app">
-    <EditableDataGrid :gridConfig="localData"></EditableDataGrid>
+    <Slider></Slider>
   </div>
 </template>
 
-<script>
-import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
+<script> 
+import Slider from './widgets/vue/slider/Slider'
+//import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
 import gridData from './widgets/vue/editableDataGrid/data/data.js'
 
 export default {
   name: 'App',
   components: {
-    EditableDataGrid
+    Slider,
+    //EditableDataGrid
   },
   data(){
     return {

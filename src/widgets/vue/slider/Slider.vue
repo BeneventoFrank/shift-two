@@ -60,7 +60,7 @@ export default {
       updateValue(slider) {
           let value = document.getElementById(slider.dataset.valueId);
           console.log("value", value)
-          value.innerHTML = "<div>" + slider.value + "</div>";
+          value.innerHTML = "<div class='sliderIndicator'> " + slider.value + "</div>";
       },
       updateValuePosition(slider) {
           let value = document.getElementById(slider.dataset.valueId);
@@ -143,9 +143,9 @@ export default {
 <style>
 
     :root {
-        --yellow: #ffd049;
+        --yellow: slategray;
         --light-yellow: #fdf2d2;
-        --orange: #ffa929;
+        --orange: slategray;
         --light-gray: #e3e4e8;
         --gray: #71738b;
         --light-blue: #7a7c93;
@@ -174,6 +174,12 @@ export default {
         display: flex;
         justify-content: center;
         align-items: center;
+    }
+    .sliderIndicator {
+      background-color: slategray;
+      border-radius: 5px;
+      color:white;
+      width:100px;
     }
 
     #sliderContainer {

@@ -3,8 +3,8 @@
       <div id="sliderContainer">
           <div class="tick-slider">
               <div class="tick-slider-value-container">
-                  <div id="weightLabelMin" class="tick-slider-label">0</div>
-                  <div id="weightLabelMax" class="tick-slider-label">40</div>
+                  <div id="weightLabelMin" class="tick-slider-label">&nbsp;</div>
+                  <div id="weightLabelMax" class="tick-slider-label">&nbsp;</div>
                   <div id="weightValue" class="tick-slider-value"></div>
               </div>
               <div class="tick-slider-background"></div>
@@ -16,10 +16,10 @@
                   class="tick-slider-input"
                   type="range"
                   min="0"
-                  max="40"
-                  step="5"
+                  max="4000"
+                  step="1000"
                   value="9"
-                  data-tick-step="5"
+                  data-tick-step="1000"
                   data-tick-id="weightTicks"
                   data-value-id="weightValue"
                   data-progress-id="weightProgress"
@@ -59,7 +59,6 @@ export default {
       },
       updateValue(slider) {
           let value = document.getElementById(slider.dataset.valueId);
-          console.log("value", value)
           value.innerHTML = "<div class='sliderIndicator'> " + slider.value + "</div>";
       },
       updateValuePosition(slider) {
@@ -78,25 +77,25 @@ export default {
 
           value.style.left = left + "px";
       },
-      updateLabels(slider) {
-          const value = document.getElementById(slider.dataset.valueId);
-          const minLabel = document.getElementById(slider.dataset.minLabelId);
-          const maxLabel = document.getElementById(slider.dataset.maxLabelId);
+      updateLabels() {
+        //   const value = document.getElementById(slider.dataset.valueId);
+        //   const minLabel = document.getElementById(slider.dataset.minLabelId);
+        //   const maxLabel = document.getElementById(slider.dataset.maxLabelId);
 
-          const valueRect = value.getBoundingClientRect();
-          const minLabelRect = minLabel.getBoundingClientRect();
-          const maxLabelRect = maxLabel.getBoundingClientRect();
+        //   const valueRect = value.getBoundingClientRect();
+        //   const minLabelRect = minLabel.getBoundingClientRect();
+        //   const maxLabelRect = maxLabel.getBoundingClientRect();
 
-          const minLabelDelta = valueRect.left - (minLabelRect.left);
-          const maxLabelDelta = maxLabelRect.left - valueRect.left;
+        //   const minLabelDelta = valueRect.left - (minLabelRect.left);
+        //   const maxLabelDelta = maxLabelRect.left - valueRect.left;
 
-          const deltaThreshold = 32;
+        //   const deltaThreshold = 32;
 
-          if (minLabelDelta < deltaThreshold) minLabel.classList.add("hidden");
-          else minLabel.classList.remove("hidden");
+        //   if (minLabelDelta < deltaThreshold) minLabel.classList.add("hidden");
+        //   else minLabel.classList.remove("hidden");
 
-          if (maxLabelDelta < deltaThreshold) maxLabel.classList.add("hidden");
-          else maxLabel.classList.remove("hidden");
+        //   if (maxLabelDelta < deltaThreshold) maxLabel.classList.add("hidden");
+        //   else maxLabel.classList.remove("hidden");
       },
       updateProgress(slider) {
           let progress = document.getElementById(slider.dataset.progressId);
@@ -111,11 +110,12 @@ export default {
           return absValue / range;
       },
       setTicks(slider) {
+          console.log(';fjks;dlkfjdsf', slider.dataset)
           let container = document.getElementById(slider.dataset.tickId);
           const spacing = parseFloat(slider.dataset.tickStep);
           const sliderRange = slider.max - slider.min;
           const tickCount = sliderRange / spacing + 1; // +1 to account for 0
-
+          console.log(tickCount)
           for (let ii = 0; ii < tickCount; ii++) {
               let tick = document.createElement("span");
 
@@ -185,18 +185,8 @@ export default {
     #sliderContainer {
         width: 100%;
         max-width: 440px;
-
-        padding: 56px 40px;
-
-        border-radius: 40px;
-
-        box-shadow: 0px 8px 40px rgba(128, 128, 128, 0.15);
+        padding: 28px 20px;
     }
-
-    #sliderContainer>div:first-child {
-        margin-bottom: 48px;
-    }
-
     .tick-slider-header {
         display: flex;
         justify-content: space-between;
@@ -226,7 +216,7 @@ export default {
         justify-content: space-between;
         align-items: center;
 
-        margin-bottom: 12px;
+        margin-bottom: 30px;
 
         font-family: "Hind Madurai", sans-serif;
         font-size: 18px;

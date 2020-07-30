@@ -1,6 +1,6 @@
 <template>
-    <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
 
+    <div>
         <div class="superHeader">
             <div :style="`width:${header.width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header) in headers" :key="header.columnIndex">
                 <span v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString())">
@@ -13,52 +13,58 @@
                 <span v-else>&nbsp;</span>
             </div>
         </div>
-        <div class="headerWrapper">
-            <div :ref="`header-${header.columnIndex}`" 
-                :style="`width:${header.width}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
-                :class="`headerCell 
-                        ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
-                        ${(currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.columnIndex.toString())?'activeFilter':null} 
-                        `" 
-                @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
-                @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
-                v-for="(header) in headers" :key="header.columnIndex">
-                
-                <span> 
-                    {{header.text}}
-                </span>
-                <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null}`">
-                    <div class='innerDiv' :style="`background-color:${bgColor}`">
-                        <div class='flyoutHeader'>
-                            <div class='headerItem sort'> 
-                                <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'asc')}"><UpArrow :isActiveSort="isActiveSort" class="sortButton" :height='15'/></span>
-                                <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'desc')}"><DownArrow :isActiveSort="isActiveSort" class="sortButton rightButton" :height='15'/></span>
+        <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
+            <div class="headerWrapper">
+                <div :ref="`header-${header.columnIndex}`" 
+                    :style="`width:${header.width}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
+                    :class="`headerCell 
+                            ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
+                            ${(currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.columnIndex.toString())?'activeFilter':null} 
+                            `" 
+                    @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
+                    @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
+                    v-for="(header) in headers" :key="header.columnIndex">
+                    
+                    <span> 
+                        {{header.text}}
+                    </span>
+                    <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null}`">
+                        <div class='innerDiv' :style="`background-color:${bgColor}`">
+                            <div class='flyoutHeader'>
+                                <div class='headerItem sort'> 
+                                    <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'asc')}"><UpArrow :isActiveSort="isActiveSort" class="sortButton" :height='15'/></span>
+                                    <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'desc')}"><DownArrow :isActiveSort="isActiveSort" class="sortButton rightButton" :height='15'/></span>
+                                </div>
+                                <div class='headerItem'>
+                                    <label class='filterHeader'>{{header.text}}</label>
+                                </div>
+                                <div class='headerItem'>
+                                    &nbsp;
+                                </div>
                             </div>
-                            <div class='headerItem'>
-                                <label class='filterHeader'>{{header.text}}</label>
+                            <br>
+                            <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
+                            <br>
+                            <div v-if="filterCount>0">
+                                <span>Results: {{filterCount}}, Specify More Characters. </span>
+                                <br>
+                                <br>
                             </div>
-                            <div class='headerItem'>
-                                &nbsp;
-                            </div>
+                            <div v-show="showReturning||isSorting">
+                                <span>{{message&&message.length>0?message:'Fetching Original Data...'}} </span>
+                                <br>    
+                                <br>
+                            </div>                    
                         </div>
-                        <br>
-                        <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
-                        <br>
-                        <div v-if="filterCount>0">
-                            <span>Results: {{filterCount}}, Specify More Characters. </span>
-                            <br>
-                            <br>
-                        </div>
-                        <div v-show="showReturning||isSorting">
-                            <span>{{message&&message.length>0?message:'Fetching Original Data...'}} </span>
-                            <br>    
-                            <br>
-                        </div>                    
-                    </div>
-                </div> 
+                    </div> 
+                </div>
             </div>
         </div>
+
+
     </div>
+
+
 </template>
 <script>
 import {colors} from '../../../../../assets/shiftTwo'
@@ -198,7 +204,7 @@ export default {
         display:flex;
         flex-direction:column;
         align-items: center;
-        border-bottom: 1px solid #C8C8C8;
+        border-bottom: 1px solid slategrey;
     }
     .headerCell{
         display:flex; 

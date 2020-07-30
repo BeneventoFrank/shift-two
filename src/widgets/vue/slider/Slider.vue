@@ -1,6 +1,6 @@
 <template>
   <div id="wrapper">
-      <div id="sliderContainer">
+      <div id="sliderContainer" :style="`max-width:${width}px`">
           <div class="tick-slider">
               <div class="tick-slider-value-container">
                   <div id="weightLabelMin" class="tick-slider-label">&nbsp;</div>
@@ -40,6 +40,9 @@ export default {
    } 
   },
   props:{
+    width:{
+      type:Number
+    }
   }, 
   methods:{
       init(){
@@ -167,19 +170,17 @@ export default {
     }
 
     #wrapper {
-        position: absolute;
         width: 100%;
         height: 100%;
-
         display: flex;
-        justify-content: center;
         align-items: center;
     }
     .sliderIndicator {
       background-color: slategray;
       border-radius: 5px;
       color:white;
-      width:100px;
+      width:50px;
+      font-size: small;
     }
 
     #sliderContainer {

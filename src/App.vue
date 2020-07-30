@@ -1,19 +1,19 @@
 <template>
   <div id="app">
-    <Slider></Slider>
+    <EditableDataGrid :gridConfig="localData"></EditableDataGrid>
   </div>
 </template>
 
 <script> 
-import Slider from './widgets/vue/slider/Slider'
-//import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
+//import Slider from './widgets/vue/slider/Slider'
+import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
 import gridData from './widgets/vue/editableDataGrid/data/data.js'
 
 export default {
   name: 'App',
   components: {
-    Slider,
-    //EditableDataGrid
+    //Slider,
+    EditableDataGrid
   },
   data(){
     return {
@@ -32,7 +32,7 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: slategrey;
   margin-top: 60px;
 }
 </style>

@@ -1,5 +1,10 @@
 <template>
-    <div ref="grid" style='width:100%;' class='container'>
+    <div ref='grid' style='width:100%;' class='container'>
+        <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center;'>
+            <div style="width:33.3%"><Slider :width="300"></Slider></div>
+            <div style="width:33.3%"><span class='title'>Race Car Statistics - 2019</span></div>
+            <div style="width:33.3%">&nbsp;</div>
+        </div>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" @columnSort="handleColumnSort" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" 
             :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" 
@@ -28,11 +33,13 @@ import reverseWorker from './webWorkers/reverseFilterWorker'
 
 import forwardWorkerSetup from './webWorkers/forwardFilterServiceWorkerSetup'
 import reverseWorkerSetup from './webWorkers/reverseFilterServiceWorkerSetup'
+import Slider from '../../slider/Slider'
 
 export default {
     name:"EditableDataGrid",
     components: {
-        HeaderRow
+        HeaderRow,
+        Slider
     },
     data() {
         return {
@@ -97,6 +104,7 @@ export default {
             for (let i = 0; i < this.gridConfig.Columns.length; i++) {
                 let tmp ={}
                 if(Object.keys(this.gridConfig.Columns[i].header).length>0){
+                    console.log('this.gridConfig.Columns[i].header.textColor', this.gridConfig.Columns[i].header.textColor, this.defaultValues.columnValues.textColor)
                     hasHeader=true;
                     tmp.columnIndex = i;
                     tmp.text = this.gridConfig.Columns[i].header.text?this.gridConfig.Columns[i].header.text:''
@@ -444,7 +452,11 @@ td:hover {
 td:hover::after {
   background-color: #E8E8E8 !important;
 }
-
+.title{
+    font-size:24px;
+    color:slategrey;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
 
 
 

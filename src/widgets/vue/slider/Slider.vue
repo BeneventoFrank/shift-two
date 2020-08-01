@@ -186,7 +186,6 @@ export default {
     #sliderContainer {
         width: 100%;
         max-width: 440px;
-        padding: 28px 20px;
     }
     .tick-slider-header {
         display: flex;

@@ -1,9 +1,9 @@
 <template>
     <div ref='grid' style='width:100%;' class='container'>
-        <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center;'>
-            <div style="width:33.3%"><Slider :width="300"></Slider></div>
-            <div style="width:33.3%"><span class='title'>Race Car Statistics - 2019</span></div>
-            <div style="width:33.3%">&nbsp;</div>
+        <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center; padding-bottom:25px;'>
+            <div style="width:33.3%; padding-left:20px;"><Slider :width="300"></Slider></div>
+            <div style="width:33.3%;"><span class='title'>Race Car Statistics - 2019</span></div>
+            <div style="width:33.3%; padding-right:20px;" class='pagination'><Pagination></Pagination></div>
         </div>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" @columnSort="handleColumnSort" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" 
@@ -13,7 +13,7 @@
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; width:100%; border-collapse: collapse; line-height:10px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <td :style="`width:${column.width} `" v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
+                    <td :style="`width:${column.width}; text-align:${column.dataAlignment}` " v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
                 </tr>
             </table>
             <div :style="`position: relative; top:0px; left:0px; width: 1px; height:${virtualHeight}px;`">
@@ -33,13 +33,15 @@ import reverseWorker from './webWorkers/reverseFilterWorker'
 
 import forwardWorkerSetup from './webWorkers/forwardFilterServiceWorkerSetup'
 import reverseWorkerSetup from './webWorkers/reverseFilterServiceWorkerSetup'
+import Pagination from '../../pagination/Pagination'
 import Slider from '../../slider/Slider'
 
 export default {
     name:"EditableDataGrid",
     components: {
         HeaderRow,
-        Slider
+        Slider,
+        Pagination
     },
     data() {
         return {
@@ -104,19 +106,18 @@ export default {
             for (let i = 0; i < this.gridConfig.Columns.length; i++) {
                 let tmp ={}
                 if(Object.keys(this.gridConfig.Columns[i].header).length>0){
-                    console.log('this.gridConfig.Columns[i].header.textColor', this.gridConfig.Columns[i].header.textColor, this.defaultValues.columnValues.textColor)
                     hasHeader=true;
                     tmp.columnIndex = i;
                     tmp.text = this.gridConfig.Columns[i].header.text?this.gridConfig.Columns[i].header.text:''
                     tmp.height = this.gridConfig.Columns[i].header.height?this.gridConfig.Columns[i].header.height:this.defaultValues.columnValues.height
                     tmp.width = this.gridConfig.Columns[i].width?this.gridConfig.Columns[i].width:this.defaultValues.columnValues.width
-                    tmp.alignment = this.gridConfig.Columns[i].header.alignment?this.translateAlignment(this.gridConfig.Columns[i].header.alignment):this.defaultValues.columnValues.alignment
+                    tmp.alignment = this.gridConfig.Columns[i].header.alignment?this.translateAlignment(this.gridConfig.Columns[i].header.alignment):this.translateAlignment(this.defaultValues.columnValues.alignment)
                     tmp.backgroundColor=this.gridConfig.Columns[i].header.backgroundColor?this.gridConfig.Columns[i].header.backgroundColor:this.defaultValues.columnValues.backgroundColor
                     tmp.textColor=this.gridConfig.Columns[i].header.textColor?this.gridConfig.Columns[i].header.textColor:this.defaultValues.columnValues.textColor
                     tmp.borderWidth=this.gridConfig.Columns[i].header.borderWidth?this.gridConfig.Columns[i].header.borderWidth:this.defaultValues.columnValues.borderWidth
                     tmp.borderColor=this.gridConfig.Columns[i].header.borderColor?this.gridConfig.Columns[i].header.borderColor:this.defaultValues.columnValues.borderColor     
                     tmp.dataProperty=this.gridConfig.Columns[i].dataProperty?this.gridConfig.Columns[i].dataProperty:''
-                    tmp.dataAlignment=this.gridConfig.Columns[i].dataAlignment?this.translateAlignment(this.gridConfig.Columns[i].dataAlignment):this.defaultValues.columnValues.dataAlignment
+                    tmp.dataAlignment=this.gridConfig.Columns[i].dataAlignment?this.gridConfig.Columns[i].dataAlignment:this.defaultValues.columnValues.dataAlignment
                 } else {
                     tmp.columnIndex = i;
                     tmp.text=''
@@ -199,7 +200,7 @@ export default {
            this.defaultValues.columnValues.width = `${eachColumn}px`
            this.defaultValues.columnValues.borderWidth = '1px'
            this.defaultValues.columnValues.alignment = 'center'
-           this.defaultValues.columnValues.dataAlignment = 'left'
+           this.defaultValues.columnValues.dataAlignment = 'center'
         },
         translateAlignment(val){
            switch (val) {
@@ -214,7 +215,7 @@ export default {
          getTestData(){
             let b = []
             for (let i = 1; i <= 100000; i++) {
-                b.push({trim:Math.ceil(Math.random()*i*98765).toString(), make:Math.ceil(Math.random()*i*98765).toString(), model:Math.ceil(Math.random()*i*98765).toString(), year:Math.ceil(Math.random()*i*98765).toString(),trim2:Math.ceil(Math.random()*i*98765).toString(), make2:Math.ceil(Math.random()*i*98765).toString(), model2:Math.ceil(Math.random()*i*98765).toString(), year2:Math.ceil(Math.random()*i*98765).toString(),trim3:Math.ceil(Math.random()*i*98765).toString(), make3:Math.ceil(Math.random()*i*98765).toString(), model3:Math.ceil(Math.random()*i*98765).toString(), year3:Math.ceil(Math.random()*i*98765).toString() })
+                b.push({trim:Math.ceil(Math.random()*i*98765).toString(), make:Math.ceil(Math.random()*i*98765).toString(), model:Math.ceil(Math.random()*i*98765).toString(), year:Math.ceil(Math.random()*i*98765).toString()})
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600
             this.dataSlice = b.slice(0,this.highestCountLoaded)
@@ -413,51 +414,53 @@ export default {
 };
 </script>
 <style >
-html {
-  scroll-behavior: smooth;
-}
-.cell{
-    width:20%;
-}
-.oddRow{
-    border-top: 1px solid #DCDCDC;    
-    background-color: #F8F8F8;
-}
-.dataRow{
-    width:100%; 
-    display:flex; 
-    flex-direction:row;
-    scroll-behavior: smooth;
-    border-bottom: 1px solid #DCDCDC;    
-}
+        html {
+        scroll-behavior: smooth;
+        }
+        .cell{
+            width:20%;
+        }
+        .oddRow{
+            border-top: 1px solid #DCDCDC;    
+            background-color: #F8F8F8;
+        }
+        .dataRow{
+            width:100%; 
+            display:flex; 
+            flex-direction:row;
+            scroll-behavior: smooth;
+            border-bottom: 1px solid #DCDCDC;    
+        }
 
-.dataGrid{
+        .dataGrid{
 
-}
-.dataGrid tr:hover{
-    background-color: #E8E8E8;
-}
-td, th {
-  padding: 10px;
-  position: relative;
-  outline: 0;
-}
+        }
+        .dataGrid tr:hover{
+            background-color: #E8E8E8;
+        }
+        td, th {
+        padding: 10px;
+        position: relative;
+        outline: 0;
+        }
+        td:hover {
+            background-color: #DCDCDC;
 
-
-td:hover {
-    background-color: #DCDCDC;
-
-}
-
-td:hover::after {
-  background-color: #E8E8E8 !important;
-}
-.title{
-    font-size:24px;
-    color:slategrey;
-    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-}
-
+        }
+        td:hover::after {
+        background-color: #E8E8E8 !important;
+        }
+        .title{
+            font-size:24px;
+            color:slategrey;
+            font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        }
+        .pagination{
+            width: 100%;
+            display:flex;
+            flex-direction: row;
+            justify-content: flex-end;
+        }
 
 
 </style>

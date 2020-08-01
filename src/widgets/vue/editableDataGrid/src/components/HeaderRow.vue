@@ -16,7 +16,7 @@
         <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
             <div class="headerWrapper">
                 <div :ref="`header-${header.columnIndex}`" 
-                    :style="`width:${header.width}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
+                    :style="`width:${header.width}; display:flex; flex-direction:row; justify-content:${header.alignment}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
                     :class="`headerCell 
                             ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
                             ${(currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.columnIndex.toString())?'activeFilter':null} 
@@ -24,7 +24,6 @@
                     @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
                     @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
                     v-for="(header) in headers" :key="header.columnIndex">
-                    
                     <span> 
                         {{header.text}}
                     </span>
@@ -151,8 +150,8 @@ export default {
        wouldCauseAScroll(index){
             let retVal = '50px'
             let y = this.$refs[`header-${index}`]
-            if((y[0].offsetLeft+350)>this.gridWidth){
-                retVal = '350px'
+            if((y[0].offsetLeft+y[0].offsetWidth/2+350)>this.gridWidth){
+                retVal = '300px'
             }
             return retVal
        },

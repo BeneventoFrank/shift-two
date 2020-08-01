@@ -7,7 +7,7 @@
 <script> 
 //import Slider from './widgets/vue/slider/Slider'
 import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
-import gridData from './widgets/vue/editableDataGrid/data/data.js'
+import gridConfig from './widgets/vue/editableDataGrid/data/data.js'
 
 export default {
   name: 'App',
@@ -17,15 +17,11 @@ export default {
   },
   data(){
     return {
-        localData:gridData
+        localData:gridConfig
     }
-  },
-  mounted(){
-    console.log('data', gridData)
   }
 }
 </script>
-
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

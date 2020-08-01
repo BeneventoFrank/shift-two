@@ -117,22 +117,6 @@ export default {
         };
     },
     computed: {
-        cmpNumPerPage:function(){
-            switch (this.ddlNumPerPage) {
-            case 20:
-                return 100
-            case 40:
-                return 200
-            case 60:
-                return 500
-            case 80:
-                return 1000
-            case 100:
-                return 2000
-            default:
-                return 100
-            }
-        },
         cmpCanPagePrevious:function(){
             return this.pagination.MinRecordsViewable<2?false:true
         },
@@ -161,19 +145,17 @@ export default {
         handleChangeNumberPerPage(event){
             let count = parseInt(event.target.value)
             this.reConfigurePagination(count);
-            
-           
             //TODO- you need to apply filtering and sorting after you do the configure
             let tmp = this.fullDS
-            
-
             let processed=[]
             for (let i = 0; i < count; i++) {
                 if(tmp[i]){
                     processed.push(tmp[i])
                 }
             }
-            this.dataSlice = processed;          
+            this.virtualHeight = processed.length*29-950>0?processed.length*29-950:600
+            this.dataSlice = processed;
+            this.filteredData = processed;
         },            
         async handleNextClick(isASingleMove){
             this.pageDataForward(isASingleMove.isASinglePageMove)
@@ -402,8 +384,13 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 80000; i++) {
-                b.push({trim:Math.ceil(Math.random()*i*98765).toString(), make:Math.ceil(Math.random()*i*98765).toString(), model:Math.ceil(Math.random()*i*98765).toString(), year:Math.ceil(Math.random()*i*98765).toString()})
+            for (let i = 1; i <= 100000; i++) {
+                b.push(
+                        {
+                        trim:Math.ceil(Math.random()*i*98765).toString(), 
+                        make:Math.ceil(Math.random()*i*98765).toString(), 
+                        model:Math.ceil(Math.random()*i*98765).toString(), 
+                        year:Math.ceil(Math.random()*i*98765).toString()})
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600
             this.fullDS = b

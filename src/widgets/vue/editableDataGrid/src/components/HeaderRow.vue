@@ -3,8 +3,13 @@
     <div>
         <div class="superHeader">
             <div :style="`width:${header.width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header) in headers" :key="header.columnIndex">
-                <span v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString())">
-                    <FilterSVG style="padding-left:5px" :height="11"></FilterSVG>
+                <span style='display:flex;flex-direction:row;' v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString())">
+                    <div>
+                        <FilterSVG style="padding-left:5px" :height="11"></FilterSVG>
+                    </div>
+                    <div style='padding-top:2px;'>
+                        <span class="filterText">{{getFilterText(currentFilters, header.columnIndex)}}</span>
+                    </div>
                 </span>
                 <span v-else>&nbsp;</span>
                 <span v-if="currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.columnIndex.toString()">
@@ -133,6 +138,18 @@ export default {
         }
     },        
     methods: {
+       getFilterText(filter, indexBeingFiltered){
+           let retVal = ''
+           for (let i = 0; i < filter.filters.length; i++) {
+               let split = filter.filters[i].split('^^')
+               if (split[0]===indexBeingFiltered.toString()) {
+                   retVal = split[1]
+                   break;
+               } 
+           }
+           return retVal
+
+       },
        handleSortClick(column, index, direction){
            if(this.isActiveSort === direction){
                this.isSorting = true;
@@ -277,5 +294,14 @@ export default {
         display: flex;
         flex-direction: row;
         background-color: white;
+    }
+    .filterText{
+        overflow: hidden;
+        width: 50px;
+        text-overflow: ellipsis;
+        display: inline-block;
+        font-size:11px; 
+        color:slateGrey; 
+        opacity:.5;
     }
 </style>

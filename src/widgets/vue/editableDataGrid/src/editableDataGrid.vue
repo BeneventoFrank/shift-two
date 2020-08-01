@@ -1,7 +1,7 @@
 <template>
     <div ref='grid' style='width:100%;' class='container'>
         <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center; padding-bottom:25px;'>
-            <div style="width:33.3%; padding-left:20px;"><Slider v-if="gridConfig.EnablePaging" :width="300"></Slider></div>
+            <div style="width:33.3%; padding-left:20px;"><Slider @change="handleChangeNumberPerPage" v-if="gridConfig.EnablePaging" :width="300"></Slider></div>
             <div style="width:33.3%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
             <div style="width:33.3%; padding-right:20px;" class='pagination'>
                 <Pagination 
@@ -143,9 +143,39 @@ export default {
     methods: {
         fetchRecordsFromDS(start,stop){
             return this.fullDS.slice(start,stop+1)
-        },        
+        },    
+        reConfigurePagination(count){
+            let paging = {
+                MinRecordsViewable:1,
+                MaxRecordsViewable:this.fullDS.length<count?this.fullDS.length:count,
+                TotalNumberOfRecords:this.fullDS.length,
+                PageNumberCurrentlyViewing:1,        
+                MaxPageNumberPossible:Math.ceil(this.fullDS.length/count),
+                NumberOfApplicibleRowsPerPage:count,
+                IsPaging:false,
+                CurrentSkip:0,
+                CurrentTake:0
+            }
+            this.pagination = paging          
+        },
+        handleChangeNumberPerPage(event){
+            let count = parseInt(event.target.value)
+            this.reConfigurePagination(count);
+            
+           
+            //TODO- you need to apply filtering and sorting after you do the configure
+            let tmp = this.fullDS
+            
+
+            let processed=[]
+            for (let i = 0; i < count; i++) {
+                if(tmp[i]){
+                    processed.push(tmp[i])
+                }
+            }
+            this.dataSlice = processed;          
+        },            
         async handleNextClick(isASingleMove){
-            console.log("waht are you getting here?", isASingleMove)  
             this.pageDataForward(isASingleMove.isASinglePageMove)
             const start = (this.pagination.PageNumberCurrentlyViewing*this.pagination.NumberOfApplicibleRowsPerPage)-this.pagination.NumberOfApplicibleRowsPerPage
             const end = start + this.pagination.NumberOfApplicibleRowsPerPage

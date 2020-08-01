@@ -59,6 +59,7 @@ export default {
           this.updateValuePosition(event.target);
           this.updateLabels(event.target);
           this.updateProgress(event.target);
+          this.$emit('change',event)
       },
       updateValue(slider) {
           let value = document.getElementById(slider.dataset.valueId);

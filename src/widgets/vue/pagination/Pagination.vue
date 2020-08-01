@@ -2,7 +2,7 @@
         <div style=''>
             <span class='pagingText' style="margin-right:25px">{{`${pagination.MinRecordsViewable} to ${pagination.MaxRecordsViewable} of ${pagination.TotalNumberOfRecords}`}}</span>
             
-            <span v-if="cmpCanPagePrevious" class='pagingText pointer' @click="()=>{this.handlePreviousClick(true)}">&#124;</span>
+            <span v-if="cmpCanPagePrevious" class='pagingText pointer' @click="()=>{this.handlePreviousClick(false)}">&#124;</span>
             <span v-else class='pagingText'>&#124;</span>
             <span v-if="cmpCanPagePrevious" style='margin-left:1px;' class='pagingTextArrow pointer' @click="()=>{this.handlePreviousClick(false)}">&#60;</span>
             <span v-else style='margin-left:1px; margin-right:3px' class='pagingTextArrow'>&#60;</span>
@@ -12,12 +12,13 @@
 
             <span class='pagingText'> {{`Page ${pagination.PageNumberCurrentlyViewing} of ${pagination.MaxPageNumberPossible}`}}</span>
 
-            <span v-if="cmpCanPageNext" style='margin-left:1px;' class='pagingTextArrow pointer' @click="()=>{this.handleNextClick(true)}">&#62;</span>
+            <span v-if="cmpCanPageNext" style='margin-left:10px;' class='pagingTextArrow pointer' @click="()=>{this.handleNextClick(true)}">&#62;</span>
             <span v-else style='margin-left:10px;' class='pagingTextArrow'>&#62;</span>
             
             <span v-if="cmpCanPageNext" style='margin-left:1px;' class='pagingTextArrow pointer' @click="()=>{this.handleNextClick(false)}">&#62;</span>
             <span v-else style='margin-left:1px;' class='pagingTextArrow'>&#62;</span>
-            <span v-if="cmpCanPageNext" class='pagingText pointer' @click="()=>{this.handleNextClick(true)}">&#124;</span>
+
+            <span v-if="cmpCanPageNext" class='pagingText pointer' @click="()=>{this.handleNextClick(false)}">&#124;</span>
             <span v-else class='pagingText'>&#124;</span>
         </div>
 </template>
@@ -35,9 +36,11 @@ export default {
     computed: {
     },
     methods: {
-            async handleNextClick(){  
+            async handleNextClick(isASinglePageMove){ 
+                this.$emit('pageDataForward',{isASinglePageMove:isASinglePageMove}) 
             },
-            async handlePreviousClick(){
+            async handlePreviousClick(isASinglePageMove){
+                this.$emit('pageDataBackwards',{isASinglePageMove:isASinglePageMove}) 
             },
     },
     props:{
@@ -83,12 +86,20 @@ export default {
     overflow: hidden;
 }
 .pagingText{
+  -webkit-user-select: none; /* Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */    
   font-size:12px;
   color:var(--ag-secondary-foreground-color,rgba(0,0,0,.54));
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
   line-height: normal;
 }
 .pagingTextArrow{
+  -webkit-user-select: none; /* Safari */        
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */    
   font-size: 15px;
   color:var(--ag-secondary-foreground-color,rgba(0,0,0,.54));
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;

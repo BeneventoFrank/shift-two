@@ -9,6 +9,8 @@
                     :cmpCanPagePrevious="cmpCanPagePrevious"
                     :cmpCanPageNext="cmpCanPageNext"
                     :pagination="pagination"
+                    @pageDataForward="handleNextClick"
+                    @pageDataBackwards="handlePreviousClick"
                 ></Pagination>
             </div>
         </div>
@@ -65,7 +67,7 @@ export default {
             multiple:10,
             addToTop:74,
             tmpResults:[],
-            highestCountLoaded:150,
+            highestCountLoaded:0,
             numberOfTerminatedFilters:0,
             skip:20,
             dataSlice:[],
@@ -135,13 +137,25 @@ export default {
             return this.pagination.MinRecordsViewable<2?false:true
         },
         cmpCanPageNext:function(){
-            return this.pagination.MaxPageNumberPossible<2?false:true
+            return (this.pagination.MaxPageNumberPossible>1?true:false)&&(this.pagination.PageNumberCurrentlyViewing<this.pagination.MaxPageNumberPossible)
         }        
     },
     methods: {
-        async handleNextClick(){  
+        fetchRecordsFromDS(start,stop){
+            return this.fullDS.slice(start,stop+1)
+        },        
+        async handleNextClick(isASingleMove){
+            console.log("waht are you getting here?", isASingleMove)  
+            this.pageDataForward(isASingleMove.isASinglePageMove)
+            const start = (this.pagination.PageNumberCurrentlyViewing*this.pagination.NumberOfApplicibleRowsPerPage)-this.pagination.NumberOfApplicibleRowsPerPage
+            const end = start + this.pagination.NumberOfApplicibleRowsPerPage
+            this.dataSlice = this.fetchRecordsFromDS(start,end)
         },
-        async handlePreviousClick(){
+        async handlePreviousClick(isASingleMove){
+            this.pageDataBackward(isASingleMove.isASinglePageMove)
+            const start = (this.pagination.PageNumberCurrentlyViewing*this.pagination.NumberOfApplicibleRowsPerPage)-this.pagination.NumberOfApplicibleRowsPerPage
+            const end = ((this.pagination.PageNumberCurrentlyViewing+1)*this.pagination.NumberOfApplicibleRowsPerPage)-(this.pagination.NumberOfApplicibleRowsPerPage)
+            this.dataSlice = this.fetchRecordsFromDS(start,end)
         },
         pageDataBackward(isASinglePageMove){
         if(isASinglePageMove){
@@ -204,7 +218,6 @@ export default {
         },
         initializePaging(numberOfRowsPerPage){
             if(this.fullDS.length > 0){
-                console.log("this.fullDS.length/numberOfRowsPerPage", this.fullDS.length,numberOfRowsPerPage)     
                 let paging = {
                 MinRecordsViewable:1,
                 MaxRecordsViewable:this.fullDS.length>numberOfRowsPerPage?numberOfRowsPerPage:this.fullDS.length,
@@ -324,7 +337,7 @@ export default {
         },
         handleColumnSort(sortStrategy){
             this.filteredData = this.sortDataset(sortStrategy, [...this.fullDS])
-            this.highestCountLoaded = 150     
+            this.highestCountLoaded = this.getInitialRowsPerPage();     
             this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
         },
@@ -359,13 +372,15 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 100000; i++) {
+            for (let i = 1; i <= 80000; i++) {
                 b.push({trim:Math.ceil(Math.random()*i*98765).toString(), make:Math.ceil(Math.random()*i*98765).toString(), model:Math.ceil(Math.random()*i*98765).toString(), year:Math.ceil(Math.random()*i*98765).toString()})
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600
+            this.fullDS = b
+            this.highestCountLoaded = this.getInitialRowsPerPage()
             this.dataSlice = b.slice(0,this.highestCountLoaded)
             this.highestCountLoaded = this.highestCountLoaded + 1
-            this.fullDS = b
+            
         },
         parseData(startingPoint){
             let tmp = []
@@ -431,7 +446,7 @@ export default {
                     this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
                     if(this.numberOfTerminatedFilters===2)    
                     {
-                        this.highestCountLoaded = 150
+                        this.highestCountLoaded = this.getInitialRowsPerPage();
                         
                         if(this.sortStrategy.isCurrentlySorting===true){
                             this.filteredData = this.sortDataset(this.sortStrategy.strategy,this.tmpResults)
@@ -451,7 +466,7 @@ export default {
         },
         handleShowDataAnyway(column){
             this.showDataAnyway = true
-            this.highestCountLoaded = 150
+            this.highestCountLoaded = this.getInitialRowsPerPage();
             this.virtualHeight = this.filteredData.length*29-950
             this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
             this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, column.toString()]
@@ -543,6 +558,7 @@ export default {
         this.setDefaultValues()
         this.deriveHeaders()
         this.initializePaging(this.getInitialRowsPerPage())
+        
         this.gridWidth = this.$refs.grid.offsetWidth //set initial size of grid used for calculating where to put the filter flyouts
         window.addEventListener('resize',this.handleResizeGrid)
         

@@ -1,5 +1,7 @@
 
 let gridConfig =  {
+    EnablePaging:true,
+    GridHeader:'New Race Cars - 2020',
     Columns:[
             {
                 header:{text:"Make"},

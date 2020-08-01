@@ -1,9 +1,9 @@
 <template>
     <div ref='grid' style='width:100%;' class='container'>
         <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center; padding-bottom:25px;'>
-            <div style="width:33.3%; padding-left:20px;"><Slider :width="300"></Slider></div>
-            <div style="width:33.3%;"><span class='title'>Race Car Statistics - 2019</span></div>
-            <div style="width:33.3%; padding-right:20px;" class='pagination'><Pagination></Pagination></div>
+            <div style="width:33.3%; padding-left:20px;"><Slider v-if="gridConfig.EnablePaging" :width="300"></Slider></div>
+            <div style="width:33.3%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
+            <div style="width:33.3%; padding-right:20px;" class='pagination'><Pagination v-if="gridConfig.EnablePaging"></Pagination></div>
         </div>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" @columnSort="handleColumnSort" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" 
@@ -93,6 +93,7 @@ export default {
                     dataAlignment:''
                 }
             }
+
         };
     },
     computed: {

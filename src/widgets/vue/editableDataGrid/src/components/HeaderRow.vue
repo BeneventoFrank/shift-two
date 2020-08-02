@@ -162,7 +162,7 @@ export default {
                this.message='Sorting...'
                setTimeout(() => {this.$emit('columnSort',`${column}^^${direction}^^${index}`)},0);
            }
-           setTimeout(() => {this.isSorting=false},50);                          
+           setTimeout(() => {this.isSorting=false},502);                          
        },
        wouldCauseAScroll(index){
             let retVal = '50px'

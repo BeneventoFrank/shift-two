@@ -8,7 +8,7 @@
                         <FilterSVG style="padding-left:5px" :height="11"></FilterSVG>
                     </div>
                     <div style='padding-top:2px;'>
-                        <span class="filterText">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
+                        <span class="filterText" style="text-align:left; margin-left:10px">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
                     </div>
                 </span>
                 <span v-else>&nbsp;</span>

@@ -8,7 +8,7 @@
                         <FilterSVG style="padding-left:5px" :height="11"></FilterSVG>
                     </div>
                     <div style='padding-top:2px;'>
-                        <span class="filterText" style="text-align:left; margin-left:10px">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
+                        <span class="filterText" style="text-align:left; margin-left:5px">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
                     </div>
                 </span>
                 <span v-else>&nbsp;</span>
@@ -162,7 +162,7 @@ export default {
                this.message='Sorting...'
                setTimeout(() => {this.$emit('columnSort',`${column}^^${direction}^^${index}`)},0);
            }
-           setTimeout(() => {this.isSorting=false},1000);                          
+           setTimeout(() => {this.isSorting=false},50);                          
        },
        wouldCauseAScroll(index){
             let retVal = '50px'
@@ -199,7 +199,7 @@ export default {
        debounceInput: debounce(function(evt, index){
             const strategy = `${index}^^${evt.target.value}`
             this.$emit('filterApplied',strategy)
-       }, 100),
+       }, 75),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
            if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 
            return usersBorderWidth?`${usersBorderWidth} solid ${usersBorderColor}`:`${this.defaultValues.borderWidth} solid ${this.defaultValues.borderColor}`

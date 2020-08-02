@@ -488,6 +488,19 @@ export default {
             this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
             this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, column.toString()]
         },
+        removeOldFilter(strategy){
+            let split = strategy.split('^^')
+            let tmp = []
+            for (let i = 0; i < this.filterStrategy.length; i++) {
+                let tmpSplit = this.filterStrategy.filters[i].split('^^')
+                if(tmpSplit[0] === split[0]){
+                    tmp.push(strategy)
+                } else {
+                    tmp.push(this.filterStrategy.filters[i])
+                }
+            }
+            this.filterStrategy.filters = tmp
+        },
         handleApplyFilter(strategy){
             let isFilterchange = false
             let split = strategy.split('^^')
@@ -495,10 +508,13 @@ export default {
 
             for (let i = 0; i < this.filterStrategy.filters.length; i++) {
                 let tmpSplit = this.filterStrategy.filters[i].split('^^')
+                console.log(tmpSplit[0], split[0])
                 if(tmpSplit[0] === split[0]){
 
-                    if (tmpSplit[1].length > split[1].length) {
+                    if (tmpSplit[1].length !== split[1].length) {
                         isFilterchange = true
+                        console.log('found an update')
+                        this.removeOldFilter(strategy)
                     } else {
                         isFilterchange = false
                     }

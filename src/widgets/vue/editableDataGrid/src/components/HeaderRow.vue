@@ -8,7 +8,7 @@
                         <FilterSVG style="padding-left:5px" :height="11"></FilterSVG>
                     </div>
                     <div style='padding-top:2px;'>
-                        <span class="filterText">{{getFilterText(currentFilters, header.columnIndex)}}</span>
+                        <span class="filterText">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
                     </div>
                 </span>
                 <span v-else>&nbsp;</span>
@@ -138,10 +138,10 @@ export default {
         }
     },        
     methods: {
-       getFilterText(filter, indexBeingFiltered){
+       getFilterText(filters, indexBeingFiltered){
            let retVal = ''
-           for (let i = 0; i < filter.filters.length; i++) {
-               let split = filter.filters[i].split('^^')
+           for (let i = 0; i < filters.length; i++) {
+               let split = filters[i].split('^^')
                if (split[0]===indexBeingFiltered.toString()) {
                    retVal = split[1]
                    break;
@@ -199,7 +199,7 @@ export default {
        debounceInput: debounce(function(evt, index){
             const strategy = `${index}^^${evt.target.value}`
             this.$emit('filterApplied',strategy)
-       }, 300),
+       }, 100),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
            if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 
            return usersBorderWidth?`${usersBorderWidth} solid ${usersBorderColor}`:`${this.defaultValues.borderWidth} solid ${this.defaultValues.borderColor}`

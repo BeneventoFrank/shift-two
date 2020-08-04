@@ -17,7 +17,7 @@
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" @columnSort="handleColumnSort" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" 
             :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" 
-            :currentSort="sortStrategy" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            :currentSort="sortStrategy" :isDoneFiltering="isDoneFiltering" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
@@ -78,6 +78,7 @@ export default {
             virtualHeight:0,
             showReturning:false,
             lastPosition:0,
+            isDoneFiltering:true,
             sortStrategy:{
                 isCurrentlySorting:false,
                 strategy:'',
@@ -439,6 +440,7 @@ export default {
                     break;
                 case 'filterResults':
                     this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, message.data.Column]
+
                     if (message.data.Data.length>0) {
                         tmp = [...this.tmpResults, ...message.data.Data]
                         this.tmpResults = tmp
@@ -475,6 +477,7 @@ export default {
                         this.filterCount = 0
                         this.numberOfTerminatedFilters = 0
                         this.tmpResults = []
+                        this.isDoneFiltering=true
                     }
                     break;
                 default:
@@ -502,55 +505,82 @@ export default {
             this.filterStrategy.filters = tmp
         },
         handleApplyFilter(strategy){
-            let isFilterchange = false
+            const removeFilter = (col)=>{
+                let tmpFilters = []
+                let tmpCols = []
+                if(this.filterStrategy.columnsBeingFiltered.length===1){
+                    this.clearFilters()
+                } else {
+                    for (let i = 0; i < this.filterStrategy.filters.length; i++) {
+                        let split = this.filterStrategy.filters[i].split('^^')
+                        if(split[0]!==col){
+                            tmpFilters.push(this.filterStrategy.filters[i])
+                            tmpCols.push(split[1])
+                        }
+                    }
+                    this.clearFilters()
+                    this.filterStrategy.filters = tmpFilters
+                    this.filterStrategy.columnsBeingFiltered = tmpCols
+                    this.tmpFilters.length>0?this.filterStrategy.isCurrentlyFiltering=true:null
+                }
+            }
+            const addFilter = (col,filter) =>{ 
+                this.filterStrategy.isCurrentlyFiltering = true
+                this.filterStrategy.filters = [...this.filterStrategy.filters, `${col}^^${filter}`]
+                this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, col]
+            }
+            const updateFilter = (col,filter) =>{
+                let previousFilter = ''
+                for (let i = 0; i < this.filterStrategy.filters.length; i++) {
+                    let split = this.filterStrategy.filters[i].split('^^')
+                    if(split[0]===col){
+                        previousFilter = split[1]
+                        this.filterStrategy.filters[i] = `${col}^^${filter}`
+                    }
+                    break;
+                }
+                return previousFilter
+            }
+
             let split = strategy.split('^^')
-            let hasOtherFiltersToApply = false
-
-            for (let i = 0; i < this.filterStrategy.filters.length; i++) {
-                let tmpSplit = this.filterStrategy.filters[i].split('^^')
-                console.log(tmpSplit[0], split[0])
-                if(tmpSplit[0] === split[0]){
-
-                    if (tmpSplit[1].length !== split[1].length) {
-                        isFilterchange = true
-                        console.log('found an update')
-                        this.removeOldFilter(strategy)
+            let col = split[0]
+            let filter = split[1]
+            
+            if(this.filterStrategy.isCurrentlyFiltering){ //if we are filtering
+                if(this.filterStrategy.columnsBeingFiltered.includes(col)){ //and we are filtering on this column...
+                //then we are changing a filter.
+                //two ways to change a filter. empty it out, or have something to filter on.. 
+                    if(filter.length>0){
+                        //then we need to apply the filter
+                        updateFilter(col,filter)
+                        this.isDoneFiltering = false;
+                        this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                        this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
                     } else {
-                        isFilterchange = false
+                        if(this.filterStrategy.columnsBeingFiltered.length>1){
+                            this.isDoneFiltering = false
+                            this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                            this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        } else {
+                            removeFilter(col,filter)
+                            this.isDoneFiltering=true
+                            this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
+                            this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
+                        }
                     }
                 } else {
-                    //else we are in here b/c there is a filter and its not the one we are on right now.
-                    //need to make sure we have one thats not ''
-                    if(tmpSplit[1].length > 0){
-                        hasOtherFiltersToApply = true
-                    }
-                } 
-            }
-            let isClearingTheOnlyFilter = false
-            if(split[1].length < 2 && hasOtherFiltersToApply===false&& this.filterStrategy.isCurrentlyFiltering){
-                isClearingTheOnlyFilter = true
-            }
-            this.SetFilterStrategy(strategy)
-            this.showReturning = false
-            if (hasOtherFiltersToApply&&split[1].length<2) {
-                this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-            } else if(isClearingTheOnlyFilter) {
-                this.showReturning = true
-                setTimeout(() => {
-                    this.showReturning = false    
-                }, 1500);
-                this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
-                this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
+                //we are filtering, but not this column. that means we are adding a new filter
+                addFilter(col,filter)
+                this.isDoneFiltering=false
+                this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
+                this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})   
+                }
             } else {
-                let isFiltering = true
-                if((!hasOtherFiltersToApply||isFilterchange)){
-                    isFiltering = false
-                }
-                if(split[1].length > 1){
-                    this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})  
-                    this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':isFiltering})                
-                }
+                //then we are adding the only filter
+                    addFilter(col,filter)
+                    this.isDoneFiltering=false
+                    this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                    this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})                
             }
         },
         clearFilters(){

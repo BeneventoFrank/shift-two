@@ -49,11 +49,9 @@
                             <br>
                             <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
                             <br>
-                            <div v-if="filterCount>0">
-                                <span>Results: {{filterCount}}, Specify More Characters. </span>
-                                <br>
-                                <br>
-                            </div>
+                            <img v-if="isSearching" src='../images/loader.gif' style='height:auto; width:50px;'>
+                            <br>
+                            <br>
                             <div v-show="showReturning||isSorting">
                                 <span>{{message&&message.length>0?message:'Fetching Original Data...'}} </span>
                                 <br>    
@@ -97,8 +95,14 @@ export default {
             showFilter:{},
             bgColor:'',
             isActiveSort:'',
-            message:null
+            message:null,
+            isSearching:false,
         };
+    },
+    watch:{
+        isDoneFiltering:function(val){
+            this.isSearching = val
+        }
     },
     computed: {
     },
@@ -135,6 +139,10 @@ export default {
         },
         currentSort:{
             type:Object
+        },
+        isDoneFiltering:{
+            type:Boolean,
+            default:false
         }
     },        
     methods: {
@@ -197,8 +205,11 @@ export default {
         }
        },
        debounceInput: debounce(function(evt, index){
+           if(evt.target.value.length>2){
+            this.isSearching = true
             const strategy = `${index}^^${evt.target.value}`
             this.$emit('filterApplied',strategy)
+           }
        }, 75),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
            if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 

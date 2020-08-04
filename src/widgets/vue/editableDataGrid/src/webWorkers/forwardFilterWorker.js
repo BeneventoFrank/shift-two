@@ -27,7 +27,7 @@ export default () => {
         if(runningMode!='silent'){
             filteredData = []
             filteredData = tmp
-            postMessage({'MessageType':'filterResults', 'Column':col, 'Data':filteredData})
+            postMessage({'MessageType':'filterResults', 'Column':col, 'Filter':strategy, 'Data':filteredData})
         } else {
             return tmp
         }

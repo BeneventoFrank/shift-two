@@ -9,20 +9,10 @@ export default () => {
         const col = strat[0]
         const keyword = strat[1]
         let tmp = []
-        let count = 0
-        let updateCount = 1
         for (let i = ds.length-1; i >= 0 ; i--) {
             if(ds[i][virtualColumns[col].dataProperty].includes(keyword)){
-                count++
                 tmp.push(ds[i])
             } 
-            updateCount++
-            if(updateCount > 2500){
-                if(runningMode!='silent'){
-                    postMessage({'MessageType':'countUpdate','Count':count})
-                }
-                updateCount = 0
-            }
         }
         if(runningMode!='silent'){
             filteredData = []
@@ -51,7 +41,6 @@ export default () => {
                     console.log("using original data")
                     tmp = originalData
                 }
-                postMessage({'MessageType':'countUpdate','Count':0})
                 filterDS(tmp, message.Strategy)
                 postMessage({'MessageType':'filterTerminated'})        
                 break;

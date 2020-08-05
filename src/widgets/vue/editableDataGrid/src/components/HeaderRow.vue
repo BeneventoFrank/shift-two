@@ -185,6 +185,7 @@ export default {
                     if(split[0] === columnIndex.toString() && split[1].length>0){
                         tmp = split
                     }
+                    break;
                 }
             }
             return tmp[1]
@@ -205,6 +206,8 @@ export default {
             this.isSearching = true
             const strategy = `${index}^^${evt.target.value}`
             this.$emit('filterApplied',strategy)
+           } else {
+               this.$emit('filterCleared',index)
            }
        }, 75),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){

@@ -15,9 +15,23 @@
             </div>
         </div>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
-            <HeaderRow v-if="userHasHeaders" @columnSort="handleColumnSort" @filterClosed="handleFilterClosed" :showReturning="showReturning" @showDataAnyway="handleShowDataAnyway" 
-            :defaultValues="defaultValues" :dataReceived="dataReceived" :filterCount="filterCount" :gridWillScroll="gridWillScroll()" :currentFilterColumns="filterStrategy.columnsBeingFiltered" 
-            :currentSort="sortStrategy" :isDoneFiltering="isDoneFiltering" :currentFilters="filterStrategy" @filterApplied="handleApplyFilter" :gridWidth="gridWidth" :headers="virtualColumns"></HeaderRow>
+            <HeaderRow v-if="userHasHeaders" 
+                             @columnSort="handleColumnSort" 
+                             @filterClosed="handleFilterClosed" 
+                             @filterApplied="handleApplyFilter" 
+                             @filterCleared="handleClearFilter"
+                                    :showReturning="showReturning" 
+                             :defaultValues="defaultValues" 
+                                :dataReceived="dataReceived" 
+                                :filterCount="filterCount" 
+                                :gridWillScroll="gridWillScroll()" 
+                             :currentFilterColumns="filterStrategy.columnsBeingFiltered" 
+                             :currentSort="sortStrategy" 
+                             :isDoneFiltering="isDoneFiltering" 
+                                :currentFilters="filterStrategy" 
+                                :gridWidth="gridWidth" 
+                             :headers="virtualColumns">
+            </HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
@@ -439,8 +453,6 @@ export default {
                     this.filterCount = message.data.Count
                     break;
                 case 'filterResults':
-                    this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, message.data.Column]
-
                     if (message.data.Data.length>0) {
                         tmp = [...this.tmpResults, ...message.data.Data]
                         this.tmpResults = tmp
@@ -484,25 +496,19 @@ export default {
                     break;
             }
         },
-        handleShowDataAnyway(column){
-            this.showDataAnyway = true
-            this.highestCountLoaded = this.getInitialRowsPerPage();
-            this.virtualHeight = this.filteredData.length*29-950
-            this.dataSlice = this.filteredData.slice(1,this.highestCountLoaded)
-            this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, column.toString()]
-        },
-        removeOldFilter(strategy){
-            let split = strategy.split('^^')
-            let tmp = []
-            for (let i = 0; i < this.filterStrategy.length; i++) {
-                let tmpSplit = this.filterStrategy.filters[i].split('^^')
-                if(tmpSplit[0] === split[0]){
-                    tmp.push(strategy)
+        handleClearFilter(columnIndex){
+            console.log('here .. ', this.filterStrategy.isCurrentlyFiltering)
+            if(this.filterStrategy.isCurrentlyFiltering){
+                //are you only filtering on this one?? 
+                console.log('here .. with? ', this.filterStrategy.columnsBeingFiltered)
+                if(this.filterStrategy.columnsBeingFiltered.length===1&&this.filterStrategy.columnsBeingFiltered[0] === columnIndex.toString()){
+                    console.log('here .. ')
+                    this.clearFilters()
                 } else {
-                    tmp.push(this.filterStrategy.filters[i])
+                    //then clear a filter was called on a column but other filters are applied. 
+
                 }
             }
-            this.filterStrategy.filters = tmp
         },
         handleApplyFilter(strategy){
             const removeFilter = (col)=>{
@@ -526,20 +532,20 @@ export default {
             }
             const addFilter = (col,filter) =>{ 
                 this.filterStrategy.isCurrentlyFiltering = true
-                this.filterStrategy.filters = [...this.filterStrategy.filters, `${col}^^${filter}`]
-                this.filterStrategy.columnsBeingFiltered = [...this.filterStrategy.columnsBeingFiltered, col]
+                this.filterStrategy.filters.push(`${col}^^${filter}`)
+                console.log('pushing................................................................... col', col)
+                
+                this.filterStrategy.columnsBeingFiltered.push(col)
             }
             const updateFilter = (col,filter) =>{
-                let previousFilter = ''
+                this.filterStrategy.isCurrentlyFiltering = true
                 for (let i = 0; i < this.filterStrategy.filters.length; i++) {
                     let split = this.filterStrategy.filters[i].split('^^')
                     if(split[0]===col){
-                        previousFilter = split[1]
                         this.filterStrategy.filters[i] = `${col}^^${filter}`
                     }
                     break;
                 }
-                return previousFilter
             }
 
             let split = strategy.split('^^')
@@ -547,11 +553,13 @@ export default {
             let filter = split[1]
             
             if(this.filterStrategy.isCurrentlyFiltering){ //if we are filtering
+                console.log('what the fuck are you ', this.filterStrategy.columnsBeingFiltered, ' and ', col)
                 if(this.filterStrategy.columnsBeingFiltered.includes(col)){ //and we are filtering on this column...
                 //then we are changing a filter.
                 //two ways to change a filter. empty it out, or have something to filter on.. 
                     if(filter.length>0){
                         //then we need to apply the filter
+                        console.log('its possible i am getting here.... ')
                         updateFilter(col,filter)
                         this.isDoneFiltering = false;
                         this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
@@ -569,6 +577,7 @@ export default {
                         }
                     }
                 } else {
+                    console.log('how many times am i adding this shit....')
                 //we are filtering, but not this column. that means we are adding a new filter
                 addFilter(col,filter)
                 this.isDoneFiltering=false
@@ -576,6 +585,7 @@ export default {
                 this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})   
                 }
             } else {
+                    console.log('how many times am i adding this shit....', col, filter)
                 //then we are adding the only filter
                     addFilter(col,filter)
                     this.isDoneFiltering=false
@@ -590,25 +600,6 @@ export default {
                                     columnsBeingFiltered:[]
                                   }
         },
-        SetFilterStrategy(strategy){
-            let split = strategy.split('^^')
-            let col = split[0]
-            let strat = split[1]
-            let columnsBeingFiltered = []
-            if (strat.length>0) {
-                this.filterStrategy.filters = [...this.filterStrategy.filters, strategy]
-            } else {
-                let filteredArray = this.filterStrategy.filters.filter(element =>{
-                    let tmpSplit = element.split('^^')
-                    if(tmpSplit[0]!==col){
-                        columnsBeingFiltered.push(tmpSplit[0])
-                        return element
-                    }
-                })
-                this.filterStrategy.filters = filteredArray
-                this.filterStrategy.columnsBeingFiltered = columnsBeingFiltered
-            }
-        }
     },
     props:{
         gridConfig:{

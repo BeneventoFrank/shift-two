@@ -49,7 +49,7 @@
                             <br>
                             <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
                             <br>
-                            <img v-if="isSearching" src='../images/loader.gif' style='height:auto; width:50px;'>
+                            <img v-show="!isDoneFiltering" src='../images/loader.gif' style='height:auto; width:50px;'>
                             <br>
                             <br>
                             <div v-show="showReturning||isSorting">
@@ -100,9 +100,6 @@ export default {
         };
     },
     watch:{
-        isDoneFiltering:function(val){
-            this.isSearching = val
-        }
     },
     computed: {
     },
@@ -141,8 +138,7 @@ export default {
             type:Object
         },
         isDoneFiltering:{
-            type:Boolean,
-            default:false
+            type:Boolean
         }
     },        
     methods: {

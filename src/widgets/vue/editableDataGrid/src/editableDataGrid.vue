@@ -399,7 +399,7 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 10000; i++) {
+            for (let i = 1; i <= 1000000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*98765).toString(), 
@@ -504,9 +504,27 @@ export default {
                     this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
                 } else {
                     //then clear a filter was called on a column but other filters are applied. 
-
+                    this.clearAFilter(columnIndex)
+                    this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                 }
             }
+        },
+        clearAFilter(col){
+            let tmp = []
+            let tmpCol = []
+            for (let i = 0; i < this.filterStrategy.filters.length; i++) {
+                let split = this.filterStrategy.filters[i].split('^^')
+                if(split[0]!==col.toString()){
+                    tmpCol.push(split[0])
+                    tmp.push(this.filterStrategy.filters[i])
+                }
+            }
+            this.filterStrategy = {
+                                    isCurrentlyFiltering:true,
+                                    filters:tmp,
+                                    columnsBeingFiltered:tmpCol
+                                  }
         },
         handleApplyFilter(strategy){
            
@@ -523,8 +541,9 @@ export default {
                     let split = this.filterStrategy.filters[i].split('^^')
                     if(split[0]===col){
                         this.filterStrategy.filters[i] = `${col}^^${filter}`
+                        break;
                     }
-                    break;
+                    
                 }
             }
 
@@ -534,7 +553,6 @@ export default {
             
             if(this.filterStrategy.isCurrentlyFiltering){ //if we are filtering
                 if(this.filterStrategy.columnsBeingFiltered.includes(col)){
-                    
                     updateFilter(col,filter)
                     this.isDoneFiltering=false
 
@@ -560,6 +578,8 @@ export default {
                     this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
                     this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})                
             }
+
+            console.log('strat', this.filterStrategy)
         },
         clearFilters(){
             this.filterStrategy = {

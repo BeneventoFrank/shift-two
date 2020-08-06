@@ -184,8 +184,9 @@ export default {
                     split = this.currentFilters.filters[i].split('^^')
                     if(split[0] === columnIndex.toString() && split[1].length>0){
                         tmp = split
+                        break;
                     }
-                    break;
+                    
                 }
             }
             return tmp[1]

@@ -399,7 +399,7 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 100000; i++) {
+            for (let i = 1; i <= 10000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*98765).toString(), 
@@ -497,13 +497,11 @@ export default {
             }
         },
         handleClearFilter(columnIndex){
-            console.log('here .. ', this.filterStrategy.isCurrentlyFiltering)
             if(this.filterStrategy.isCurrentlyFiltering){
-                //are you only filtering on this one?? 
-                console.log('here .. with? ', this.filterStrategy.columnsBeingFiltered)
                 if(this.filterStrategy.columnsBeingFiltered.length===1&&this.filterStrategy.columnsBeingFiltered[0] === columnIndex.toString()){
-                    console.log('here .. ')
                     this.clearFilters()
+                    this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
+                    this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
                 } else {
                     //then clear a filter was called on a column but other filters are applied. 
 
@@ -511,25 +509,7 @@ export default {
             }
         },
         handleApplyFilter(strategy){
-            const removeFilter = (col)=>{
-                let tmpFilters = []
-                let tmpCols = []
-                if(this.filterStrategy.columnsBeingFiltered.length===1){
-                    this.clearFilters()
-                } else {
-                    for (let i = 0; i < this.filterStrategy.filters.length; i++) {
-                        let split = this.filterStrategy.filters[i].split('^^')
-                        if(split[0]!==col){
-                            tmpFilters.push(this.filterStrategy.filters[i])
-                            tmpCols.push(split[1])
-                        }
-                    }
-                    this.clearFilters()
-                    this.filterStrategy.filters = tmpFilters
-                    this.filterStrategy.columnsBeingFiltered = tmpCols
-                    this.tmpFilters.length>0?this.filterStrategy.isCurrentlyFiltering=true:null
-                }
-            }
+           
             const addFilter = (col,filter) =>{ 
                 this.filterStrategy.isCurrentlyFiltering = true
                 this.filterStrategy.filters.push(`${col}^^${filter}`)
@@ -553,13 +533,8 @@ export default {
             let filter = split[1]
             
             if(this.filterStrategy.isCurrentlyFiltering){ //if we are filtering
-                console.log('what the fuck are you ', this.filterStrategy.columnsBeingFiltered, ' and ', col)
                 if(this.filterStrategy.columnsBeingFiltered.includes(col)){ //and we are filtering on this column...
-                //then we are changing a filter.
-                //two ways to change a filter. empty it out, or have something to filter on.. 
                     if(filter.length>0){
-                        //then we need to apply the filter
-                        console.log('its possible i am getting here.... ')
                         updateFilter(col,filter)
                         this.isDoneFiltering = false;
                         this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
@@ -569,15 +544,9 @@ export default {
                             this.isDoneFiltering = false
                             this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                             this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                        } else {
-                            removeFilter(col,filter)
-                            this.isDoneFiltering=true
-                            this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
-                            this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
                         }
                     }
                 } else {
-                    console.log('how many times am i adding this shit....')
                 //we are filtering, but not this column. that means we are adding a new filter
                 addFilter(col,filter)
                 this.isDoneFiltering=false
@@ -585,7 +554,6 @@ export default {
                 this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})   
                 }
             } else {
-                    console.log('how many times am i adding this shit....', col, filter)
                 //then we are adding the only filter
                     addFilter(col,filter)
                     this.isDoneFiltering=false

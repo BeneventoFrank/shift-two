@@ -44,7 +44,7 @@
                                 </div>
                                 <div class='headerItem'>
                                     &nbsp;
-                                </div>
+                                </div>       
                             </div>
                             <br>
                             <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
@@ -202,7 +202,7 @@ export default {
         }
        },
        debounceInput: debounce(function(evt, index){
-           if(evt.target.value.length>2){
+           if(evt.target.value.length>1){
             this.isSearching = true
             const strategy = `${index}^^${evt.target.value}`
             this.$emit('filterApplied',strategy)

@@ -533,25 +533,25 @@ export default {
             let filter = split[1]
             
             if(this.filterStrategy.isCurrentlyFiltering){ //if we are filtering
-                if(this.filterStrategy.columnsBeingFiltered.includes(col)){ //and we are filtering on this column...
-                    if(filter.length>0){
-                        updateFilter(col,filter)
-                        this.isDoneFiltering = false;
+                if(this.filterStrategy.columnsBeingFiltered.includes(col)){
+                    
+                    updateFilter(col,filter)
+                    this.isDoneFiltering=false
+
+                    if(this.filterStrategy.columnsBeingFiltered.length>1){ 
+                        this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    } 
+                    if(this.filterStrategy.columnsBeingFiltered.length===1){ 
                         this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
                         this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
-                    } else {
-                        if(this.filterStrategy.columnsBeingFiltered.length>1){
-                            this.isDoneFiltering = false
-                            this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                            this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                        }
-                    }
+                    } 
+   
                 } else {
-                //we are filtering, but not this column. that means we are adding a new filter
-                addFilter(col,filter)
-                this.isDoneFiltering=false
-                this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
-                this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})   
+                    addFilter(col,filter)
+                    this.isDoneFiltering=false
+                    this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
+                    this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true}) 
                 }
             } else {
                 //then we are adding the only filter

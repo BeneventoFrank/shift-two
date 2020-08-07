@@ -53,9 +53,12 @@ import { colors } from '../../../../assets/shiftTwo'
 
 import forwardWorker from './webWorkers/forwardFilterWorker'
 import reverseWorker from './webWorkers/reverseFilterWorker'
+import sortWorker from './webWorkers/sortWorker'
 
 import forwardWorkerSetup from './webWorkers/forwardFilterServiceWorkerSetup'
 import reverseWorkerSetup from './webWorkers/reverseFilterServiceWorkerSetup'
+import sortWorkerSetup from './webWorkers/sortWorkerSetup'
+
 import Pagination from '../../pagination/Pagination'
 import Slider from '../../slider/Slider'
 
@@ -105,6 +108,7 @@ export default {
             },
             ww_forwardWorker:null,
             ww_reverseWorker:null,
+            ww_sortWorker:null,
             defaultValues:{
                 columnValues:{
                     width:'',
@@ -334,33 +338,6 @@ export default {
                 retVal=true
             }
             return retVal
-        },
-        sortDataset(strategy, dataset) {
-            const setValue = (value)=>{return value?value:''}
-
-            let sort = strategy.split('^^')
-            if (sort[1]&&sort[1].length>0) {
-                let column = sort[0]             
-                let sortDirection = sort[1]   
-                let index = sort[2]             
-
-                this.sortStrategy.columnBeingSorted = index
-                let tmp = []
-                if(sortDirection==="asc")
-                {
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(a[column]).toLowerCase()).localeCompare(setValue(b[column]).toLowerCase());})
-                } else {
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(b[column]).toLowerCase()).localeCompare(setValue(a[column]).toLowerCase());})
-                }
-                this.sortStrategy.isCurrentlySorting = true;
-                this.sortStrategy.strategy = strategy
-                return tmp
-            } else {
-                this.sortStrategy.columnBeingSorted = ''
-                this.sortStrategy.isCurrentlySorting = false;
-                this.sortStrategy.strategy = ''
-                return this.filterStrategy.isCurrentlyFiltering?this.dataSlice:this.fullDS
-            }
         },
         handleColumnSort(sortStrategy){
             this.filteredData = this.sortDataset(sortStrategy, this.filterStrategy.isCurrentlyFiltering?this.dataSlice:this.fullDS)
@@ -607,9 +584,14 @@ export default {
         this.ww_forwardWorker = new forwardWorkerSetup(forwardWorker)
         this.ww_forwardWorker.addEventListener('message',event =>{this.handleMessage(event)})
         this.ww_forwardWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
+
         this.ww_reverseWorker = new reverseWorkerSetup(reverseWorker)
         this.ww_reverseWorker.addEventListener('message',event =>{this.handleMessage(event)})
         this.ww_reverseWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
+
+        this.ww_sortWorker = new sortWorkerSetup(sortWorker)
+        this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
+        this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
 
   },
   beforeDestroy(){

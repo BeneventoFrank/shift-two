@@ -359,11 +359,11 @@ export default {
                 this.sortStrategy.columnBeingSorted = ''
                 this.sortStrategy.isCurrentlySorting = false;
                 this.sortStrategy.strategy = ''
-                return this.fullDS
+                return this.filterStrategy.isCurrentlyFiltering?this.dataSlice:this.fullDS
             }
         },
         handleColumnSort(sortStrategy){
-            this.filteredData = this.sortDataset(sortStrategy, [...this.fullDS])
+            this.filteredData = this.sortDataset(sortStrategy, this.filterStrategy.isCurrentlyFiltering?this.dataSlice:this.fullDS)
             this.highestCountLoaded = this.getInitialRowsPerPage();     
             this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
@@ -399,7 +399,7 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 1000000; i++) {
+            for (let i = 1; i <= 100000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*98765).toString(), 

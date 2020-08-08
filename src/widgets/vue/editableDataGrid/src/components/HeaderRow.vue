@@ -5,15 +5,15 @@
             <div :style="`width:${header.width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header) in headers" :key="header.columnIndex">
                 <span style='display:flex;flex-direction:row;' v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString())">
                     <div>
-                        <FilterSVG style="padding-left:5px" :height="11"></FilterSVG>
+                        <FilterSVG style="padding-left:10px" :height="11"></FilterSVG>
                     </div>
                     <div style='padding-top:2px;'>
                         <span class="filterText" style="text-align:left; margin-left:5px">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
                     </div>
                 </span>
                 <span v-else>&nbsp;</span>
-                <span v-if="currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.dataProperty">
-                    <SortSVG style="padding-right:5px" :height="11"></SortSVG>
+                <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty">
+                    <SortSVG style="padding-right:20px" :height="11"></SortSVG>
                 </span>
                 <span v-else>&nbsp;</span>
             </div>
@@ -24,7 +24,7 @@
                     :style="`width:${header.width}; display:flex; flex-direction:row; justify-content:${header.alignment}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
                     :class="`headerCell 
                             ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
-                            ${(currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.columnIndex.toString())?'activeFilter':null} 
+                            ${(currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.columnIndex.toString())?'activeFilter':null} 
                             `" 
                     @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
                     @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  

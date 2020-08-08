@@ -5,16 +5,19 @@ let gridConfig =  {
     Columns:[
             {
                 header:{text:"Make"},
-                dataProperty:"make"
+                dataProperty:"make",
+                dataType:'number'
             },
             {
                 header:{text:"Model"},
-                dataProperty:"model"
+                dataProperty:"model",
+                dataType:'number'
 
             },
             {
                 header:{text:"Year"},
-                dataProperty:"year"
+                dataProperty:"year",
+                dataType:'number'
             },
             {
                 header:{text:"Trim"},            

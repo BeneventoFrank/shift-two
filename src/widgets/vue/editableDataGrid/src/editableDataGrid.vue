@@ -382,19 +382,13 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 10; i++) {
+            for (let i = 1; i <= 100000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*98765), 
                         make:Math.ceil(Math.random()*i*98765), 
-                        // model:Math.ceil(Math.random()*i*98765).toString(), 
-                        // year:Math.ceil(Math.random()*i*98765).toString()})
-                        //trim:i, 
-                        //make:i, 
-                        model:i, 
-                        year:i.toString()})
-
-
+                        model:Math.ceil(Math.random()*i*98765), 
+                        year:Math.ceil(Math.random()*i*98765)})
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600
             this.fullDS = b

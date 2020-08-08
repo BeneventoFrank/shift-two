@@ -77,7 +77,7 @@ export default () => {
                 property = split[0]
                 direction = split[1]
                 console.log('sending back ', sortedData[property][direction])
-                postMessage({'MessageType':'dataSorted', 'Data':sortedData[property][direction]})
+                postMessage({'MessageType':'dataSorted', 'Data':sortedData[property][direction], 'Column':property})
                 break;
             case 'sortFilteredData':
                 sortStrategy = message.SortStrategy 

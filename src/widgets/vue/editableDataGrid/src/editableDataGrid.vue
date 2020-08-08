@@ -345,7 +345,11 @@ export default {
         },
         handleColumnSort(strategy){
             this.isDoneSorting = false
-            this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})            
+            if(this.filterStrategy.isCurrentlyFiltering){
+               this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})            
+            } else {
+               this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
+            }
         },
         handleResizeGrid(){
             debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()
@@ -460,6 +464,7 @@ export default {
                 case 'dataSorted': 
                     if (message.data.Data.length>0) {
                         this.sortStrategy.isCurrentlySorting = true
+                        this.sortStrategy.columnBeingSorted=message.data.Column
                         this.highestCountLoaded = this.getInitialRowsPerPage();
                         this.virtualHeight = (message.data.Data.length*29-950)<600?600:message.data.Data.length*29-950
                         this.dataSlice = message.data.Data.slice(0,this.highestCountLoaded)

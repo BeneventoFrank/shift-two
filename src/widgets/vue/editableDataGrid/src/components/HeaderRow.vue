@@ -12,7 +12,7 @@
                     </div>
                 </span>
                 <span v-else>&nbsp;</span>
-                <span v-if="currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.columnIndex.toString()">
+                <span v-if="currentSort&&currentSort.columnBeingSorted.length>0&&currentSort.columnBeingSorted === header.dataProperty">
                     <SortSVG style="padding-right:5px" :height="11"></SortSVG>
                 </span>
                 <span v-else>&nbsp;</span>

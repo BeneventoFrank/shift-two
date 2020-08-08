@@ -84,7 +84,7 @@ export default () => {
                 data = message.Data
                 split = sortStrategy.split('^^')
                 property = split[0]
-                postMessage({'MessageType':'dataSorted', 'Data':sortDataset(sortStrategy, data, getDataType(property))})
+                postMessage({'MessageType':'dataSorted', 'Column':property, 'Data':sortDataset(sortStrategy, data, getDataType(property))})
                 break;
             default:
                 break;

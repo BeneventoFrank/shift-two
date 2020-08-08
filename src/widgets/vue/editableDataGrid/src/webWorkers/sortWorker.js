@@ -61,7 +61,7 @@ export default () => {
 
     onmessage = (event)=>{ 
         message = event.data 
-        console.log("forward filter received a message ", message)
+        console.log("sort worker received a message ", message)
         
         let split='',property='',direction='', data=[]
 

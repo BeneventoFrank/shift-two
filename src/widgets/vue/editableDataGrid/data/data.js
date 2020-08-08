@@ -23,7 +23,34 @@ let gridConfig =  {
                 header:{text:"Trim"},            
                 dataProperty:"trim",
                 dataType:'number'
-            }                        
+            },
+            {
+                header:{text:"Color"},            
+                dataProperty:"color",
+            },            
+            {
+                header:{text:"Manufacturer"},            
+                dataProperty:"manufacturer"
+            },
+            {
+                header:{text:"Plant"},            
+                dataProperty:"plant"
+            },
+            {
+                header:{text:"Vin"},            
+                dataProperty:"vin",
+                dataType:'number'
+            },
+            {
+                header:{text:"Plate Number"},            
+                dataProperty:"plateNumber",
+                dataType:'number'
+            },
+            {
+                header:{text:"Price"},            
+                dataProperty:"price",
+                dataType:'number'
+            }                                    
         ]
 }
 

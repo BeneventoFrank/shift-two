@@ -388,7 +388,14 @@ export default {
                         trim:Math.ceil(Math.random()*i*98765), 
                         make:Math.ceil(Math.random()*i*98765), 
                         model:Math.ceil(Math.random()*i*98765), 
-                        year:Math.ceil(Math.random()*i*98765)})
+                        year:Math.ceil(Math.random()*i*98765),
+                        color:Math.ceil(Math.random()*i*98765),
+                        manufacturer:Math.ceil(Math.random()*i*98765),
+                        plant:Math.ceil(Math.random()*i*98765),
+                        vin:Math.ceil(Math.random()*i*98765),
+                        plateNumber:Math.ceil(Math.random()*i*98765),
+                        price:Math.ceil(Math.random()*i*98765)
+                        })
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600
             this.fullDS = b

@@ -27,7 +27,8 @@
                                 :gridWillScroll="gridWillScroll()" 
                              :currentFilterColumns="filterStrategy.columnsBeingFiltered" 
                              :currentSort="sortStrategy" 
-                             :isDoneFiltering="isDoneFiltering" 
+                             :isDoneFiltering="isDoneFiltering"
+                             :isDoneSorting="isDoneSorting" 
                                 :currentFilters="filterStrategy" 
                                 :gridWidth="gridWidth" 
                              :headers="virtualColumns">
@@ -96,6 +97,7 @@ export default {
             showReturning:false,
             lastPosition:0,
             isDoneFiltering:true,
+            isDoneSorting:true,
             sortStrategy:{
                 isCurrentlySorting:false,
                 strategy:'',
@@ -307,6 +309,7 @@ export default {
                     tmp.borderColor=this.gridConfig.Columns[i].header.borderColor?this.gridConfig.Columns[i].header.borderColor:this.defaultValues.columnValues.borderColor     
                     tmp.dataProperty=this.gridConfig.Columns[i].dataProperty?this.gridConfig.Columns[i].dataProperty:''
                     tmp.dataAlignment=this.gridConfig.Columns[i].dataAlignment?this.gridConfig.Columns[i].dataAlignment:this.defaultValues.columnValues.dataAlignment
+                    tmp.dataType=this.gridConfig.Columns[i].dataType?this.gridConfig.Columns[i].dataType:'string'
                 } else {
                     tmp.columnIndex = i;
                     tmp.text=''
@@ -319,6 +322,7 @@ export default {
                     tmp.borderColor=''
                     tmp.dataProperty=''
                     tmp.dataAlignment=''
+                    tmp.dataType = String
                 }
                 this.userHasHeaders=hasHeader
                 this.virtualColumns.push(tmp)
@@ -339,11 +343,9 @@ export default {
             }
             return retVal
         },
-        handleColumnSort(sortStrategy){
-            this.filteredData = this.sortDataset(sortStrategy, this.filterStrategy.isCurrentlyFiltering?this.dataSlice:this.fullDS)
-            this.highestCountLoaded = this.getInitialRowsPerPage();     
-            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+        handleColumnSort(strategy){
+            this.isDoneSorting = false
+            this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})            
         },
         handleResizeGrid(){
             debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()
@@ -376,20 +378,25 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 100000; i++) {
+            for (let i = 1; i <= 10; i++) {
                 b.push(
                         {
-                        trim:Math.ceil(Math.random()*i*98765).toString(), 
-                        make:Math.ceil(Math.random()*i*98765).toString(), 
-                        model:Math.ceil(Math.random()*i*98765).toString(), 
-                        year:Math.ceil(Math.random()*i*98765).toString()})
+                        trim:Math.ceil(Math.random()*i*98765), 
+                        make:Math.ceil(Math.random()*i*98765), 
+                        // model:Math.ceil(Math.random()*i*98765).toString(), 
+                        // year:Math.ceil(Math.random()*i*98765).toString()})
+                        //trim:i, 
+                        //make:i, 
+                        model:i, 
+                        year:i.toString()})
+
+
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600
             this.fullDS = b
             this.highestCountLoaded = this.getInitialRowsPerPage()
             this.dataSlice = b.slice(0,this.highestCountLoaded)
             this.highestCountLoaded = this.highestCountLoaded + 1
-            
         },
         parseData(startingPoint){
             let tmp = []
@@ -450,6 +457,15 @@ export default {
                     }
                     this.clearFilters()
                     break;
+                case 'dataSorted': 
+                    if (message.data.Data.length>0) {
+                        this.sortStrategy.isCurrentlySorting = true
+                        this.highestCountLoaded = this.getInitialRowsPerPage();
+                        this.virtualHeight = (message.data.Data.length*29-950)<600?600:message.data.Data.length*29-950
+                        this.dataSlice = message.data.Data.slice(0,this.highestCountLoaded)
+                        this.isDoneSorting = true;
+                    }
+                    break;
                 case 'filterTerminated':
                     this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
                     if(this.numberOfTerminatedFilters===2)    
@@ -457,7 +473,7 @@ export default {
                         this.highestCountLoaded = this.getInitialRowsPerPage();
                         
                         if(this.sortStrategy.isCurrentlySorting===true){
-                            this.filteredData = this.sortDataset(this.sortStrategy.strategy,this.tmpResults)
+                            this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData', 'SortStrategy':this.sortStrategy, 'Data': this.tmpResults})
                         } else {
                             this.filteredData = this.tmpResults
                         }
@@ -473,6 +489,7 @@ export default {
                     break;
             }
         },
+
         handleClearFilter(columnIndex){
             if(this.filterStrategy.isCurrentlyFiltering){
                 if(this.filterStrategy.columnsBeingFiltered.length===1&&this.filterStrategy.columnsBeingFiltered[0] === columnIndex.toString()){

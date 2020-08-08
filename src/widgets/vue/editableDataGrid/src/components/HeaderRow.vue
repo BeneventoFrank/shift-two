@@ -49,14 +49,8 @@
                             <br>
                             <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
                             <br>
-                            <img v-show="!isDoneFiltering" src='../images/loader.gif' style='height:auto; width:50px;'>
+                            <img v-show="(!isDoneFiltering)||(!isDoneSorting)" src='../images/loader.gif' style='height:auto; width:50px;'>
                             <br>
-                            <br>
-                            <div v-show="showReturning||isSorting">
-                                <span>{{message&&message.length>0?message:'Fetching Original Data...'}} </span>
-                                <br>    
-                                <br>
-                            </div>                    
                         </div>
                     </div> 
                 </div>
@@ -139,6 +133,9 @@ export default {
         },
         isDoneFiltering:{
             type:Boolean
+        },
+        isDoneSorting:{
+            type:Boolean
         }
     },        
     methods: {
@@ -156,17 +153,12 @@ export default {
        },
        handleSortClick(column, index, direction){
            if(this.isActiveSort === direction){
-               this.isSorting = true;
-               this.message = 'Returning Original Data...'
-               setTimeout(() => {this.$emit('columnSort','')},0);
+               this.$emit('columnSort','')
                this.isActiveSort = ''
            } else {
                this.isActiveSort=direction
-               this.isSorting = true;
-               this.message='Sorting...'
-               setTimeout(() => {this.$emit('columnSort',`${column}^^${direction}^^${index}`)},0);
+               this.$emit('columnSort',`${column}^^${direction}`)
            }
-           setTimeout(() => {this.isSorting=false},502);                          
        },
        wouldCauseAScroll(index){
             let retVal = '50px'

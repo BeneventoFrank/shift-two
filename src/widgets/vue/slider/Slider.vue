@@ -59,7 +59,7 @@ export default {
           this.updateValuePosition(event.target);
           this.updateLabels(event.target);
           this.updateProgress(event.target);
-          this.$emit('change',event)
+          setTimeout(() => {this.$emit('change',event)}, 0);
       },
       updateValue(slider) {
           let value = document.getElementById(slider.dataset.valueId);
@@ -114,12 +114,10 @@ export default {
           return absValue / range;
       },
       setTicks(slider) {
-          console.log(';fjks;dlkfjdsf', slider.dataset)
           let container = document.getElementById(slider.dataset.tickId);
           const spacing = parseFloat(slider.dataset.tickStep);
           const sliderRange = slider.max - slider.min;
           const tickCount = sliderRange / spacing + 1; // +1 to account for 0
-          console.log(tickCount)
           for (let ii = 0; ii < tickCount; ii++) {
               let tick = document.createElement("span");
 

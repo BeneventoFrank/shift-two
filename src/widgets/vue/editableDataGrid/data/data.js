@@ -10,6 +10,7 @@ let gridConfig =  {
             {
                 header:{text:"Model"},
                 dataProperty:"model"
+
             },
             {
                 header:{text:"Year"},
@@ -17,7 +18,8 @@ let gridConfig =  {
             },
             {
                 header:{text:"Trim"},            
-                dataProperty:"trim"
+                dataProperty:"trim",
+                dataType:'number'
             }                        
         ]
 }

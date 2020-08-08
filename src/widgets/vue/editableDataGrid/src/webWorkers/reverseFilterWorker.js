@@ -10,7 +10,7 @@ export default () => {
         const keyword = strat[1]
         let tmp = []
         for (let i = ds.length-1; i >= 0 ; i--) {
-            if(ds[i][virtualColumns[col].dataProperty].includes(keyword)){
+            if(ds[i][virtualColumns[col].dataProperty].toString().includes(keyword)){
                 tmp.push(ds[i])
             } 
         }

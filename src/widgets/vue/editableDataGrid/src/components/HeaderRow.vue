@@ -24,7 +24,7 @@
                     :style="`width:${header.width}; display:flex; flex-direction:row; justify-content:${header.alignment}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
                     :class="`headerCell 
                             ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
-                            ${(currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.columnIndex.toString())?'activeFilter':null} 
+                            ${(currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty.toString())?'activeFilter':null} 
                             `" 
                     @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
                     @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
@@ -36,8 +36,8 @@
                         <div class='innerDiv' :style="`background-color:${bgColor}`">
                             <div class='flyoutHeader'>
                                 <div class='headerItem sort'> 
-                                    <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'asc')}"><UpArrow :isActiveSort="isActiveSort" class="sortButton" :height='15'/></span>
-                                    <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'desc')}"><DownArrow :isActiveSort="isActiveSort" class="sortButton rightButton" :height='15'/></span>
+                                    <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'asc')}"><UpArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
+                                    <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'desc')}"><DownArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
                                 </div>
                                 <div class='headerItem'>
                                     <label class='filterHeader'>{{header.text}}</label>

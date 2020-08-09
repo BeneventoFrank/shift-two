@@ -22,13 +22,19 @@ export default {
     height:{
       type:Number
     },
+    isActiveColumn:{
+      type:Boolean
+    },    
     isActiveSort:{
       type:String
     }
   }, 
   methods:{
     getFillColor(){
-      return this.isActiveSort==='asc'?'black':'#c3c3c3'
+      if(this.isActiveSort==='asc'&&this.isActiveColumn){
+        return 'black'
+      }
+      return '#c3c3c3'
     }
   }
 }

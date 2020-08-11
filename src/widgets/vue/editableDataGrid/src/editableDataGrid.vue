@@ -1,5 +1,5 @@
 <template>
-    <div ref='grid' style='width:100%;' class='container'>
+    <div ref='grid' style='width:100%;' >
         <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center; padding-bottom:25px;'>
             <div style="width:33.3%; padding-left:20px;"><Slider @change="handleChangeNumberPerPage" v-if="gridConfig.EnablePaging" :width="300"></Slider></div>
             <div style="width:33.3%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
@@ -54,10 +54,14 @@ import { colors } from '../../../../assets/shiftTwo'
 
 import forwardWorker from './webWorkers/forwardFilterWorker'
 import reverseWorker from './webWorkers/reverseFilterWorker'
+import evenSortWorker from './webWorkers/evenSortWorker'
+import oddSortWorker from './webWorkers/oddSortWorker'
 import sortWorker from './webWorkers/sortWorker'
 
 import forwardWorkerSetup from './webWorkers/forwardFilterServiceWorkerSetup'
 import reverseWorkerSetup from './webWorkers/reverseFilterServiceWorkerSetup'
+import evenSortWorkerSetup from './webWorkers/sortWorkerSetup'
+import oddSortWorkerSetup from './webWorkers/sortWorkerSetup'
 import sortWorkerSetup from './webWorkers/sortWorkerSetup'
 
 import Pagination from '../../pagination/Pagination'
@@ -78,6 +82,8 @@ export default {
             gridWidth:0,
             highestScrollPosition:0,
             fullDS:[],
+            sortedData:{},
+            isDonePreSorting:false,
             filterCount:0,
             dataReceived:false,
             tableTop:0,
@@ -85,8 +91,10 @@ export default {
             multiple:10,
             addToTop:74,
             tmpResults:[],
+            tmpResultsSort:{},
             highestCountLoaded:0,
             numberOfTerminatedFilters:0,
+            numberOfTerminatedSorts:0,
             skip:20,
             dataSlice:[],
             showDataAnyway:false,
@@ -110,7 +118,8 @@ export default {
             },
             ww_forwardWorker:null,
             ww_reverseWorker:null,
-            ww_sortWorker:null,
+            ww_evenSortWorker:null,
+            ww_oddSortWorker:null,
             defaultValues:{
                 columnValues:{
                     width:'',
@@ -346,10 +355,32 @@ export default {
         handleColumnSort(strategy){
             this.isDoneSorting = false
             if(this.filterStrategy.isCurrentlyFiltering){
-               this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})            
+               this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})
             } else {
-               this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
+                if(this.isDonePreSorting)
+                {
+                    try {
+                        let split = strategy.split('^^')
+                        this.sortStrategy = {}
+                        this.sortStrategy.strategy = strategy
+                        this.sortStrategy.isCurrentlySorting = true
+                        this.sortStrategy.columnBeingSorted = split[0]
+                        this.highestCountLoaded = this.getInitialRowsPerPage();
+                        this.filteredData = []
+                        this.filteredData = this.sortedData[split[0]][split[1]] 
+                        this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                        this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                        this.isDoneSorting = true;
+                    } catch (error) {
+                        this.isDoneSorting = true;
+                        //do nothing
+                    }
+                } else {
+                    console.log('not done sorting yet... .')
+                    this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
+                }
             }
+
         },
         handleResizeGrid(){
             debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()
@@ -382,19 +413,19 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 100000; i++) {
+            for (let i = 1; i <= 10000; i++) {
                 b.push(
                         {
-                        trim:Math.ceil(Math.random()*i*98765), 
+                        trim:Math.ceil(Math.random()*i*65), 
                         make:Math.ceil(Math.random()*i*98765), 
-                        model:Math.ceil(Math.random()*i*98765), 
+                        model:Math.ceil(Math.random()*i*965), 
                         year:Math.ceil(Math.random()*i*98765),
-                        color:Math.ceil(Math.random()*i*98765),
+                        color:Math.ceil(Math.random()*i*9765),
                         manufacturer:Math.ceil(Math.random()*i*98765),
-                        plant:Math.ceil(Math.random()*i*98765),
-                        vin:Math.ceil(Math.random()*i*98765),
-                        plateNumber:Math.ceil(Math.random()*i*98765),
-                        price:Math.ceil(Math.random()*i*98765)
+                        plant:Math.ceil(Math.random()*i*5),
+                        vin:Math.ceil(Math.random()*i*75),
+                        plateNumber:Math.ceil(Math.random()*i*95),
+                        price:Math.ceil(Math.random()*i*9)
                         })
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:600
@@ -437,6 +468,7 @@ export default {
         },
         handleMessage(message){
             let tmp = []
+
             switch (message.data.MessageType) {
                 case 'countUpdate':
                     this.filterCount = message.data.Count
@@ -462,15 +494,34 @@ export default {
                     }
                     this.clearFilters()
                     break;
-                case 'dataSorted': 
-                    if (message.data.Data.length>0) {
+                case 'sortComplete':
+                        this.filteredData = [...message.data.Data]
+                        this.sortStrategy = {}
+                        this.sortStrategy.strategy = message.data.Strategy
                         this.sortStrategy.isCurrentlySorting = true
-                        this.sortStrategy.columnBeingSorted=message.data.Column
+                        this.sortStrategy.columnBeingSorted = message.data.Column
+
                         this.highestCountLoaded = this.getInitialRowsPerPage();
-                        this.virtualHeight = (message.data.Data.length*29-950)<600?600:message.data.Data.length*29-950
-                        this.dataSlice = message.data.Data.slice(0,this.highestCountLoaded)
-                        this.isDoneSorting = true;
+                        this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                        this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                        this.filterCount = 0
+                        this.tmpResults = []
+                        this.isDoneSorting = true
+                    break;
+                case 'dataSorted':
+                    this.tmpResultsSort= {...this.tmpResultsSort, ...message.data.Data}
+                    break;
+                case 'sortTerminated':
+                    this.numberOfTerminatedSorts = this.numberOfTerminatedSorts +1                      
+                    if(this.numberOfTerminatedSorts===2)    
+                    {
+                        console.log("this.tmpResultsSort",this.tmpResultsSort)
+                        this.sortedData = this.tmpResultsSort
+                        this.isDonePreSorting = true
+                        this.ww_oddSortWorker.terminate()
+                        this.ww_evenSortWorker.terminate()
                     }
+                    
                     break;
                 case 'filterTerminated':
                     this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
@@ -489,6 +540,7 @@ export default {
                         this.numberOfTerminatedFilters = 0
                         this.tmpResults = []
                         this.isDoneFiltering=true
+                        
                     }
                     break;
                 default:
@@ -612,9 +664,18 @@ export default {
         this.ww_reverseWorker.addEventListener('message',event =>{this.handleMessage(event)})
         this.ww_reverseWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
 
+        this.ww_evenSortWorker = new evenSortWorkerSetup(evenSortWorker)
+        this.ww_evenSortWorker.addEventListener('message',event => {this.handleMessage(event)})
+        this.ww_evenSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
+
+        this.ww_oddSortWorker = new oddSortWorkerSetup(oddSortWorker)
+        this.ww_oddSortWorker.addEventListener('message',event => {this.handleMessage(event)})
+        this.ww_oddSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
+
         this.ww_sortWorker = new sortWorkerSetup(sortWorker)
         this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
         this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
+
 
   },
   beforeDestroy(){

@@ -152,13 +152,13 @@ export default {
 
        },
        handleSortClick(column, index, direction){
-           if(this.isActiveSort === direction){
-               this.$emit('columnSort','')
-               this.isActiveSort = ''
-           } else {
-               this.isActiveSort=direction
-               this.$emit('columnSort',`${column}^^${direction}`)
-           }
+            if(this.isActiveSort === direction){
+                this.$emit('columnSort','')
+                this.isActiveSort = ''
+            } else {
+                this.isActiveSort=direction
+                this.$emit('columnSort',`${column}^^${direction}`)
+            }
        },
        wouldCauseAScroll(index){
             let retVal = '50px'

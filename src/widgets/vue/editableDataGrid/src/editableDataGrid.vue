@@ -354,30 +354,50 @@ export default {
         },
         handleColumnSort(strategy){
             this.isDoneSorting = false
-            if(this.filterStrategy.isCurrentlyFiltering){
-               this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})
-            } else {
-                if(this.isDonePreSorting)
-                {
-                    try {
-                        let split = strategy.split('^^')
-                        this.sortStrategy = {}
-                        this.sortStrategy.strategy = strategy
-                        this.sortStrategy.isCurrentlySorting = true
-                        this.sortStrategy.columnBeingSorted = split[0]
-                        this.highestCountLoaded = this.getInitialRowsPerPage();
-                        this.filteredData = []
-                        this.filteredData = this.sortedData[split[0]][split[1]] 
-                        this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-                        this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                        this.isDoneSorting = true;
-                    } catch (error) {
-                        this.isDoneSorting = true;
-                        //do nothing
+            if(strategy !== ''){
+                    if(this.filterStrategy.isCurrentlyFiltering){
+                        console.log('passing in ', strategy)
+                    this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})
+                    } else {
+                        if(this.isDonePreSorting)
+                        {
+                            try {
+                                let split = strategy.split('^^')
+                                this.sortStrategy = {}
+                                this.sortStrategy.strategy = strategy
+                                this.sortStrategy.isCurrentlySorting = true
+                                this.sortStrategy.columnBeingSorted = split[0]
+                                this.highestCountLoaded = this.getInitialRowsPerPage();
+                                this.filteredData = []
+                                this.filteredData = this.sortedData[split[0]][split[1]] 
+                                this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                                this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                                this.isDoneSorting = true;
+                            } catch (error) {
+                                this.isDoneSorting = true;
+                                //do nothing
+                            }
+                        } else {
+                            console.log('not done sorting yet... .')
+                            this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
+                        }
                     }
+            } else {
+                this.sortStrategy={
+                    isCurrentlySorting:false,
+                    strategy:'',
+                    columnBeingSorted:''
+                }
+                this.isDoneSorting = true;
+                if(this.filterStrategy.isCurrentlyFiltering){
+                    this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                 } else {
-                    console.log('not done sorting yet... .')
-                    this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
+                    this.highestCountLoaded = this.getInitialRowsPerPage();
+                    this.filteredData = []
+                    this.filteredData = this.fullDS 
+                    this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                 }
             }
 
@@ -413,7 +433,18 @@ export default {
         },
          getTestData(){
             let b = []
-            for (let i = 1; i <= 10000; i++) {
+            let alphaString = []
+            let alpha = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+            const getAlpha = ()=>{
+                alphaString = ''
+                for (let i = 0; i < 10; i++) {
+                    alphaString += (alpha[Math.floor(Math.random() * 27)])
+                }
+                return alphaString.length>10?alphaString.substring(1,10):alphaString
+            }
+
+
+            for (let i = 1; i <= 100000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*65), 
@@ -421,7 +452,7 @@ export default {
                         model:Math.ceil(Math.random()*i*965), 
                         year:Math.ceil(Math.random()*i*98765),
                         color:Math.ceil(Math.random()*i*9765),
-                        manufacturer:Math.ceil(Math.random()*i*98765),
+                        manufacturer:getAlpha(),
                         plant:Math.ceil(Math.random()*i*5),
                         vin:Math.ceil(Math.random()*i*75),
                         plateNumber:Math.ceil(Math.random()*i*95),
@@ -468,7 +499,7 @@ export default {
         },
         handleMessage(message){
             let tmp = []
-
+            console.log('editableGrid received a message', message)
             switch (message.data.MessageType) {
                 case 'countUpdate':
                     this.filterCount = message.data.Count
@@ -527,20 +558,22 @@ export default {
                     this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
                     if(this.numberOfTerminatedFilters===2)    
                     {
-                        this.highestCountLoaded = this.getInitialRowsPerPage();
-                        
+                        console.log("checking this current sort",this.sortStrategy.isCurrentlySorting)
                         if(this.sortStrategy.isCurrentlySorting===true){
-                            this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData', 'SortStrategy':this.sortStrategy, 'Data': this.tmpResults})
+                            console.log('making a call to sort this filterd data', this.tmpResults)
+                            this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData', 'SortStrategy':this.sortStrategy.strategy, 'Data': this.tmpResults})
+                            this.numberOfTerminatedFilters = 0
+                            this.isDoneFiltering=true
                         } else {
                             this.filteredData = this.tmpResults
+                            this.highestCountLoaded = this.getInitialRowsPerPage();
+                            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                            this.filterCount = 0
+                            this.numberOfTerminatedFilters = 0
+                            this.tmpResults = []
+                            this.isDoneFiltering=true
                         }
-                        this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-                        this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                        this.filterCount = 0
-                        this.numberOfTerminatedFilters = 0
-                        this.tmpResults = []
-                        this.isDoneFiltering=true
-                        
                     }
                     break;
                 default:
@@ -552,14 +585,29 @@ export default {
             if(this.filterStrategy.isCurrentlyFiltering){
                 if(this.filterStrategy.columnsBeingFiltered.length===1&&this.filterStrategy.columnsBeingFiltered[0] === columnIndex.toString()){
                     this.clearFilters()
-                    this.ww_forwardWorker.postMessage({'MessageType':'returnInitialData'})
-                    this.ww_reverseWorker.postMessage({'MessageType':'returnInitialData'})
-                } else {
+                    if (this.sortStrategy.isCurrentlySorting) {
+                            const split = this.sortStrategy.strategy.split('^^')
+                            this.filteredData = this.sortedData[split[0]][split[1]]
+                            this.highestCountLoaded = this.getInitialRowsPerPage();
+                            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                    } else {
+                            this.highestCountLoaded = this.getInitialRowsPerPage();
+                            this.filteredData = []
+                            this.filteredData = this.fullDS 
+                            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)                        
+                    }
+3                } else {
                     //then clear a filter was called on a column but other filters are applied. 
                     this.clearAFilter(columnIndex)
                     this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                     this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                 }
+
+                if(this.sortStrategy.isCurrentlySorting===true){
+                    this.ww_sortWorker.postMessage({'MessageType':'applySort', 'SortStrategy':this.sortStrategy.strategy})
+                }                
             }
         },
         clearAFilter(col){
@@ -602,9 +650,10 @@ export default {
             let split = strategy.split('^^')
             let col = split[0]
             let filter = split[1]
-            
+            console.log('i should be a yes... ' ,this.filterStrategy.isCurrentlyFiltering)
             if(this.filterStrategy.isCurrentlyFiltering){ //if we are filtering
                 if(this.filterStrategy.columnsBeingFiltered.includes(col)){
+                    console.log('dropped in...')
                     updateFilter(col,filter)
                     this.isDoneFiltering=false
 
@@ -628,7 +677,7 @@ export default {
                     addFilter(col,filter)
                     this.isDoneFiltering=false
                     this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
-                    this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})                
+                    this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
             }
 
             console.log('strat', this.filterStrategy)

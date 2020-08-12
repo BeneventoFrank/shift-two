@@ -67,9 +67,10 @@ export default () => {
                 postMessage({'MessageType':'sortComplete', 'Data':sortDataset(sortStrategy, null, getDataType(property)), 'Column':property, 'Strategy':sortStrategy})
                 break;
             case 'sortFilteredData':
-                sortStrategy = message.SortStrategy 
+                console.log("wtf ", message.SortStrategy)
+                sortStrategy = message.SortStrategy
                 data = message.Data
-                split = sortStrategy.strategy.split('^^')
+                split = sortStrategy.split('^^')
                 property = split[0]
                 postMessage({'MessageType':'sortComplete', 'Column':property, 'Strategy':sortStrategy,  'Data':sortDataset(sortStrategy, data, getDataType(property))})
                 break;

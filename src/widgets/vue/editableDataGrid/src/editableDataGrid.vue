@@ -1,7 +1,15 @@
 <template>
     <div ref='grid' style='width:100%;' >
         <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center; padding-bottom:25px;'>
-            <div style="width:33.3%; padding-left:20px;"><Slider @change="handleChangeNumberPerPage" v-if="gridConfig.EnablePaging" :width="300"></Slider></div>
+            <div style="width:33.3%; padding-left:20px; display:flex; flex-direction:row; align-items:flex-end;">
+                <div style="width:300px; display:flex; flex-direction:row; justify-content:flex-start;">
+                    <Slider @change="handleChangeNumberPerPage" v-if="gridConfig.EnablePaging" :width="300"></Slider>
+                </div>
+                <div style="margin-left:50px;">
+                    <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :height='25'/></div>
+                    <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /><span class="tooltiptext">Clear Filtering/Sorting</span></div>
+                </div>
+            </div>
             <div style="width:33.3%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
             <div style="width:33.3%; padding-right:20px;" class='pagination'>
                 <Pagination 
@@ -66,13 +74,17 @@ import sortWorkerSetup from './webWorkers/sortWorkerSetup'
 
 import Pagination from '../../pagination/Pagination'
 import Slider from '../../slider/Slider'
+import Eye from '../src/images/Eye'
+import CancelEye from '../src/images/CancelEye'
 
 export default {
     name:"EditableDataGrid",
     components: {
         HeaderRow,
         Slider,
-        Pagination
+        Pagination,
+        Eye,
+        CancelEye
     },
     data() {
         return {
@@ -97,6 +109,7 @@ export default {
             numberOfTerminatedSorts:0,
             skip:20,
             dataSlice:[],
+            isHovering:false,
             showDataAnyway:false,
             filteredData:[],
             userHasHeaders:false,
@@ -155,6 +168,27 @@ export default {
         }        
     },
     methods: {
+        handleClearAllFilters(){
+            this.sortStrategy = {
+                isCurrentlySorting:false,
+                strategy:'',
+                columnBeingSorted:''
+            }
+            this.filterStrategy = {
+                isCurrentlyFiltering:false,
+                filters:[],
+                columnsBeingFiltered:[]
+            }
+            this.highestCountLoaded = this.getInitialRowsPerPage();
+            this.filteredData = []
+            this.filteredData = this.fullDS 
+            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)                       
+        },
+        handleShowCancelEye(){
+            console.log('handling the hover')
+            this.isHovering = !this.isHovering
+        },
         fetchRecordsFromDS(start,stop){
             return this.fullDS.slice(start,stop+1)
         },    
@@ -501,9 +535,6 @@ export default {
             let tmp = []
             console.log('editableGrid received a message', message)
             switch (message.data.MessageType) {
-                case 'countUpdate':
-                    this.filterCount = message.data.Count
-                    break;
                 case 'filterResults':
                     if (message.data.Data.length>0) {
                         tmp = [...this.tmpResults, ...message.data.Data]
@@ -650,10 +681,8 @@ export default {
             let split = strategy.split('^^')
             let col = split[0]
             let filter = split[1]
-            console.log('i should be a yes... ' ,this.filterStrategy.isCurrentlyFiltering)
             if(this.filterStrategy.isCurrentlyFiltering){ //if we are filtering
                 if(this.filterStrategy.columnsBeingFiltered.includes(col)){
-                    console.log('dropped in...')
                     updateFilter(col,filter)
                     this.isDoneFiltering=false
 
@@ -679,8 +708,6 @@ export default {
                     this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
                     this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
             }
-
-            console.log('strat', this.filterStrategy)
         },
         clearFilters(){
             this.filterStrategy = {
@@ -733,6 +760,9 @@ export default {
 };
 </script>
 <style >
+        .pointer {
+            cursor: pointer;
+        }
         html {
         scroll-behavior: smooth;
         }
@@ -780,6 +810,34 @@ export default {
             flex-direction: row;
             justify-content: flex-end;
         }
+        .tooltip {
+        position: relative;
+        display: inline-block;
+        }
 
+        .tooltip .tooltiptext {
+        visibility: hidden;
+        width: 250px;
+        background-color: #e3e4e8;
+        text-align: center;
+        border-radius: 6px;
+        padding: 5px 0;
+
+        /* Position the tooltip */
+        position: absolute;
+        z-index: 1;
+        top: 30px;
+        left:30px;
+        
+        }
+        .tooltip:hover .tooltiptext {
+        visibility: visible;
+        }
+        .eye{
+            display:flex;
+            flex-direction: row;
+            align-items: flex-end;
+            height:20px
+        }
 
 </style>

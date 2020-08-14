@@ -40,12 +40,13 @@ export default () => {
     }
     const sortAllColumns = ()=>{
         for (let i = 0; i < virtualColumns.length; i=i+2) {
-                let tmpAsc = originalData.slice(0,originalData.length)
-                let tmpDesc = originalData.slice(0,originalData.length)
-                sortedData[virtualColumns[i].dataProperty]= {}
-                sortedData[virtualColumns[i].dataProperty].asc = sortDataset(`${virtualColumns[i].dataProperty}^^asc`,tmpAsc, virtualColumns[i].dataType)
-                sortedData[virtualColumns[i].dataProperty].desc = sortDataset(`${virtualColumns[i].dataProperty}^^desc`,tmpDesc, virtualColumns[i].dataType)
-                
+                if(virtualColumns[i].isPreSortEnabled){
+                    let tmpAsc = originalData.slice(0,originalData.length)
+                    let tmpDesc = originalData.slice(0,originalData.length)
+                    sortedData[virtualColumns[i].dataProperty]= {}
+                    sortedData[virtualColumns[i].dataProperty].asc = sortDataset(`${virtualColumns[i].dataProperty}^^asc`,tmpAsc, virtualColumns[i].dataType)
+                    sortedData[virtualColumns[i].dataProperty].desc = sortDataset(`${virtualColumns[i].dataProperty}^^desc`,tmpDesc, virtualColumns[i].dataType)
+                }
         }
         postMessage({'MessageType':'dataSorted', 'Data':sortedData })
         postMessage({'MessageType':'sortTerminated'})

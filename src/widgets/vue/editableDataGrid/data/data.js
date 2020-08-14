@@ -2,29 +2,30 @@
 let gridConfig =  {
     EnablePaging:true,
     GridHeader:'New Race Cars - 2020',
-    PreSortData: true,
     Columns:[
             {
                 header:{text:"Make"},
                 dataProperty:"make",
                 dataType:'number',
-                presortColumn: false
+                preSortColumn: false
             },
             {
                 header:{text:"Model"},
                 dataProperty:"model",
-                dataType:'number'
-
+                dataType:'number',
+                preSortColumn: true
             },
             {
                 header:{text:"Year"},
                 dataProperty:"year",
-                dataType:'number'
+                dataType:'number',
+                preSortColumn: true
             },
             {
                 header:{text:"Trim"},            
                 dataProperty:"trim",
-                dataType:'number'
+                dataType:'number',
+                preSortColumn: true
             },
             {
                 header:{text:"Color"},            

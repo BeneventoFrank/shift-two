@@ -32,7 +32,7 @@
                              :defaultValues="defaultValues" 
                                 :dataReceived="dataReceived" 
                                 :filterCount="filterCount" 
-                                :gridWillScroll="gridWillScroll()" 
+                                :gridWillScroll="boolGridWillScroll" 
                              :currentFilterColumns="filterStrategy.columnsBeingFiltered" 
                              :currentSort="sortStrategy" 
                              :isDoneFiltering="isDoneFiltering"
@@ -42,14 +42,13 @@
                              :headers="virtualColumns">
             </HeaderRow>
         </div>
-        <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; max-height:600px`">
-            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; `">
+        <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; height:600px`">
+            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; padding-bottom:62px `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; width:100%; border-collapse: collapse; line-height:10px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <td :style="`width:${column.width}; text-align:${column.dataAlignment}` " v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
                 </tr>
             </table>
-            <div :style="`position: relative; top:0px; left:0px; width: 1px; height:${virtualHeight}px;`">
-            </div>
+           
         </div>
     </div>
 </template>
@@ -94,6 +93,8 @@ export default {
             gridWidth:0,
             highestScrollPosition:0,
             fullDS:[],
+            sliderDataset:[],
+            weAreUsingTheSlider:false,
             sortedData:{},
             isDonePreSorting:false,
             filterCount:0,
@@ -103,6 +104,7 @@ export default {
             multiple:10,
             addToTop:74,
             tmpResults:[],
+            boolGridWillScroll:false,
             tmpResultsSort:{},
             highestCountLoaded:0,
             numberOfTerminatedFilters:0,
@@ -186,19 +188,26 @@ export default {
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)                       
         },
         handleShowCancelEye(){
-            console.log('handling the hover')
             this.isHovering = !this.isHovering
         },
         fetchRecordsFromDS(start,stop){
             return this.fullDS.slice(start,stop+1)
         },    
         reConfigurePagination(count){
+            let tmp = []
+            if (this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting){
+                tmp = this.filteredData
+            } else{
+                tmp = this.fullDS
+            }
+
+
             let paging = {
                 MinRecordsViewable:1,
-                MaxRecordsViewable:this.fullDS.length<count?this.fullDS.length:count,
-                TotalNumberOfRecords:this.fullDS.length,
+                MaxRecordsViewable:tmp.length<count?tmp.length:count,
+                TotalNumberOfRecords:tmp.length,
                 PageNumberCurrentlyViewing:1,        
-                MaxPageNumberPossible:Math.ceil(this.fullDS.length/count),
+                MaxPageNumberPossible:Math.ceil(tmp.length/count),
                 NumberOfApplicibleRowsPerPage:count,
                 IsPaging:false,
                 CurrentSkip:0,
@@ -207,19 +216,28 @@ export default {
             this.pagination = paging          
         },
         handleChangeNumberPerPage(event){
+            this.weAreUsingTheSlider=true
             let count = parseInt(event.target.value)
             this.reConfigurePagination(count);
-            //TODO- you need to apply filtering and sorting after you do the configure
-            let tmp = this.fullDS
+            let tmp = []
+            if (this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting){
+                tmp = this.filteredData
+            } else{
+                tmp = this.fullDS
+            }
+            console.log("what is count", count)
             let processed=[]
             for (let i = 0; i < count; i++) {
                 if(tmp[i]){
                     processed.push(tmp[i])
                 }
             }
-            this.virtualHeight = processed.length*29-950>0?processed.length*29-950:600
+
+            let willScroll = this.gridWillScroll(processed.length)
+            console.log('willscroll', willScroll)
+            this.virtualHeight = !willScroll?600:(processed.length*29-950)<600?600:processed.length*29-950
             this.dataSlice = processed;
-            this.filteredData = processed;
+            this.sliderDataset = processed;
         },            
         async handleNextClick(isASingleMove){
             this.pageDataForward(isASingleMove.isASinglePageMove)
@@ -336,6 +354,17 @@ export default {
             return this.$refs.grid.offsetWidth
         },
         deriveHeaders(){
+            const checkThreshold = ()=>{
+                if(this.fullDS.length>10000)
+                {
+                    return false
+                }
+                if(this.virtualColumns.length > 10)
+                {
+                    return false
+                }
+                return true
+            }
             let hasHeader=false
             for (let i = 0; i < this.gridConfig.Columns.length; i++) {
                 let tmp ={}
@@ -353,6 +382,7 @@ export default {
                     tmp.dataProperty=this.gridConfig.Columns[i].dataProperty?this.gridConfig.Columns[i].dataProperty:''
                     tmp.dataAlignment=this.gridConfig.Columns[i].dataAlignment?this.gridConfig.Columns[i].dataAlignment:this.defaultValues.columnValues.dataAlignment
                     tmp.dataType=this.gridConfig.Columns[i].dataType?this.gridConfig.Columns[i].dataType:'string'
+                    tmp.isPreSortEnabled=this.gridConfig.Columns[i].preSortColumn===true?true:checkThreshold()
                 } else {
                     tmp.columnIndex = i;
                     tmp.text=''
@@ -366,12 +396,13 @@ export default {
                     tmp.dataProperty=''
                     tmp.dataAlignment=''
                     tmp.dataType = String
+                    tmp.isPreSortEnabled=false
                 }
                 this.userHasHeaders=hasHeader
                 this.virtualColumns.push(tmp)
             }
         },
-        gridWillScroll(){
+        gridWillScroll(numberOfRows){
             let height = 600
             let retVal = false
             if(this.gridConfig.Height){
@@ -380,23 +411,43 @@ export default {
                     height = this.gridConfig.Height.split('p')[0]
                 }
             }
-            if (this.fullDS.length*30>height)
+            let tmp = 0
+            if (this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting){
+                tmp = this.filteredData.length
+            } else{
+                if(numberOfRows){
+                    tmp = numberOfRows
+                } else {
+                    tmp = this.fullDS.length
+                }
+            }
+
+            if (tmp*31>height)
             {
                 retVal=true
             }
+            console.log('gridwill scroll?????????', retVal, numberOfRows)
+            this.boolGridWillScroll = retVal
             return retVal
         },
         handleColumnSort(strategy){
             this.isDoneSorting = false
+            const checkColumn = (column)=>{
+                for (let i = 0; i < this.virtualColumns.length; i++) {
+                    if(this.virtualColumns[i].dataProperty===column){
+                        return this.virtualColumns[i].isPreSortEnabled
+                    }
+                }
+            }
             if(strategy !== ''){
                     if(this.filterStrategy.isCurrentlyFiltering){
-                        console.log('passing in ', strategy)
                     this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})
                     } else {
-                        if(this.isDonePreSorting)
+                        let split = strategy.split('^^')
+                        let isApplicable = checkColumn(split[0])
+                        if(this.isDonePreSorting&&isApplicable)
                         {
                             try {
-                                let split = strategy.split('^^')
                                 this.sortStrategy = {}
                                 this.sortStrategy.strategy = strategy
                                 this.sortStrategy.isCurrentlySorting = true
@@ -471,14 +522,18 @@ export default {
             let alpha = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
             const getAlpha = ()=>{
                 alphaString = ''
-                for (let i = 0; i < 10; i++) {
-                    alphaString += (alpha[Math.floor(Math.random() * 27)])
+                for (let i = 0; i < 4; i++) {
+                    let index = Math.floor(Math.random() * 27)
+                    if (index<1||index>26) {
+                        index = Math.floor(Math.random() * 27)
+                    }
+                    alphaString += (alpha[index])
                 }
-                return alphaString.length>10?alphaString.substring(1,10):alphaString
+                return alphaString.length>10?alphaString.substring(1,4):alphaString
             }
 
 
-            for (let i = 1; i <= 100000; i++) {
+            for (let i = 1; i <= 4000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*65), 
@@ -501,8 +556,19 @@ export default {
         },
         parseData(startingPoint){
             let tmp = []
-            let ds = this.filteredData.length>0?this.filteredData:this.fullDS
-            for (let i = startingPoint+1; i < startingPoint+150; i++) {
+            let ds = []
+            let tmpVal = 150
+            if(this.filterStrategy.strategy||this.sortStrategy.isCurrentlySorting){
+                ds = this.filteredData
+            } else {
+                if (this.weAreUsingTheSlider){
+                    ds = this.sliderDataset
+                } else {
+                    ds = this.fullDS
+                }
+                
+            }
+            for (let i = startingPoint; i < startingPoint+tmpVal; i++) {
                 if(ds[i]&&Object.keys(ds[i]).length>0)
                 {
                     tmp.push(ds[i])
@@ -511,25 +577,25 @@ export default {
             this.dataSlice = tmp
         },
         handleScroll(){
-            let scrollHeight
-            window.requestAnimationFrame(()=>{
-                if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
-                    if (this.$refs.dataRow.scrollTop>1000) {
-                    this.tableTop = this.$refs.dataRow.scrollTop -1000    
-                    }
-                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)
-                    this.parseData(scrollHeight)
+            // let scrollHeight
+            // window.requestAnimationFrame(()=>{
+            //     if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
+            //         if (this.$refs.dataRow.scrollTop>1000) {
+            //         this.tableTop = this.$refs.dataRow.scrollTop -1000    
+            //         }
+            //         scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)
+            //         this.parseData(scrollHeight)
 
-                } else {
-                    scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-450
-                    if(scrollHeight<950){
-                        scrollHeight = 0
-                    }
-                    this.tableTop = this.$refs.dataRow.scrollTop
-                    this.parseData(scrollHeight)
-                }
-                this.highestScrollPosition = scrollHeight
-            })
+            //     } else {
+            //         scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-450
+            //         if(scrollHeight<950){
+            //             scrollHeight = 0
+            //         }
+            //         this.tableTop = this.$refs.dataRow.scrollTop
+            //         this.parseData(scrollHeight)
+            //     }
+            //     this.highestScrollPosition = scrollHeight
+            // })
         },
         handleMessage(message){
             let tmp = []
@@ -728,7 +794,7 @@ export default {
         this.setDefaultValues()
         this.deriveHeaders()
         this.initializePaging(this.getInitialRowsPerPage())
-        
+        this.gridWillScroll()
         this.gridWidth = this.$refs.grid.offsetWidth //set initial size of grid used for calculating where to put the filter flyouts
         window.addEventListener('resize',this.handleResizeGrid)
         

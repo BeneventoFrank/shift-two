@@ -3,7 +3,7 @@
         <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center; padding-bottom:25px;'>
             <div style="width:33.3%; padding-left:20px; display:flex; flex-direction:row; align-items:flex-end;">
                 <div style="width:300px; display:flex; flex-direction:row; justify-content:flex-start;">
-                    <Slider @change="handleChangeNumberPerPage" v-if="gridConfig.EnablePaging" :width="300"></Slider>
+                    <Slider @change="handleChangeNumberPerPage" @initialValue="handleInitialValue" v-if="gridConfig.EnablePaging" :width="300"></Slider>
                 </div>
                 <div style="margin-left:50px;">
                     <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :height='25'/></div>
@@ -171,6 +171,10 @@ export default {
         }        
     },
     methods: {
+        handleInitialValue(event){
+            console.log('setting initial value to ',event)
+            this.sliderCount = event
+        },
         handleClearAllFilters(){
             this.sortStrategy = {
                 isCurrentlySorting:false,
@@ -186,7 +190,8 @@ export default {
             this.filteredData = []
             this.filteredData = this.fullDS 
             this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
-            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)                       
+            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)   
+            this.reConfigurePagination(this.sliderCount)                    
         },
         handleShowCancelEye(){
             this.isHovering = !this.isHovering
@@ -539,7 +544,7 @@ export default {
             }
 
 
-            for (let i = 1; i <= 4000; i++) {
+            for (let i = 1; i <= 50000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*65), 
@@ -615,6 +620,7 @@ export default {
                         this.filterCount = 0
                         this.tmpResults = []
                         this.isDoneSorting = true
+                        this.reConfigurePagination(this.sliderCount)
                     break;
                 case 'dataSorted':
                     this.tmpResultsSort= {...this.tmpResultsSort, ...message.data.Data}
@@ -650,7 +656,14 @@ export default {
                             this.numberOfTerminatedFilters = 0
                             this.tmpResults = []
                             this.isDoneFiltering=true
+                            if (this.filteredData.length>this.sliderCount) {
+                                this.reConfigurePagination(this.sliderCount)
+                            } else {
+                                this.reConfigurePagination(this.filteredData.length)
+                            }
+                            
                         }
+                        
                     }
                     break;
                 default:
@@ -684,7 +697,8 @@ export default {
 
                 if(this.sortStrategy.isCurrentlySorting===true){
                     this.ww_sortWorker.postMessage({'MessageType':'applySort', 'SortStrategy':this.sortStrategy.strategy})
-                }                
+                } 
+                this.reConfigurePagination(this.sliderCount)               
             }
         },
         clearAFilter(col){

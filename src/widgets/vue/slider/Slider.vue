@@ -18,7 +18,7 @@
                   min="500"
                   max="4000"
                   step="500"
-                  value="500"
+                  value="1000"
                   data-tick-step="500"
                   data-tick-id="weightTicks"
                   data-value-id="weightValue"
@@ -54,6 +54,7 @@ export default {
           this.updateLabels(slider);
           this.updateProgress(slider);
           this.setTicks(slider);
+          this.$emit('initialValue',slider.value)
       },
       debounceSlider: debounce(function (event){
           this.updateValue(event.target);

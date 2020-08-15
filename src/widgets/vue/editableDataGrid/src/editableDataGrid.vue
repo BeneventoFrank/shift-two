@@ -42,7 +42,7 @@
                              :headers="virtualColumns">
             </HeaderRow>
         </div>
-        <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:100%; overflow:auto; position:relative; height:600px`">
+        <div ref='dataRow' class='dataRow' :style="`width:100%; overflow:auto; position:relative; height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; padding-bottom:62px `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; width:100%; border-collapse: collapse; line-height:10px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <td :style="`width:${column.width}; text-align:${column.dataAlignment}` " v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
@@ -95,6 +95,7 @@ export default {
             fullDS:[],
             sliderDataset:[],
             weAreUsingTheSlider:false,
+            sliderCount:false,
             sortedData:{},
             isDonePreSorting:false,
             filterCount:0,
@@ -218,6 +219,7 @@ export default {
         handleChangeNumberPerPage(event){
             this.weAreUsingTheSlider=true
             let count = parseInt(event.target.value)
+            this.sliderCount = count
             this.reConfigurePagination(count);
             let tmp = []
             if (this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting){
@@ -342,12 +344,16 @@ export default {
             }
         },
         getInitialRowsPerPage(){
-            if((this.fullDS.length>=0)&&(this.fullDS.length<=100)){
-                return 100
-            } else if((this.fullDS.length>100)&&(this.fullDS.length<=1000)){
-                return 500
-            } else if(this.fullDS.length>1000){
-                return 1000
+            if (this.weAreUsingTheSlider) {
+                return this.sliderCount
+            } else {
+                if((this.fullDS.length>=0)&&(this.fullDS.length<=100)){
+                    return 100
+                } else if((this.fullDS.length>100)&&(this.fullDS.length<=1000)){
+                    return 500
+                } else if(this.fullDS.length>1000){
+                    return 1000
+                }
             }
         },        
         getWidthOfGrid(){
@@ -561,12 +567,7 @@ export default {
             if(this.filterStrategy.strategy||this.sortStrategy.isCurrentlySorting){
                 ds = this.filteredData
             } else {
-                if (this.weAreUsingTheSlider){
-                    ds = this.sliderDataset
-                } else {
-                    ds = this.fullDS
-                }
-                
+                ds = this.fullDS
             }
             for (let i = startingPoint; i < startingPoint+tmpVal; i++) {
                 if(ds[i]&&Object.keys(ds[i]).length>0)
@@ -575,27 +576,6 @@ export default {
                 }
             }
             this.dataSlice = tmp
-        },
-        handleScroll(){
-            // let scrollHeight
-            // window.requestAnimationFrame(()=>{
-            //     if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
-            //         if (this.$refs.dataRow.scrollTop>1000) {
-            //         this.tableTop = this.$refs.dataRow.scrollTop -1000    
-            //         }
-            //         scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)
-            //         this.parseData(scrollHeight)
-
-            //     } else {
-            //         scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/29)-450
-            //         if(scrollHeight<950){
-            //             scrollHeight = 0
-            //         }
-            //         this.tableTop = this.$refs.dataRow.scrollTop
-            //         this.parseData(scrollHeight)
-            //     }
-            //     this.highestScrollPosition = scrollHeight
-            // })
         },
         handleMessage(message){
             let tmp = []

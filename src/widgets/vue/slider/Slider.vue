@@ -15,10 +15,10 @@
                   id="weightSlider"
                   class="tick-slider-input"
                   type="range"
-                  min="1000"
+                  min="500"
                   max="4000"
                   step="500"
-                  value="0"
+                  value="500"
                   data-tick-step="500"
                   data-tick-id="weightTicks"
                   data-value-id="weightValue"
@@ -32,6 +32,7 @@
   </div>
 </template>
 <script>
+import debounce from 'lodash.debounce'
 export default {
   name: 'Slider',
   data(){
@@ -47,20 +48,20 @@ export default {
   methods:{
       init(){
           const slider = this.$refs.sliderInput;
-          slider.oninput = this.onSliderInput;
+          slider.oninput = this.debounceSlider;
           this.updateValue(slider);
           this.updateValuePosition(slider);
           this.updateLabels(slider);
           this.updateProgress(slider);
           this.setTicks(slider);
       },
-      onSliderInput(event) {
+      debounceSlider: debounce(function (event){
           this.updateValue(event.target);
           this.updateValuePosition(event.target);
           this.updateLabels(event.target);
           this.updateProgress(event.target);
-          setTimeout(() => {this.$emit('change',event)}, 0);
-      },
+          setTimeout(() => {this.$emit('change',event)}, 0);          
+      },75),  
       updateValue(slider) {
           let value = document.getElementById(slider.dataset.valueId);
           value.innerHTML = "<div class='sliderIndicator'> " + slider.value + "</div>";

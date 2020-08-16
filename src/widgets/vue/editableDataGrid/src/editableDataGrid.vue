@@ -3,7 +3,15 @@
         <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center; padding-bottom:25px;'>
             <div style="width:33.3%; padding-left:20px; display:flex; flex-direction:row; align-items:flex-end;">
                 <div style="width:300px; display:flex; flex-direction:row; justify-content:flex-start;">
-                    <Slider @change="handleChangeNumberPerPage" @initialValue="handleInitialValue" v-if="gridConfig.EnablePaging" :width="300"></Slider>
+                    <Slider @change="handleChangeNumberPerPage" 
+                            @initialValue="handleInitialValue" 
+                            v-if="gridConfig.Slider.EnableSlider" 
+                            :width="sliderWidth"
+                            :minValue="minValue"
+                            :maxValue="maxValue"
+                            :stepValue="stepValue"
+                            :initialValue="initialValue"
+                    ></Slider>
                 </div>
                 <div style="margin-left:50px;">
                     <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :height='25'/></div>
@@ -13,7 +21,7 @@
             <div style="width:33.3%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
             <div style="width:33.3%; padding-right:20px;" class='pagination'>
                 <Pagination 
-                    v-if="gridConfig.EnablePaging"
+                    v-if="gridConfig.Paging.EnablePaging"
                     :cmpCanPagePrevious="cmpCanPagePrevious"
                     :cmpCanPageNext="cmpCanPageNext"
                     :pagination="pagination"
@@ -28,22 +36,18 @@
                              @filterClosed="handleFilterClosed" 
                              @filterApplied="handleApplyFilter" 
                              @filterCleared="handleClearFilter"
-                                    :showReturning="showReturning" 
                              :defaultValues="defaultValues" 
-                                :dataReceived="dataReceived" 
-                                :filterCount="filterCount" 
-                                :gridWillScroll="boolGridWillScroll" 
-                             :currentFilterColumns="filterStrategy.columnsBeingFiltered" 
+                             :gridWillScroll="boolGridWillScroll" 
                              :currentSort="sortStrategy" 
                              :isDoneFiltering="isDoneFiltering"
                              :isDoneSorting="isDoneSorting" 
-                                :currentFilters="filterStrategy" 
-                                :gridWidth="gridWidth" 
+                             :currentFilters="filterStrategy" 
+                             :gridWidth="gridWidth" 
                              :headers="virtualColumns">
             </HeaderRow>
         </div>
         <div ref='dataRow' class='dataRow' :style="`width:100%; overflow:auto; position:relative; height:600px`">
-            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:${tableTop}px; position:absolute; padding-bottom:62px `">
+            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:absolute; padding-bottom:62px `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; width:100%; border-collapse: collapse; line-height:10px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <td :style="`width:${column.width}; text-align:${column.dataAlignment}` " v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
                 </tr>
@@ -93,33 +97,31 @@ export default {
             gridWidth:0,
             highestScrollPosition:0,
             fullDS:[],
-            sliderDataset:[],
             weAreUsingTheSlider:false,
             sliderCount:false,
             sortedData:{},
             isDonePreSorting:false,
             filterCount:0,
             dataReceived:false,
-            tableTop:0,
             scrollCount:0,
-            multiple:10,
-            addToTop:74,
             tmpResults:[],
             boolGridWillScroll:false,
             tmpResultsSort:{},
             highestCountLoaded:0,
             numberOfTerminatedFilters:0,
             numberOfTerminatedSorts:0,
+            sliderWidth:0,
+            minValue:0,
+            maxValue:0,
+            stepValue:0,
+            initialValue:0,
             skip:20,
             dataSlice:[],
             isHovering:false,
-            showDataAnyway:false,
             filteredData:[],
             userHasHeaders:false,
             virtualColumns:[],
             virtualHeight:0,
-            showReturning:false,
-            lastPosition:0,
             isDoneFiltering:true,
             isDoneSorting:true,
             sortStrategy:{
@@ -146,8 +148,17 @@ export default {
                     textColor:'',
                     alignment:'',
                     dataAlignment:''
+                }, 
+                sliderValues:{
+                    sliderWidth:300,
+                    minValue:0,
+                    maxValue:4000,
+                    stepValue:0,
+                    initialValue:2000,
                 }
+
             },
+
             pagination:{
                 MinRecordsViewable:0,
                 MaxRecordsViewable:0,
@@ -172,7 +183,6 @@ export default {
     },
     methods: {
         handleInitialValue(event){
-            console.log('setting initial value to ',event)
             this.sliderCount = event
         },
         handleClearAllFilters(){
@@ -206,8 +216,6 @@ export default {
             } else{
                 tmp = this.fullDS
             }
-
-
             let paging = {
                 MinRecordsViewable:1,
                 MaxRecordsViewable:tmp.length<count?tmp.length:count,
@@ -232,7 +240,6 @@ export default {
             } else{
                 tmp = this.fullDS
             }
-            console.log("what is count", count)
             let processed=[]
             for (let i = 0; i < count; i++) {
                 if(tmp[i]){
@@ -241,10 +248,8 @@ export default {
             }
 
             let willScroll = this.gridWillScroll(processed.length)
-            console.log('willscroll', willScroll)
             this.virtualHeight = !willScroll?600:(processed.length*29-950)<600?600:processed.length*29-950
             this.dataSlice = processed;
-            this.sliderDataset = processed;
         },            
         async handleNextClick(isASingleMove){
             this.pageDataForward(isASingleMove.isASinglePageMove)
@@ -318,13 +323,37 @@ export default {
             }
         },
         initializePaging(numberOfRowsPerPage){
+            if (this.gridConfig.Slider.EnableSlider&&this.gridConfig.Slider.EnableSlider===true) {
+
+                if(this.gridConfig.Paging.EnablePaging!=true){
+                    //then the user is asking for slider but not allowing for page transitions. need to override that
+                   this.gridConfig.Paging.EnablePaging = true; 
+                }
+
+                if (this.gridConfig.Slider.Values&&this.gridConfig.Slider.Values.UseDefaultValues!==false) {
+                    //load the slider props from default vales
+                    this.minValue = this.defaultValues.sliderValues.minValue
+                    this.maxValue = this.defaultValues.sliderValues.maxValue
+                    this.stepValue = this.defaultValues.sliderValues.stepValue
+                    this.initialValue = this.defaultValues.sliderValues.initialValue
+                    this.sliderWidth = this.defaultValues.sliderValues.sliderWidth
+                    
+                } else {
+                    //load them from the gridConfig
+                    this.minValue = this.gridConfig.Slider.Values.MinValue?this.gridConfig.Slider.Values.MinValue:0
+                    this.maxValue = this.gridConfig.Slider.Values.MaxValue?this.gridConfig.Slider.Values.MaxValue:0
+                    this.stepValue = this.gridConfig.Slider.Values.StepValue?this.gridConfig.Slider.Values.StepValue:0
+                    this.initialValue = this.gridConfig.Slider.Values.InitialValue?this.gridConfig.Slider.Values.InitialValue:0
+                    this.sliderWidth = this.gridConfig.Slider.Values.Width?this.gridConfig.Slider.Values.Width:0 
+                }
+            }
+
             if(this.fullDS.length > 0){
                 let paging = {
                 MinRecordsViewable:1,
                 MaxRecordsViewable:this.fullDS.length>numberOfRowsPerPage?numberOfRowsPerPage:this.fullDS.length,
                 TotalNumberOfRecords:this.fullDS.length,
-                PageNumberCurrentlyViewing:1,   
-                
+                PageNumberCurrentlyViewing:1,                   
                 MaxPageNumberPossible:Math.ceil(this.fullDS.length/numberOfRowsPerPage),
                 NumberOfApplicibleRowsPerPage:numberOfRowsPerPage,
                 IsPaging:false,
@@ -332,7 +361,6 @@ export default {
                 CurrentTake:0
                 }
                 this.pagination = paging          
-
             } else {
                 let paging = {
                 MinRecordsViewable:0,
@@ -353,11 +381,165 @@ export default {
                 return this.sliderCount
             } else {
                 if((this.fullDS.length>=0)&&(this.fullDS.length<=100)){
-                    return 100
+                    if (this.gridConfig.Paging.EnablePaging) {
+                        if (this.gridConfig.Slider.EnableSlider) {
+                            if(this.gridConfig.Slider.Values && !this.gridConfig.Slider.Values.UseDefaultValues){
+                                this.defaultValues.sliderValues.minValue = this.gridConfig.Slider.Values.MinValue
+                                this.defaultValues.sliderValues.stepValue = this.gridConfig.Slider.Values.StepValue
+                                this.defaultValues.sliderValues.maxValue = this.gridConfig.Slider.Values.MaxValue
+                                this.defaultValues.sliderValues.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                return this.gridConfig.Slider.Values.InitialValue
+                            } else {
+                                this.defaultValues.sliderValues.minValue = 10
+                                this.defaultValues.sliderValues.stepValue = 10
+                                this.defaultValues.sliderValues.maxValue = 100
+                                this.defaultValues.sliderValues.initialValue = 10                        
+                                this.initialValue = 10
+                                return 10
+                            }
+                        } else {
+                            this.defaultValues.sliderValues.minValue = 10
+                            this.defaultValues.sliderValues.stepValue = 10
+                            this.defaultValues.sliderValues.maxValue = 100
+                            this.defaultValues.sliderValues.initialValue = this.fullDS.length                        
+                            this.initialValue = this.fullDS.length
+                            return this.fullDS.length
+                        }
+                    } else {
+                        if (this.gridConfig.Slider.EnableSlider){
+                            if(this.gridConfig.Slider.Values.UseDefaultValues!==true) {
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                this.defaultValues.sliderValues.minValue = this.gridConfig.Slider.Values.MinValue 
+                                this.defaultValues.sliderValues.stepValue = this.gridConfig.Slider.Values.stepValue
+                                this.defaultValues.sliderValues.maxValue = this.gridConfig.Slider.Values.MaxValue
+                                this.defaultValues.sliderValues.initialValue = this.gridConfig.Slider.Values.InitialValue             
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue                                
+                                return this.initialValue
+                            } else {
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                this.defaultValues.sliderValues.minValue = 100
+                                this.defaultValues.sliderValues.stepValue = 100
+                                this.defaultValues.sliderValues.maxValue = 1000
+                                this.defaultValues.sliderValues.initialValue = 100
+                                this.initialValue = 100                                
+                                return this.initialValue
+                            }
+                        } else {
+                            this.defaultValues.sliderValues.minValue = 100
+                            this.defaultValues.sliderValues.stepValue = 100
+                            this.defaultValues.sliderValues.maxValue = 1000
+                            this.defaultValues.sliderValues.initialValue = 100
+                            return this.fullDS.length
+                        }
+                    }                       
                 } else if((this.fullDS.length>100)&&(this.fullDS.length<=1000)){
-                    return 500
+                    if (this.gridConfig.Paging.EnablePaging) {
+                        if (this.gridConfig.Slider.EnableSlider) {
+                            if(this.gridConfig.Slider.Values && !this.gridConfig.Slider.Values.UseDefaultValues){
+                                this.defaultValues.sliderValues.minValue = this.gridConfig.Slider.Values.MinValue
+                                this.defaultValues.sliderValues.stepValue = this.gridConfig.Slider.Values.StepValue
+                                this.defaultValues.sliderValues.maxValue = this.gridConfig.Slider.Values.MaxValue
+                                this.defaultValues.sliderValues.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                return this.gridConfig.Slider.Values.InitialValue
+                            } else {
+                                this.defaultValues.sliderValues.minValue = 100
+                                this.defaultValues.sliderValues.stepValue = 100
+                                this.defaultValues.sliderValues.maxValue = 1000
+                                this.defaultValues.sliderValues.initialValue = 100                        
+                                this.initialValue = 100
+                                return 100
+                            }
+                        } else {
+                            this.defaultValues.sliderValues.minValue = 100
+                            this.defaultValues.sliderValues.stepValue = 100
+                            this.defaultValues.sliderValues.maxValue = 1000
+                            this.defaultValues.sliderValues.initialValue = this.fullDS.length                        
+                            this.initialValue = this.fullDS.length
+                            return this.fullDS.length
+                        }
+                    } else {
+                        if (this.gridConfig.Slider.EnableSlider){
+                            if(this.gridConfig.Slider.Values.UseDefaultValues!==true) {
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                this.defaultValues.sliderValues.minValue = this.gridConfig.Slider.Values.MinValue 
+                                this.defaultValues.sliderValues.stepValue = this.gridConfig.Slider.Values.stepValue
+                                this.defaultValues.sliderValues.maxValue = this.gridConfig.Slider.Values.MaxValue
+                                this.defaultValues.sliderValues.initialValue = this.gridConfig.Slider.Values.InitialValue             
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue                                
+                                return this.initialValue
+                            } else {
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                this.defaultValues.sliderValues.minValue = 100
+                                this.defaultValues.sliderValues.stepValue = 100
+                                this.defaultValues.sliderValues.maxValue = 1000
+                                this.defaultValues.sliderValues.initialValue = 100
+                                this.initialValue = 100                                
+                                return this.initialValue
+                            }
+                        } else {
+                            this.defaultValues.sliderValues.minValue = 100
+                            this.defaultValues.sliderValues.stepValue = 100
+                            this.defaultValues.sliderValues.maxValue = 1000
+                            this.defaultValues.sliderValues.initialValue = 100
+                            return this.fullDS.length
+                        }
+                    }                    
                 } else if(this.fullDS.length>1000){
-                    return 1000
+                    if (this.gridConfig.Paging.EnablePaging) {
+                        if (this.gridConfig.Slider.EnableSlider) {
+                            if(this.gridConfig.Slider.Values && !this.gridConfig.Slider.Values.UseDefaultValues){
+                                this.defaultValues.sliderValues.minValue = this.gridConfig.Slider.Values.MinValue
+                                this.defaultValues.sliderValues.stepValue = this.gridConfig.Slider.Values.StepValue
+                                this.defaultValues.sliderValues.maxValue = this.gridConfig.Slider.Values.MaxValue
+                                this.defaultValues.sliderValues.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                return this.gridConfig.Slider.Values.InitialValue
+                            } else {
+                                this.defaultValues.sliderValues.minValue = 500
+                                this.defaultValues.sliderValues.stepValue = 500
+                                this.defaultValues.sliderValues.maxValue = 4000
+                                this.defaultValues.sliderValues.initialValue = 1000                        
+                                this.initialValue = 1000
+                                return 1000
+                            }
+                        } else {
+                            this.defaultValues.sliderValues.minValue = 500
+                            this.defaultValues.sliderValues.stepValue = 500
+                            this.defaultValues.sliderValues.maxValue = 4000
+                            this.defaultValues.sliderValues.initialValue = this.fullDS.length                        
+                            this.initialValue = this.fullDS.length
+                            return this.fullDS.length
+                        }
+                    } else {
+                        if (this.gridConfig.Slider.EnableSlider){
+                            if(this.gridConfig.Slider.Values.UseDefaultValues!==true) {
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                this.defaultValues.sliderValues.minValue = this.gridConfig.Slider.Values.MinValue 
+                                this.defaultValues.sliderValues.stepValue = this.gridConfig.Slider.Values.stepValue
+                                this.defaultValues.sliderValues.maxValue = this.gridConfig.Slider.Values.MaxValue
+                                this.defaultValues.sliderValues.initialValue = this.gridConfig.Slider.Values.InitialValue             
+                                this.initialValue = 1000                                
+                                return this.initialValue
+                            } else {
+                                this.initialValue = this.gridConfig.Slider.Values.InitialValue
+                                this.defaultValues.sliderValues.minValue = 500
+                                this.defaultValues.sliderValues.stepValue = 500
+                                this.defaultValues.sliderValues.maxValue = 4000
+                                this.defaultValues.sliderValues.initialValue = 1000
+                                this.initialValue = 1000                                
+                                return this.initialValue
+                            }
+                        } else {
+                            this.defaultValues.sliderValues.minValue = 500
+                            this.defaultValues.sliderValues.stepValue = 500
+                            this.defaultValues.sliderValues.maxValue = 4000
+                            this.defaultValues.sliderValues.initialValue = 1000
+                            return this.fullDS.length
+                        }
+                    }
+                    
                 }
             }
         },        
@@ -432,12 +614,10 @@ export default {
                     tmp = this.fullDS.length
                 }
             }
-
             if (tmp*31>height)
             {
                 retVal=true
             }
-            console.log('gridwill scroll?????????', retVal, numberOfRows)
             this.boolGridWillScroll = retVal
             return retVal
         },
@@ -474,7 +654,6 @@ export default {
                                 //do nothing
                             }
                         } else {
-                            console.log('not done sorting yet... .')
                             this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
                         }
                     }
@@ -544,7 +723,7 @@ export default {
             }
 
 
-            for (let i = 1; i <= 50000; i++) {
+            for (let i = 1; i <= 10000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*65), 
@@ -584,7 +763,6 @@ export default {
         },
         handleMessage(message){
             let tmp = []
-            console.log('editableGrid received a message', message)
             switch (message.data.MessageType) {
                 case 'filterResults':
                     if (message.data.Data.length>0) {
@@ -629,7 +807,6 @@ export default {
                     this.numberOfTerminatedSorts = this.numberOfTerminatedSorts +1                      
                     if(this.numberOfTerminatedSorts===2)    
                     {
-                        console.log("this.tmpResultsSort",this.tmpResultsSort)
                         this.sortedData = this.tmpResultsSort
                         this.isDonePreSorting = true
                         this.ww_oddSortWorker.terminate()
@@ -641,9 +818,7 @@ export default {
                     this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
                     if(this.numberOfTerminatedFilters===2)    
                     {
-                        console.log("checking this current sort",this.sortStrategy.isCurrentlySorting)
                         if(this.sortStrategy.isCurrentlySorting===true){
-                            console.log('making a call to sort this filterd data', this.tmpResults)
                             this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData', 'SortStrategy':this.sortStrategy.strategy, 'Data': this.tmpResults})
                             this.numberOfTerminatedFilters = 0
                             this.isDoneFiltering=true
@@ -718,12 +893,9 @@ export default {
                                   }
         },
         handleApplyFilter(strategy){
-           
             const addFilter = (col,filter) =>{ 
                 this.filterStrategy.isCurrentlyFiltering = true
                 this.filterStrategy.filters.push(`${col}^^${filter}`)
-                console.log('pushing................................................................... col', col)
-                
                 this.filterStrategy.columnsBeingFiltered.push(col)
             }
             const updateFilter = (col,filter) =>{
@@ -734,10 +906,8 @@ export default {
                         this.filterStrategy.filters[i] = `${col}^^${filter}`
                         break;
                     }
-                    
                 }
             }
-
             let split = strategy.split('^^')
             let col = split[0]
             let filter = split[1]

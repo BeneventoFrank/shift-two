@@ -1,5 +1,4 @@
 <template>
-
     <div>
         <div class="superHeader">
             <div :style="`width:${header.width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header) in headers" :key="header.columnIndex">
@@ -56,11 +55,7 @@
                 </div>
             </div>
         </div>
-
-
     </div>
-
-
 </template>
 <script>
 import {colors} from '../../../../../assets/shiftTwo'
@@ -72,8 +67,6 @@ import FilterSVG from '../images/FilterSVG'
 import SortSVG from '../images/SortSVG'
 
 export default {
-
-
     name:"HeaderRow",
     components: {
         FilterInput,
@@ -104,26 +97,8 @@ export default {
         gridWillScroll:{
             type:Boolean
         },
-        dataReceived:{
-            type:Boolean
-        },
-        currentFilterColumns:{
-            type:Array
-        },
         currentFilters:{
             type:Object
-        },
-        sortDesc:{
-            type:Boolean
-        },
-        sortAsc:{
-            type:Boolean
-        },
-        filterCount:{
-            type:Number
-        },
-        showReturning:{
-            type:Boolean
         },
         gridWidth:{
             type:Number
@@ -182,9 +157,6 @@ export default {
                 }
             }
             return tmp[1]
-       },
-       handleShowTheDataAnyway(columnIndex){
-           this.$emit('showDataAnyway',columnIndex)
        },
        handleFlyout(index,value){
         this.showAFilter=value

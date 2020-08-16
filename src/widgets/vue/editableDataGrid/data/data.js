@@ -1,6 +1,14 @@
 
 let gridConfig =  {
-    EnablePaging:true,
+    Paging:{
+        EnablePaging:true,
+    },
+    Slider:{
+        EnableSlider:true,
+        Values:{
+            UseDefaultValues:true //default to true
+        }
+    },
     GridHeader:'New Race Cars - 2020',
     Columns:[
             {

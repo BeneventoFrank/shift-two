@@ -1,6 +1,6 @@
 <template>
   <div id="wrapper">
-      <div id="sliderContainer" :style="`max-width:${width}px`">
+      <div id="sliderContainer" :style="`max-width:${width}px; width:${width}px;`">
           <div class="tick-slider">
               <div class="tick-slider-value-container">
                   <div id="weightLabelMin" class="tick-slider-label">&nbsp;</div>
@@ -15,11 +15,11 @@
                   id="weightSlider"
                   class="tick-slider-input"
                   type="range"
-                  min="500"
-                  max="4000"
-                  step="500"
-                  value="1000"
-                  data-tick-step="500"
+                  :min="minValue"
+                  :max="maxValue"
+                  :step="stepValue"
+                  :value="initialValue"
+                  :data-tick-step="stepValue"
                   data-tick-id="weightTicks"
                   data-value-id="weightValue"
                   data-progress-id="weightProgress"
@@ -37,21 +37,35 @@ export default {
   name: 'Slider',
   data(){
    return{
-     val:0
    } 
   },
   props:{
+    initialValue:{
+        type:Number
+    },
+    stepValue:{
+        type:Number
+    },
+    maxValue:{
+        type:Number
+    },
+    minValue:{
+        type:Number
+    },
     width:{
       type:Number
     }
   }, 
+  updated(){
+    this.init()
+  },
   methods:{
       init(){
           const slider = this.$refs.sliderInput;
+          console.log(slider)
           slider.oninput = this.debounceSlider;
           this.updateValue(slider);
           this.updateValuePosition(slider);
-          this.updateLabels(slider);
           this.updateProgress(slider);
           this.setTicks(slider);
           this.$emit('initialValue',slider.value)
@@ -59,17 +73,16 @@ export default {
       debounceSlider: debounce(function (event){
           this.updateValue(event.target);
           this.updateValuePosition(event.target);
-          this.updateLabels(event.target);
           this.updateProgress(event.target);
-          setTimeout(() => {this.$emit('change',event)}, 0);          
-      },75),  
+          setTimeout(() => {this.$emit('change',event)}, 1000);          
+      },50),  
       updateValue(slider) {
           let value = document.getElementById(slider.dataset.valueId);
           value.innerHTML = "<div class='sliderIndicator'> " + slider.value + "</div>";
       },
       updateValuePosition(slider) {
           let value = document.getElementById(slider.dataset.valueId);
-
+          console.log('what is the value', value)
           const percent = this.getSliderPercent(slider);
 
           const sliderWidth = slider.getBoundingClientRect().width;
@@ -82,26 +95,6 @@ export default {
           left = slider.value === slider.min ? 0 : left;
 
           value.style.left = left + "px";
-      },
-      updateLabels() {
-        //   const value = document.getElementById(slider.dataset.valueId);
-        //   const minLabel = document.getElementById(slider.dataset.minLabelId);
-        //   const maxLabel = document.getElementById(slider.dataset.maxLabelId);
-
-        //   const valueRect = value.getBoundingClientRect();
-        //   const minLabelRect = minLabel.getBoundingClientRect();
-        //   const maxLabelRect = maxLabel.getBoundingClientRect();
-
-        //   const minLabelDelta = valueRect.left - (minLabelRect.left);
-        //   const maxLabelDelta = maxLabelRect.left - valueRect.left;
-
-        //   const deltaThreshold = 32;
-
-        //   if (minLabelDelta < deltaThreshold) minLabel.classList.add("hidden");
-        //   else minLabel.classList.remove("hidden");
-
-        //   if (maxLabelDelta < deltaThreshold) maxLabel.classList.add("hidden");
-        //   else maxLabel.classList.remove("hidden");
       },
       updateProgress(slider) {
           let progress = document.getElementById(slider.dataset.progressId);
@@ -118,7 +111,9 @@ export default {
       setTicks(slider) {
           let container = document.getElementById(slider.dataset.tickId);
           const spacing = parseFloat(slider.dataset.tickStep);
-          const sliderRange = slider.max - slider.min;
+          console.log("wtf is spacing', ", spacing)
+          const sliderRange = (parseInt(slider.max)  - parseInt(slider.min));
+          console.log('slider range ', sliderRange, parseInt(slider.max), parseInt(slider.min))
           const tickCount = sliderRange / spacing + 1; // +1 to account for 0
           for (let ii = 0; ii < tickCount; ii++) {
               let tick = document.createElement("span");
@@ -155,10 +150,10 @@ export default {
         --light-blue: #7a7c93;
         --blue: #34385a;
 
-        --slider-handle-size: 14px;
+        --slider-handle-size: 16px;
         --slider-handle-border-radius: 50%;
         --slider-handle-margin-top: -4px;
-        --slider-track-height: 6px;
+        --slider-track-height: 8px;
         --slider-track-border-radius: 4px;
     }
 
@@ -277,9 +272,8 @@ export default {
     .tick-slider-tick {
         width: 5px;
         height: 5px;
-
         border-radius: 50%;
-
+        margin-bottom:.05rem;
         background-color: white;
     }
 

@@ -46,10 +46,10 @@
                              :headers="virtualColumns">
             </HeaderRow>
         </div>
-        <div ref='dataRow' class='dataRow' :style="`width:100%; overflow:auto; position:relative; height:600px`">
-            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:absolute; padding-bottom:62px `">
-                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; width:100%; border-collapse: collapse; line-height:10px; display:block;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <td :style="`width:${column.width}; text-align:${column.dataAlignment}` " v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
+        <div ref='dataRow' class='dataRow' :style="`width:100%; overflow-y:auto; overflow-x:hidden; position:relative; height:600px`">
+            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:absolute; padding-bottom:62px; overflow-x:hidden; `">
+                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+                    <td :style="`width:${column.width}; text-overflow: ellipsis; margin-left:-2px; overflow: hidden; display: block;  text-align:${column.dataAlignment}` " v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
                 </tr>
             </table>
            
@@ -60,7 +60,7 @@
 
 
 import HeaderRow from './components/HeaderRow'
-import debounce from 'lodash.debounce'
+
 import { colors } from '../../../../assets/shiftTwo'
 
 import forwardWorker from './webWorkers/forwardFilterWorker'
@@ -678,7 +678,16 @@ export default {
 
         },
         handleResizeGrid(){
-            debounce(()=>{this.gridWidth = this.$refs.grid.offsetWidth},300)()
+            window.requestAnimationFrame(()=>{
+                this.gridWidth = this.$refs.grid.offsetWidth
+                const numColumns = Object.keys(this.fullDS[0]).length
+                const eachColumn = Math.round(this.gridWidth/numColumns)
+                this.defaultValues.columnValues.width = `${eachColumn}px`
+                for (let i = 0; i < this.virtualColumns.length; i++) {
+                    this.virtualColumns[i].width = `${eachColumn}px`
+                    
+                }
+            })
         },
         handleFilterClosed(){
             this.filterCount = 0
@@ -726,15 +735,15 @@ export default {
             for (let i = 1; i <= 10000; i++) {
                 b.push(
                         {
-                        trim:Math.ceil(Math.random()*i*65), 
-                        make:Math.ceil(Math.random()*i*98765), 
-                        model:Math.ceil(Math.random()*i*965), 
-                        year:Math.ceil(Math.random()*i*98765),
-                        color:Math.ceil(Math.random()*i*9765),
+                        trim:Math.ceil(Math.random()*i*65398765343434434), 
+                        make:Math.ceil(Math.random()*i*98765343434), 
+                        model:Math.ceil(Math.random()*i*98765343434), 
+                        year:Math.ceil(Math.random()*i*9876534343433),
+                        color:Math.ceil(Math.random()*i*979876534343465),
                         manufacturer:getAlpha(),
-                        plant:Math.ceil(Math.random()*i*5),
-                        vin:Math.ceil(Math.random()*i*75),
-                        plateNumber:Math.ceil(Math.random()*i*95),
+                        plant:Math.ceil(Math.random()*i*3335),
+                        vin:Math.ceil(Math.random()*i*333333),
+                        plateNumber:Math.ceil(Math.random()*i*444444),
                         price:Math.ceil(Math.random()*i*9)
                         })
             }   

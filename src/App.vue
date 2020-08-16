@@ -1,6 +1,13 @@
 <template>
-  <div id="app">
-    <EditableDataGrid :gridConfig="localData"></EditableDataGrid>
+  <div id="app" style='display:flex; flex-direction:row; justify-content:center; align-items:center;'>
+    <!-- <slider 
+      :width="300"
+      :minValue="500"
+      :maxValue="4000"
+      :stepValue="500"
+      :initialValue="500"    
+    /> -->
+    <EditableDataGrid :gridConfig="localData" />
   </div>
 </template>
 

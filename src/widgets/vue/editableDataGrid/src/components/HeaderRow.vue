@@ -1,57 +1,61 @@
 <template>
     <div>
-        <div class="superHeader">
-            <div :style="`width:${header.width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header) in headers" :key="header.columnIndex">
-                <span style='display:flex;flex-direction:row;' v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString())">
-                    <div>
-                        <FilterSVG style="padding-left:10px" :height="11"></FilterSVG>
-                    </div>
-                    <div style='padding-top:2px;'>
-                        <span class="filterText" style="text-align:left; margin-left:5px">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
-                    </div>
-                </span>
-                <span v-else>&nbsp;</span>
-                <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty">
-                    <SortSVG style="padding-right:20px" :height="11"></SortSVG>
-                </span>
-                <span v-else>&nbsp;</span>
+        <div style='width:100%; background-color:white;'>
+            <div class="superHeader" :style="`width:${gridWillScroll?'99%':'100%'}`">
+                <div :style="`width:${header.width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header) in headers" :key="header.columnIndex">
+                    <span style='display:flex;flex-direction:row;' v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString())">
+                        <div>
+                            <FilterSVG style="padding-left:10px" :height="11"></FilterSVG>
+                        </div>
+                        <div style='padding-top:2px;'>
+                            <span class="filterText" style="text-align:left; margin-left:5px">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
+                        </div>
+                    </span>
+                    <span v-else>&nbsp;</span>
+                    <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty">
+                        <SortSVG style="padding-right:20px" :height="11"></SortSVG>
+                    </span>
+                    <span v-else>&nbsp;</span>
+                </div>
             </div>
         </div>
-        <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
-            <div class="headerWrapper">
-                <div :ref="`header-${header.columnIndex}`" 
-                    :style="`width:${header.width}; display:flex; flex-direction:row; justify-content:${header.alignment}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
-                    :class="`headerCell 
-                            ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
-                            ${(currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty.toString())?'activeFilter':null} 
-                            `" 
-                    @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
-                    @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
-                    v-for="(header) in headers" :key="header.columnIndex">
-                    <span> 
-                        {{header.text}}
-                    </span>
-                    <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null}`">
-                        <div class='innerDiv' :style="`background-color:${bgColor}`">
-                            <div class='flyoutHeader'>
-                                <div class='headerItem sort'> 
-                                    <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'asc')}"><UpArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
-                                    <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'desc')}"><DownArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
+        <div style='width:100%; background-color:rgb(245, 245, 245);'>
+            <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
+                <div class="headerWrapper">
+                    <div :ref="`header-${header.columnIndex}`" 
+                        :style="`width:${header.width}; display:flex; flex-direction:row; justify-content:${header.alignment}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
+                        :class="`headerCell 
+                                ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
+                                ${(currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty.toString())?'activeFilter':null} 
+                                `" 
+                        @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
+                        @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
+                        v-for="(header) in headers" :key="header.columnIndex">
+                        <span> 
+                            {{header.text}}
+                        </span>
+                        <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null}`">
+                            <div class='innerDiv' :style="`background-color:${bgColor}`">
+                                <div class='flyoutHeader'>
+                                    <div class='headerItem sort'> 
+                                        <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'asc')}"><UpArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
+                                        <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'desc')}"><DownArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
+                                    </div>
+                                    <div class='headerItem'>
+                                        <label class='filterHeader'>{{header.text}}</label>
+                                    </div>
+                                    <div class='headerItem'>
+                                        &nbsp;
+                                    </div>       
                                 </div>
-                                <div class='headerItem'>
-                                    <label class='filterHeader'>{{header.text}}</label>
-                                </div>
-                                <div class='headerItem'>
-                                    &nbsp;
-                                </div>       
+                                <br>
+                                <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
+                                <br>
+                                <img v-show="(!isDoneFiltering)||(!isDoneSorting)" src='../images/loader.gif' style='height:auto; width:50px;'>
+                                <br>
                             </div>
-                            <br>
-                            <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
-                            <br>
-                            <img v-show="(!isDoneFiltering)||(!isDoneSorting)" src='../images/loader.gif' style='height:auto; width:50px;'>
-                            <br>
-                        </div>
-                    </div> 
+                        </div> 
+                    </div>
                 </div>
             </div>
         </div>
@@ -204,8 +208,6 @@ export default {
         justify-content:center; 
         font-size: 15px; 
         font-family:Arial, Helvetica, sans-serif;
-        padding-left:5px;
-        padding-right:5px;
     }
     .flyout {
         position: relative;

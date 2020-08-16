@@ -50,7 +50,7 @@
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:absolute; padding-bottom:62px; overflow-x:hidden; `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     
-                    <div @mouseleave="handleHoverOverCell()" @mouseenter="handleHoverOverCell(rowIndex,column.columnIndex,dataRow[column.dataProperty])" style="display:flex;" v-for="column in virtualColumns"  :key="column.columnIndex" >
+                    <div @mouseleave="handleHoverOverCell()" @mouseenter="handleHoverOverCell(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" style="display:flex;" v-for="column in virtualColumns"  :key="column.columnIndex" >
                         <td :style="`width:${column.width}; text-overflow: ellipsis; overflow: hidden; display: block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
                         <span style='display:none; background-color:gray; color: white; position:absolute; padding:5px; text-align:center; vertical-align:center; height:25px; z-index: 99999;' v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">{{dataRow[column.dataProperty]}}</span></div>
                     
@@ -125,8 +125,8 @@ export default {
             dataSlice:[],
             isHovering:false,
             isHoverOverCell:true,
-            rowCurrentlyHoveringOver:0,
-            cellCurrentlyHoveringOver:0,
+            rowCurrentlyHoveringOver:null,
+            cellCurrentlyHoveringOver:null,
             curentlyHovering:0,
             filteredData:[],
             userHasHeaders:false,
@@ -213,12 +213,16 @@ export default {
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)   
             this.reConfigurePagination(this.sliderCount)                    
         },
-        handleHoverOverCell(row, cell, data){
-            console.log("data ", data)
-            if(data&&data.toString().includes('...')){
+        handleHoverOverCell(row, cell, cellWidth, data){
+            console.log("data ", data, cellWidth )
+            if(data&&(data.toString().length)* 9.4 > parseInt(cellWidth.split('p')[0])-20){
                 this.curentlyHovering = cell;
                 this.rowCurrentlyHoveringOver = row;
                 this.cellCurrentlyHoveringOver = cell;
+            } else {
+                this.curentlyHovering = null
+                this.rowCurrentlyHoveringOver = null;
+                this.cellCurrentlyHoveringOver = null;                
             }
         },
         handleShowCancelEye(){

@@ -7,7 +7,7 @@ let gridConfig =  {
     Slider:{
         EnableSlider:true,
         Values:{
-            UseDefaultValues:false, //default to true
+            UseDefaultValues:true, //default to true
             SliderWidth:300,
             MinValue:10,
             MaxValue:100,

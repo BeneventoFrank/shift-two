@@ -46,10 +46,14 @@
                              :headers="virtualColumns">
             </HeaderRow>
         </div>
-        <div ref='dataRow' class='dataRow' :style="`width:100%; overflow-y:auto; overflow-x:hidden; position:relative; height:600px`">
+        <div ref='dataRow' class='dataRow' :style="`width:100%; overflow-y:auto; overflow-x:hidden; position:relative; height:${gridHeight}`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:absolute; padding-bottom:62px; overflow-x:hidden; `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <td :style="`width:${column.width}; text-overflow: ellipsis; overflow: hidden; display: block;  text-align:${column.dataAlignment}` " v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
+                    
+                    <div @mouseleave="handleHoverOverCell()" @mouseenter="handleHoverOverCell(rowIndex,column.columnIndex,dataRow[column.dataProperty])" style="display:flex;" v-for="column in virtualColumns"  :key="column.columnIndex" >
+                        <td :style="`width:${column.width}; text-overflow: ellipsis; overflow: hidden; display: block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
+                        <span style='display:none; background-color:gray; color: white; position:absolute; padding:5px; text-align:center; vertical-align:center; height:25px; z-index: 99999;' v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">{{dataRow[column.dataProperty]}}</span></div>
+                    
                 </tr>
             </table>
            
@@ -95,6 +99,8 @@ export default {
                 hasHeaders:false
             },
             gridWidth:0,
+            gridHeight:'',
+            gridHeightValue:0,
             highestScrollPosition:0,
             fullDS:[],
             weAreUsingTheSlider:false,
@@ -118,6 +124,10 @@ export default {
             skip:20,
             dataSlice:[],
             isHovering:false,
+            isHoverOverCell:true,
+            rowCurrentlyHoveringOver:0,
+            cellCurrentlyHoveringOver:0,
+            curentlyHovering:0,
             filteredData:[],
             userHasHeaders:false,
             virtualColumns:[],
@@ -199,9 +209,17 @@ export default {
             this.highestCountLoaded = this.getInitialRowsPerPage();
             this.filteredData = []
             this.filteredData = this.fullDS 
-            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+            this.virtualHeight = (this.filteredData.length*29-950)<this.gridHeightValue?this.gridHeightValue:this.filteredData.length*29-950
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)   
             this.reConfigurePagination(this.sliderCount)                    
+        },
+        handleHoverOverCell(row, cell, data){
+            console.log("data ", data)
+            if(data&&data.toString().includes('...')){
+                this.curentlyHovering = cell;
+                this.rowCurrentlyHoveringOver = row;
+                this.cellCurrentlyHoveringOver = cell;
+            }
         },
         handleShowCancelEye(){
             this.isHovering = !this.isHovering
@@ -248,7 +266,7 @@ export default {
             }
 
             let willScroll = this.gridWillScroll(processed.length)
-            this.virtualHeight = !willScroll?600:(processed.length*29-950)<600?600:processed.length*29-950
+            this.virtualHeight = !willScroll?this.gridHeightValue:(processed.length*29-950)<this.gridHeightValue?this.gridHeightValue:processed.length*29-950
             this.dataSlice = processed;
         },            
         async handleNextClick(isASingleMove){
@@ -344,7 +362,7 @@ export default {
                     this.maxValue = this.gridConfig.Slider.Values.MaxValue?this.gridConfig.Slider.Values.MaxValue:0
                     this.stepValue = this.gridConfig.Slider.Values.StepValue?this.gridConfig.Slider.Values.StepValue:0
                     this.initialValue = this.gridConfig.Slider.Values.InitialValue?this.gridConfig.Slider.Values.InitialValue:0
-                    this.sliderWidth = this.gridConfig.Slider.Values.Width?this.gridConfig.Slider.Values.Width:0 
+                    this.sliderWidth = this.gridConfig.Slider.Values.SliderWidth?this.gridConfig.Slider.Values.SliderWidth:0 
                 }
             }
 
@@ -598,7 +616,7 @@ export default {
             }
         },
         gridWillScroll(numberOfRows){
-            let height = 600
+            let height = this.gridHeightValue
             let retVal = false
             if(this.gridConfig.Height){
                 //should come in as ###px but users are users 
@@ -648,7 +666,7 @@ export default {
                                 this.highestCountLoaded = this.getInitialRowsPerPage();
                                 this.filteredData = []
                                 this.filteredData = this.sortedData[split[0]][split[1]] 
-                                this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                                this.virtualHeight = (this.filteredData.length*29-950)<this.gridHeightValue?this.gridHeightValue:this.filteredData.length*29-950
                                 this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                                 this.isDoneSorting = true;
                             } catch (error) {
@@ -673,7 +691,7 @@ export default {
                     this.highestCountLoaded = this.getInitialRowsPerPage();
                     this.filteredData = []
                     this.filteredData = this.fullDS 
-                    this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                    this.virtualHeight = (this.filteredData.length*29-950)<this.gridHeightValue?this.gridHeightValue:this.filteredData.length*29-950
                     this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                 }
             }
@@ -786,7 +804,7 @@ export default {
                         price:Math.ceil(Math.random()*i*9)
                         })
             }   
-            this.virtualHeight = b.length*29-950>0?b.length*29-950:600
+            this.virtualHeight = b.length*29-950>0?b.length*29-950:this.gridHeightValue
             this.fullDS = b
             this.highestCountLoaded = this.getInitialRowsPerPage()
             this.dataSlice = b.slice(0,this.highestCountLoaded)
@@ -841,7 +859,7 @@ export default {
                         this.sortStrategy.columnBeingSorted = message.data.Column
 
                         this.highestCountLoaded = this.getInitialRowsPerPage();
-                        this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                        this.virtualHeight = (this.filteredData.length*29-950)<this.gridHeightValue?this.gridHeightValue:this.filteredData.length*29-950
                         this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                         this.filterCount = 0
                         this.tmpResults = []
@@ -873,7 +891,7 @@ export default {
                         } else {
                             this.filteredData = this.tmpResults
                             this.highestCountLoaded = this.getInitialRowsPerPage();
-                            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                            this.virtualHeight = (this.filteredData.length*29-950)<this.gridHeightValue?this.gridHeightValue:this.filteredData.length*29-950
                             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                             this.filterCount = 0
                             this.numberOfTerminatedFilters = 0
@@ -902,13 +920,13 @@ export default {
                             const split = this.sortStrategy.strategy.split('^^')
                             this.filteredData = this.sortedData[split[0]][split[1]]
                             this.highestCountLoaded = this.getInitialRowsPerPage();
-                            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                            this.virtualHeight = (this.filteredData.length*29-950)<this.gridHeightValue?this.gridHeightValue:this.filteredData.length*29-950
                             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                     } else {
                             this.highestCountLoaded = this.getInitialRowsPerPage();
                             this.filteredData = []
                             this.filteredData = this.fullDS 
-                            this.virtualHeight = (this.filteredData.length*29-950)<600?600:this.filteredData.length*29-950
+                            this.virtualHeight = (this.filteredData.length*29-950)<this.gridHeightValue?this.gridHeightValue:this.filteredData.length*29-950
                             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)                        
                     }
 3                } else {
@@ -1008,6 +1026,10 @@ export default {
         this.initializePaging(this.getInitialRowsPerPage())
         this.gridWillScroll()
         this.gridWidth = this.$refs.grid.offsetWidth //set initial size of grid used for calculating where to put the filter flyouts
+        this.gridHeight = this.gridConfig.GridHeight
+        if(this.gridHeight.includes('px')){
+            this.gridHeightValue = parseInt(this.gridHeight.split('p')[0])
+        }
         window.addEventListener('resize',this.handleResizeGrid)
         this.handleResizeGrid()
         this.ww_forwardWorker = new forwardWorkerSetup(forwardWorker)

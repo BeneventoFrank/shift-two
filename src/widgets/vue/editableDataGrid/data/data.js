@@ -1,12 +1,19 @@
 
 let gridConfig =  {
+    GridHeight:'800px', //required prompt if not there or in correct format
     Paging:{
         EnablePaging:true,
     },
     Slider:{
         EnableSlider:true,
         Values:{
-            UseDefaultValues:true //default to true
+            UseDefaultValues:false, //default to true
+            SliderWidth:300,
+            MinValue:10,
+            MaxValue:100,
+            StepValue:10,
+            InitialValue:10,
+
         }
     },
     GridHeader:'New Race Cars - 2020',

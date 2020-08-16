@@ -49,7 +49,7 @@
         <div ref='dataRow' class='dataRow' :style="`width:100%; overflow-y:auto; overflow-x:hidden; position:relative; height:600px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:absolute; padding-bottom:62px; overflow-x:hidden; `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <td :style="`width:${column.width}; text-overflow: ellipsis; margin-left:-2px; overflow: hidden; display: block;  text-align:${column.dataAlignment}` " v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
+                    <td :style="`width:${column.width}; text-overflow: ellipsis; overflow: hidden; display: block;  text-align:${column.dataAlignment}` " v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
                 </tr>
             </table>
            
@@ -567,6 +567,7 @@ export default {
                     tmp.text = this.gridConfig.Columns[i].header.text?this.gridConfig.Columns[i].header.text:''
                     tmp.height = this.gridConfig.Columns[i].header.height?this.gridConfig.Columns[i].header.height:this.defaultValues.columnValues.height
                     tmp.width = this.gridConfig.Columns[i].width?this.gridConfig.Columns[i].width:this.defaultValues.columnValues.width
+                    tmp.isCustomWidth = this.gridConfig.Columns[i].width?true:false
                     tmp.alignment = this.gridConfig.Columns[i].header.alignment?this.translateAlignment(this.gridConfig.Columns[i].header.alignment):this.translateAlignment(this.defaultValues.columnValues.alignment)
                     tmp.backgroundColor=this.gridConfig.Columns[i].header.backgroundColor?this.gridConfig.Columns[i].header.backgroundColor:this.defaultValues.columnValues.backgroundColor
                     tmp.textColor=this.gridConfig.Columns[i].header.textColor?this.gridConfig.Columns[i].header.textColor:this.defaultValues.columnValues.textColor
@@ -581,6 +582,7 @@ export default {
                     tmp.text=''
                     tmp.height=''
                     tmp.width = this.gridConfig.Columns[i].width?this.gridConfig.Columns[i].width:this.defaultValues.columnValues.width
+                    tmp.isCustomWidth = this.gridConfig.Columns[i].width?true:false
                     tmp.alignment = this.defaultValues.columnValues.alignment
                     tmp.backgroundColor=''
                     tmp.textColor=''
@@ -678,16 +680,53 @@ export default {
 
         },
         handleResizeGrid(){
-            window.requestAnimationFrame(()=>{
-                this.gridWidth = this.$refs.grid.offsetWidth
-                const numColumns = Object.keys(this.fullDS[0]).length
-                const eachColumn = Math.round(this.gridWidth/numColumns)
-                this.defaultValues.columnValues.width = `${eachColumn}px`
-                for (let i = 0; i < this.virtualColumns.length; i++) {
+            this.gridWidth = this.$refs.grid.offsetWidth
+            console.log('what are you gridwidth', this.gridWidth)
+            let totalCustom = 0;
+            let customColumns = {}
+            let split = []
+            for (let i = 0; i < this.virtualColumns.length; i++) {
+                 if(this.virtualColumns[i].isCustomWidth){  
+                    try {
+                        console.log("split that shit", this.virtualColumns[i].width)
+                        if(typeof this.virtualColumns[i].width ==='string'){
+                            split = this.virtualColumns[i].width.split('p')
+                            totalCustom = totalCustom + parseInt(split[0])
+                            customColumns[i] = parseInt(split[0])
+                        } else 
+                        {
+                            totalCustom = totalCustom + this.virtualColumns[i].width
+                            customColumns[i] = this.virtualColumns[i].width                            
+                        }
+                    } catch (error) {
+                        //todo. throw up a popup that tells the dev theres a mistake with the config.
+                        console.log('ruh ro raggie', error)
+                    }
+                 }
+            }
+            let numColumns = Object.keys(this.fullDS[0]).length
+            if (Object.keys(customColumns).length > 0 ) {
+
+               numColumns = Object.keys(this.fullDS[0]).length - Object.keys(customColumns).length
+            } 
+            console.log('numcol', numColumns)
+            let gw = this.gridWidth
+            if (this.gridWillScroll()) {
+                gw = gw *.99
+            }
+            gw = gw-9
+
+            const eachColumn = Math.round((gw-totalCustom)/numColumns)
+            console.log(eachColumn, ' should be...  ', totalCustom, ' and . ', customColumns)
+            //this.defaultValues.columnValues.width = `${eachColumn}px`
+            for (let i = 0; i < this.virtualColumns.length; i++) {
+                if(customColumns[i]){
+                    console.log(" you should see me i am setting ",  this.virtualColumns[i].width , customColumns[i])
+                    this.virtualColumns[i].width = `${customColumns[i]}px`
+                }else{
                     this.virtualColumns[i].width = `${eachColumn}px`
-                    
                 }
-            })
+            }
         },
         handleFilterClosed(){
             this.filterCount = 0
@@ -970,7 +1009,7 @@ export default {
         this.gridWillScroll()
         this.gridWidth = this.$refs.grid.offsetWidth //set initial size of grid used for calculating where to put the filter flyouts
         window.addEventListener('resize',this.handleResizeGrid)
-        
+        this.handleResizeGrid()
         this.ww_forwardWorker = new forwardWorkerSetup(forwardWorker)
         this.ww_forwardWorker.addEventListener('message',event =>{this.handleMessage(event)})
         this.ww_forwardWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})

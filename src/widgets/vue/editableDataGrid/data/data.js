@@ -15,7 +15,8 @@ let gridConfig =  {
                 header:{text:"Make"},
                 dataProperty:"make",
                 dataType:'number',
-                preSortColumn: false
+                preSortColumn: false,
+                width:'600px'
             },
             {
                 header:{text:"Model"},
@@ -33,7 +34,8 @@ let gridConfig =  {
                 header:{text:"Trim"},            
                 dataProperty:"trim",
                 dataType:'number',
-                preSortColumn: true
+                preSortColumn: true,
+                width:'200px'
             },
             {
                 header:{text:"Color"},            
@@ -41,7 +43,8 @@ let gridConfig =  {
             },            
             {
                 header:{text:"Manufacturer"},            
-                dataProperty:"manufacturer"
+                dataProperty:"manufacturer",
+                width:'300px'
             },
             {
                 header:{text:"Plant"},            

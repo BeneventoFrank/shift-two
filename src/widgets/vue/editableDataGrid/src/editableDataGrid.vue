@@ -49,11 +49,23 @@
         <div ref='dataRow' class='dataRow' :style="`width:100%; overflow-y:auto; overflow-x:hidden; position:relative; height:${gridHeight}`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:absolute; padding-bottom:62px; overflow-x:hidden; `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    
-                    <div @mouseleave="handleHoverOverCell()" @mouseenter="handleHoverOverCell(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" style="display:flex;" v-for="column in virtualColumns"  :key="column.columnIndex" >
+                    <div @mouseleave="debounceHover()" @mouseenter="debounceHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" style="display:flex;" v-for="column in virtualColumns"  :key="column.columnIndex" >
                         <td :style="`width:${column.width}; text-overflow: ellipsis; overflow: hidden; display: block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
-                        <span style='display:none; background-color:gray; color: white; position:absolute; padding:5px; text-align:center; vertical-align:center; height:25px; z-index: 99999;' v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">{{dataRow[column.dataProperty]}}</span></div>
-                    
+                        <div style='display:flex; flex-direction: row; align-items:center;'>
+                            <span :style="`display:none; border:1px solid #C8C8C8; position:absolute;
+                                    border-radius: 5px;
+                                    width:200px;
+                                    margin-left:${willOverflow?'-260px':'-15px'};
+                                    padding:10px;
+                                    botder:1px solid slategrey;
+                                    box-shadow: black 0px 8px 6px -6px;
+                                    background-color:#F5F5F5;  
+                                    cursor:zoom-in; 
+                                    height:50px;  
+                                    z-index: 99999;`" v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">
+                                    <div style="display:flex; flex-direction:row; justify-content:center; width:100%; height:100%; align-items:center">{{dataRow[column.dataProperty]}}</div></span>
+                        </div>
+                  </div>
                 </tr>
             </table>
            
@@ -66,7 +78,7 @@
 import HeaderRow from './components/HeaderRow'
 
 import { colors } from '../../../../assets/shiftTwo'
-
+import debounce from 'lodash.debounce'
 import forwardWorker from './webWorkers/forwardFilterWorker'
 import reverseWorker from './webWorkers/reverseFilterWorker'
 import evenSortWorker from './webWorkers/evenSortWorker'
@@ -108,10 +120,10 @@ export default {
             sortedData:{},
             isDonePreSorting:false,
             filterCount:0,
-            dataReceived:false,
             scrollCount:0,
             tmpResults:[],
             boolGridWillScroll:false,
+            willOverflow:false,
             tmpResultsSort:{},
             highestCountLoaded:0,
             numberOfTerminatedFilters:0,
@@ -213,18 +225,25 @@ export default {
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)   
             this.reConfigurePagination(this.sliderCount)                    
         },
-        handleHoverOverCell(row, cell, cellWidth, data){
+        debounceHover: debounce(function(row, cell, cellWidth, data){
             console.log("data ", data, cellWidth )
             if(data&&(data.toString().length)* 9.4 > parseInt(cellWidth.split('p')[0])-20){
                 this.curentlyHovering = cell;
                 this.rowCurrentlyHoveringOver = row;
                 this.cellCurrentlyHoveringOver = cell;
+                this.willOverflow=false;
+                let y = document.getElementById(`header-${cell}`)
+                console.log('y?',y)
+                if((y.offsetLeft+y.offsetWidth/2+250)>this.gridWidth){
+                    this.willOverflow = true
+                }
             } else {
                 this.curentlyHovering = null
                 this.rowCurrentlyHoveringOver = null;
-                this.cellCurrentlyHoveringOver = null;                
+                this.cellCurrentlyHoveringOver = null;
+                this.willOverflow=false;                
             }
-        },
+         },100),
         handleShowCancelEye(){
             this.isHovering = !this.isHovering
         },

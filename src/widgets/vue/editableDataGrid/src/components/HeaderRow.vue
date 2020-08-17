@@ -22,7 +22,7 @@
         <div style='width:100%; background-color:rgb(245, 245, 245);'>
             <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
                 <div class="headerWrapper">
-                    <div :ref="`header-${header.columnIndex}`" 
+                    <div :id="`header-${header.columnIndex}`" :ref="`header-${header.columnIndex}`" 
                         :style="`width:${header.width}; display:flex; flex-direction:row; justify-content:${header.alignment}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
                         :class="`headerCell 
                                 ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
@@ -223,6 +223,7 @@ export default {
         height:150px;
         width:300px;
         padding:10px;
+        box-shadow: 0 8px 6px -6px black;
     }
     .filterHeader {
         font-size:larger;

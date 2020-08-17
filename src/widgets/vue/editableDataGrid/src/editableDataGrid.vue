@@ -50,7 +50,7 @@
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:absolute; padding-bottom:62px; overflow-x:hidden; `">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <div @mouseleave="debounceHover()" @mouseenter="debounceHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" style="display:flex;" v-for="column in virtualColumns"  :key="column.columnIndex" >
-                        <td :style="`width:${column.width}; text-overflow: ellipsis; overflow: hidden; display: block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
+                        <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden;  cursor:zoom-in; display:block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
                         <div style='display:flex; flex-direction: row; align-items:center;'>
                             <span :style="`display:none; border:1px solid #C8C8C8; position:absolute;
                                     border-radius: 5px;
@@ -60,7 +60,6 @@
                                     botder:1px solid slategrey;
                                     box-shadow: black 0px 8px 6px -6px;
                                     background-color:#F5F5F5;  
-                                    cursor:zoom-in; 
                                     height:50px;  
                                     z-index: 99999;`" v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">
                                     <div style="display:flex; flex-direction:row; justify-content:center; width:100%; height:100%; align-items:center">{{dataRow[column.dataProperty]}}</div></span>

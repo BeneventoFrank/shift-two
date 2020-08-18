@@ -1,5 +1,5 @@
 <template>
-  <div id="app" style='display:flex; flex-direction:row; justify-content:center; align-items:center;'>
+  <div id="app" style='width:100%;'>
     <!-- <slider 
       :width="300"
       :minValue="500"
@@ -36,6 +36,5 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: slategrey !important;
-  margin-top: 60px;
 }
 </style>

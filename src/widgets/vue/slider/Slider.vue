@@ -1,6 +1,6 @@
 <template>
   <div id="wrapper">
-      <div id="sliderContainer" :style="`max-width:${width}px; width:${width}px;`">
+      <div id="sliderContainer" :style="`width:${width}px;`">
           <div class="tick-slider">
               <div class="tick-slider-value-container">
                   <div id="weightLabelMin" class="tick-slider-label">&nbsp;</div>
@@ -211,9 +211,7 @@ export default {
         display: flex;
         justify-content: space-between;
         align-items: center;
-
-        margin-bottom: 30px;
-
+        margin-bottom: 20px;
         font-family: "Hind Madurai", sans-serif;
         font-size: 18px;
         color: var(--gray);

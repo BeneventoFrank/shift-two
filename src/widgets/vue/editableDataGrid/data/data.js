@@ -1,6 +1,7 @@
 
 let gridConfig =  {
-    GridHeight:'800px', //required prompt if not there or in correct format
+    GridWidth:'610px', //required
+    GridHeight:'600px', //required
     Paging:{
         EnablePaging:true,
     },
@@ -23,7 +24,6 @@ let gridConfig =  {
                 dataProperty:"make",
                 dataType:'number',
                 preSortColumn: false,
-                width:'600px'
             },
             {
                 header:{text:"Model"},
@@ -42,36 +42,34 @@ let gridConfig =  {
                 dataProperty:"trim",
                 dataType:'number',
                 preSortColumn: true,
-                width:'200px'
             },
             {
                 header:{text:"Color"},            
                 dataProperty:"color",
             },            
-            {
-                header:{text:"Manufacturer"},            
-                dataProperty:"manufacturer",
-                width:'300px'
-            },
-            {
-                header:{text:"Plant"},            
-                dataProperty:"plant"
-            },
-            {
-                header:{text:"Vin"},            
-                dataProperty:"vin",
-                dataType:'number'
-            },
-            {
-                header:{text:"Plate Number"},            
-                dataProperty:"plateNumber",
-                dataType:'number'
-            },
-            {
-                header:{text:"Price"},            
-                dataProperty:"price",
-                dataType:'number'
-            }                                    
+            // {
+            //     header:{text:"Manufacturer"},            
+            //     dataProperty:"manufacturer",
+            // },
+            // {
+            //     header:{text:"Plant"},            
+            //     dataProperty:"plant"
+            // },
+            // {
+            //     header:{text:"Vin"},            
+            //     dataProperty:"vin",
+            //     dataType:'number'
+            // },
+            // {
+            //     header:{text:"Plate Number"},            
+            //     dataProperty:"plateNumber",
+            //     dataType:'number'
+            // },
+            // {
+            //     header:{text:"Price"},            
+            //     dataProperty:"price",
+            //     dataType:'number'
+            // }                                    
         ]
 }
 

@@ -1,8 +1,9 @@
 <template>
-    <div ref='grid' style='width:100%;' >
-        <div style='display:flex; flex-direction:row; width:100%; justify-content:center; align-items:center; padding-bottom:25px;'>
-            <div style="width:33.3%; padding-left:20px; display:flex; flex-direction:row; align-items:flex-end;">
-                <div style="width:300px; display:flex; flex-direction:row; justify-content:flex-start;">
+    <div :style="`position:absolute; width:${gridWidth}; height:${gridHeight}; margin-left:${gridWidthValue/2*-1}px; left:50%; width:${gridWidth};`">
+    <div ref='grid' :style="`position:absolute; height:${gridHeight}; width:${gridWidth};`" >
+        <div :style="`display:flex; flex-direction:row; width:${gridWidth}; justify-content:center; align-items:flex-end; flex-wrap:wrap; padding-bottom:12px;`">
+            <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; margin-top:${gridWidthValue>600?20:60}px; align-items:center;`">
+                <div :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridWidthValue>600?'flex-end':'center'};`">
                     <Slider @change="handleChangeNumberPerPage" 
                             @initialValue="handleInitialValue" 
                             v-if="gridConfig.Slider.EnableSlider" 
@@ -18,8 +19,8 @@
                     <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /><span class="tooltiptext">Clear Filtering/Sorting</span></div>
                 </div>
             </div>
-            <div style="width:33.3%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
-            <div style="width:33.3%; padding-right:20px;" class='pagination'>
+
+            <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center; margin-top:${gridWidthValue>600?0:20}px; justify-content:${gridWidthValue>600?'flex-end':'center'};`" class='pagination'>
                 <Pagination 
                     v-if="gridConfig.Paging.EnablePaging"
                     :cmpCanPagePrevious="cmpCanPagePrevious"
@@ -30,6 +31,7 @@
                 ></Pagination>
             </div>
         </div>
+        <div style="width:100%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
         <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" 
                              @columnSort="handleColumnSort" 
@@ -42,33 +44,34 @@
                              :isDoneFiltering="isDoneFiltering"
                              :isDoneSorting="isDoneSorting" 
                              :currentFilters="filterStrategy" 
-                             :gridWidth="gridWidth" 
+                             :gridWidth="gridWidthValue" 
                              :headers="virtualColumns">
             </HeaderRow>
         </div>
-        <div ref='dataRow' class='dataRow' :style="`width:100%; overflow-y:auto; overflow-x:hidden; position:relative; height:${gridHeight}`">
-            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:absolute; padding-bottom:62px; overflow-x:hidden; `">
-                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <div @mouseleave="debounceHover()" @mouseenter="debounceHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" style="display:flex;" v-for="column in virtualColumns"  :key="column.columnIndex" >
-                        <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden;  cursor:zoom-in; display:block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
-                        <div style='display:flex; flex-direction: row; align-items:center;'>
-                            <span :style="`display:none; border:1px solid #C8C8C8; position:absolute;
-                                    border-radius: 5px;
-                                    width:200px;
-                                    margin-left:${willOverflow?'-260px':'-15px'};
-                                    padding:10px;
-                                    botder:1px solid slategrey;
-                                    box-shadow: black 0px 8px 6px -6px;
-                                    background-color:#F5F5F5;  
-                                    height:50px;  
-                                    z-index: 99999;`" v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">
-                                    <div style="display:flex; flex-direction:row; justify-content:center; width:100%; height:100%; align-items:center">{{dataRow[column.dataProperty]}}</div></span>
-                        </div>
+        <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}px; overflow-x:hidden;  position:relative; height:${gridHeight}`">
+            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:relative; padding-bottom:62px; overflow-x:scroll; width:${gridWidth};`">
+                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:97%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+                    <div @mouseleave="debounceHover()" @mouseenter="debounceHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
+                        <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
+                            
+                                <span :style="`display:none; border:1px solid #C8C8C8; position:absolute;
+                                        border-radius: 5px;
+                                        width:200px;
+                                        left:${((column.columnIndex)*column.widthValue)-200}px;
+                                        padding:10px;
+                                        botder:1px solid slategrey;
+                                        box-shadow: black 0px 8px 6px -6px;
+                                        background-color:#F5F5F5;  
+                                        height:50px;  
+                                        z-index: 9999;`" v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">
+                                        <div style="display:flex; flex-direction:row; cursor:zoom-in; justify-content:center; width:100%; height:100%; align-items:center">{{dataRow[column.dataProperty]}}</div></span>
+                            
                   </div>
                 </tr>
             </table>
            
         </div>
+    </div>
     </div>
 </template>
 <script>
@@ -109,9 +112,11 @@ export default {
             headers:{
                 hasHeaders:false
             },
-            gridWidth:0,
+            gridWidth:'',
             gridHeight:'',
             gridHeightValue:0,
+            gridWidthValue:0,
+            numberOfColumns:0,
             highestScrollPosition:0,
             fullDS:[],
             weAreUsingTheSlider:false,
@@ -123,6 +128,7 @@ export default {
             tmpResults:[],
             boolGridWillScroll:false,
             willOverflow:false,
+            totalWidthOfColumns:0,
             tmpResultsSort:{},
             highestCountLoaded:0,
             numberOfTerminatedFilters:0,
@@ -230,19 +236,13 @@ export default {
                 this.curentlyHovering = cell;
                 this.rowCurrentlyHoveringOver = row;
                 this.cellCurrentlyHoveringOver = cell;
-                this.willOverflow=false;
-                let y = document.getElementById(`header-${cell}`)
-                console.log('y?',y)
-                if((y.offsetLeft+y.offsetWidth/2+250)>this.gridWidth){
-                    this.willOverflow = true
-                }
             } else {
                 this.curentlyHovering = null
                 this.rowCurrentlyHoveringOver = null;
                 this.cellCurrentlyHoveringOver = null;
                 this.willOverflow=false;                
             }
-         },100),
+         },0),
         handleShowCancelEye(){
             this.isHovering = !this.isHovering
         },
@@ -583,9 +583,6 @@ export default {
                 }
             }
         },        
-        getWidthOfGrid(){
-            return this.$refs.grid.offsetWidth
-        },
         deriveHeaders(){
             const checkThreshold = ()=>{
                 if(this.fullDS.length>10000)
@@ -599,15 +596,22 @@ export default {
                 return true
             }
             let hasHeader=false
+            let totalWidth = 0
             for (let i = 0; i < this.gridConfig.Columns.length; i++) {
                 let tmp ={}
+
                 if(Object.keys(this.gridConfig.Columns[i].header).length>0){
+                    
+                    let w = this.gridConfig.Columns[i].width?this.gridConfig.Columns[i].width.split('p')[0]-1:this.defaultValues.columnValues.width.split('p')[0]-1
+                    totalWidth = totalWidth+w
+
                     hasHeader=true;
                     tmp.columnIndex = i;
                     tmp.text = this.gridConfig.Columns[i].header.text?this.gridConfig.Columns[i].header.text:''
                     tmp.height = this.gridConfig.Columns[i].header.height?this.gridConfig.Columns[i].header.height:this.defaultValues.columnValues.height
                     tmp.width = this.gridConfig.Columns[i].width?this.gridConfig.Columns[i].width:this.defaultValues.columnValues.width
                     tmp.isCustomWidth = this.gridConfig.Columns[i].width?true:false
+                    tmp.widthValue = w
                     tmp.alignment = this.gridConfig.Columns[i].header.alignment?this.translateAlignment(this.gridConfig.Columns[i].header.alignment):this.translateAlignment(this.defaultValues.columnValues.alignment)
                     tmp.backgroundColor=this.gridConfig.Columns[i].header.backgroundColor?this.gridConfig.Columns[i].header.backgroundColor:this.defaultValues.columnValues.backgroundColor
                     tmp.textColor=this.gridConfig.Columns[i].header.textColor?this.gridConfig.Columns[i].header.textColor:this.defaultValues.columnValues.textColor
@@ -636,14 +640,15 @@ export default {
                 this.userHasHeaders=hasHeader
                 this.virtualColumns.push(tmp)
             }
+            this.totalWidthOfColumns = totalWidth
         },
         gridWillScroll(numberOfRows){
             let height = this.gridHeightValue
             let retVal = false
-            if(this.gridConfig.Height){
+            if(this.gridConfig.GridHeight){
                 //should come in as ###px but users are users 
-                if(this.gridConfig.Height.includes('px')){
-                    height = this.gridConfig.Height.split('p')[0]
+                if(this.gridConfig.GridHeight.includes('p')){
+                    height = this.gridConfig.GridHeight.split('p')[0]
                 }
             }
             let tmp = 0
@@ -661,7 +666,9 @@ export default {
                 retVal=true
             }
             this.boolGridWillScroll = retVal
+            console.log('returning the damn value ', retVal)
             return retVal
+        
         },
         handleColumnSort(strategy){
             this.isDoneSorting = false
@@ -719,62 +726,14 @@ export default {
             }
 
         },
-        handleResizeGrid(){
-            this.gridWidth = this.$refs.grid.offsetWidth
-            console.log('what are you gridwidth', this.gridWidth)
-            let totalCustom = 0;
-            let customColumns = {}
-            let split = []
-            for (let i = 0; i < this.virtualColumns.length; i++) {
-                 if(this.virtualColumns[i].isCustomWidth){  
-                    try {
-                        console.log("split that shit", this.virtualColumns[i].width)
-                        if(typeof this.virtualColumns[i].width ==='string'){
-                            split = this.virtualColumns[i].width.split('p')
-                            totalCustom = totalCustom + parseInt(split[0])
-                            customColumns[i] = parseInt(split[0])
-                        } else 
-                        {
-                            totalCustom = totalCustom + this.virtualColumns[i].width
-                            customColumns[i] = this.virtualColumns[i].width                            
-                        }
-                    } catch (error) {
-                        //todo. throw up a popup that tells the dev theres a mistake with the config.
-                        console.log('ruh ro raggie', error)
-                    }
-                 }
-            }
-            let numColumns = Object.keys(this.fullDS[0]).length
-            if (Object.keys(customColumns).length > 0 ) {
-
-               numColumns = Object.keys(this.fullDS[0]).length - Object.keys(customColumns).length
-            } 
-            console.log('numcol', numColumns)
-            let gw = this.gridWidth
-            if (this.gridWillScroll()) {
-                gw = gw *.99
-            }
-            gw = gw-9
-
-            const eachColumn = Math.round((gw-totalCustom)/numColumns)
-            console.log(eachColumn, ' should be...  ', totalCustom, ' and . ', customColumns)
-            //this.defaultValues.columnValues.width = `${eachColumn}px`
-            for (let i = 0; i < this.virtualColumns.length; i++) {
-                if(customColumns[i]){
-                    console.log(" you should see me i am setting ",  this.virtualColumns[i].width , customColumns[i])
-                    this.virtualColumns[i].width = `${customColumns[i]}px`
-                }else{
-                    this.virtualColumns[i].width = `${eachColumn}px`
-                }
-            }
-        },
         handleFilterClosed(){
             this.filterCount = 0
         },
         setDefaultValues(){
            const numColumns = Object.keys(this.fullDS[0]).length
-           const widthOfGrid = this.$refs.dataRow.offsetWidth
-           const eachColumn = Math.round(widthOfGrid/numColumns)
+           const widthOfGrid = this.gridWidthValue
+           console.log("widthof grid", widthOfGrid)
+           const eachColumn = Math.ceil(widthOfGrid/numColumns)
            this.defaultValues.columnValues.backgroundColor = colors.editableDataGrid.defaultHeaderColor
            this.defaultValues.columnValues.borderColor = colors.editableDataGrid.defaultBorderColor
            this.defaultValues.columnValues.textColor = colors.editableDataGrid.defaultTextColor
@@ -796,34 +755,34 @@ export default {
         },
          getTestData(){
             let b = []
-            let alphaString = []
-            let alpha = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-            const getAlpha = ()=>{
-                alphaString = ''
-                for (let i = 0; i < 4; i++) {
-                    let index = Math.floor(Math.random() * 27)
-                    if (index<1||index>26) {
-                        index = Math.floor(Math.random() * 27)
-                    }
-                    alphaString += (alpha[index])
-                }
-                return alphaString.length>10?alphaString.substring(1,4):alphaString
-            }
+            // let alphaString = []
+            // let alpha = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+            // const getAlpha = ()=>{
+            //     alphaString = ''
+            //     for (let i = 0; i < 4; i++) {
+            //         let index = Math.floor(Math.random() * 27)
+            //         if (index<1||index>26) {
+            //             index = Math.floor(Math.random() * 27)
+            //         }
+            //         alphaString += (alpha[index])
+            //     }
+            //     return alphaString.length>10?alphaString.substring(1,4):alphaString
+            // }
 
 
             for (let i = 1; i <= 10000; i++) {
                 b.push(
                         {
-                        trim:Math.ceil(Math.random()*i*65398765343434434), 
-                        make:Math.ceil(Math.random()*i*98765343434), 
-                        model:Math.ceil(Math.random()*i*98765343434), 
-                        year:Math.ceil(Math.random()*i*9876534343433),
-                        color:Math.ceil(Math.random()*i*979876534343465),
-                        manufacturer:getAlpha(),
-                        plant:Math.ceil(Math.random()*i*3335),
-                        vin:Math.ceil(Math.random()*i*333333),
-                        plateNumber:Math.ceil(Math.random()*i*444444),
-                        price:Math.ceil(Math.random()*i*9)
+                        trim:Math.ceil(Math.random()*i*434353434434569364434), 
+                        make:Math.ceil(Math.random()*i*65343434343434334), 
+                        model:Math.ceil(Math.random()*i*5343434343433434), 
+                        year:Math.ceil(Math.random()*i*3434343343433443),
+                        color:Math.ceil(Math.random()*i*4346566566653465),
+                        // manufacturer:getAlpha(),
+                        // plant:Math.ceil(Math.random()*i*3335),
+                        // vin:Math.ceil(Math.random()*i*333333),
+                        // plateNumber:Math.ceil(Math.random()*i*444444),
+                        // price:Math.ceil(Math.random()*i*9)
                         })
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:this.gridHeightValue
@@ -1043,17 +1002,25 @@ export default {
     },        
     async mounted(){
         await this.getTestData()
-        this.setDefaultValues()
-        this.deriveHeaders()
-        this.initializePaging(this.getInitialRowsPerPage())
+        this.numberOfColumns = Object.keys(this.fullDS[0]).length
         this.gridWillScroll()
-        this.gridWidth = this.$refs.grid.offsetWidth //set initial size of grid used for calculating where to put the filter flyouts
+        this.gridWidth = this.gridConfig.GridWidth 
         this.gridHeight = this.gridConfig.GridHeight
         if(this.gridHeight.includes('px')){
             this.gridHeightValue = parseInt(this.gridHeight.split('p')[0])
         }
-        window.addEventListener('resize',this.handleResizeGrid)
-        this.handleResizeGrid()
+        if(this.gridWidth.includes('px')){
+            if(this.boolGridWillScroll){
+                this.gridWidthValue = parseInt(this.gridWidth.split('p')[0])*.99
+                this.gridWidth = `${this.gridWidthValue}px`
+            } else {
+                this.gridWidthValue = parseInt(this.gridWidth.split('p')[0])
+            }
+        }
+        this.setDefaultValues()
+        this.deriveHeaders()
+        this.initializePaging(this.getInitialRowsPerPage())
+        
         this.ww_forwardWorker = new forwardWorkerSetup(forwardWorker)
         this.ww_forwardWorker.addEventListener('message',event =>{this.handleMessage(event)})
         this.ww_forwardWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
@@ -1077,7 +1044,6 @@ export default {
 
   },
   beforeDestroy(){
-    window.removeEventListener('resize',this.handleResizeGrid)
   }
 };
 </script>
@@ -1139,7 +1105,7 @@ export default {
 
         .tooltip .tooltiptext {
         visibility: hidden;
-        width: 250px;
+        width: 200px;
         background-color: #e3e4e8;
         text-align: center;
         border-radius: 6px;

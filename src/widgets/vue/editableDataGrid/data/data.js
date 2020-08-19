@@ -1,7 +1,7 @@
 
 let gridConfig =  {
-    GridWidth:'610px', //required
-    GridHeight:'600px', //required
+    GridWidth:'400px', //required
+    GridHeight:'400px', //required
     Paging:{
         EnablePaging:true,
     },

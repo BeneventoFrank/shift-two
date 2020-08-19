@@ -1,38 +1,40 @@
 <template>
-    <div :style="`position:absolute; width:${gridWidth}; height:${gridHeight}; margin-left:${gridWidthValue/2*-1}px; left:50%; width:${gridWidth};`">
+<div :style="`position:relative; display:flex; min-width:${gridWidth}; height:${gridHeight}; flex-direction:column; align-items:center; justify-content:center;`">
+    <div :style="`position:absolute; width:${gridWidth}; height:${gridHeight}; padding:5px;`">
     <div ref='grid' :style="`position:absolute; height:${gridHeight}; width:${gridWidth};`" >
-        <div :style="`display:flex; flex-direction:row; width:${gridWidth}; justify-content:center; align-items:flex-end; flex-wrap:wrap; padding-bottom:12px;`">
-            <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; margin-top:${gridWidthValue>600?20:60}px; align-items:center;`">
-                <div :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridWidthValue>600?'flex-end':'center'};`">
-                    <Slider @change="handleChangeNumberPerPage" 
-                            @initialValue="handleInitialValue" 
-                            v-if="gridConfig.Slider.EnableSlider" 
-                            :width="sliderWidth"
-                            :minValue="minValue"
-                            :maxValue="maxValue"
-                            :stepValue="stepValue"
-                            :initialValue="initialValue"
-                    ></Slider>
+        <div ref='gridHeader' id='gridHeader'>
+            <div :style="`display:flex; flex-direction:row; width:${gridWidth}; justify-content:center; align-items:flex-end; flex-wrap:wrap; padding-bottom:12px;`">
+                <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center;`">
+                    <div :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridWidthValue>600?'flex-end':'center'};`">
+                        <Slider @change="handleChangeNumberPerPage" 
+                                @initialValue="handleInitialValue" 
+                                v-if="gridConfig.Slider.EnableSlider" 
+                                :width="sliderWidth"
+                                :minValue="minValue"
+                                :maxValue="maxValue"
+                                :stepValue="stepValue"
+                                :initialValue="initialValue"
+                        ></Slider>
+                    </div>
+                    <div style="margin-left:50px;">
+                        <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :height='25'/></div>
+                        <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /><span class="tooltiptext">Clear Filtering/Sorting</span></div>
+                    </div>
                 </div>
-                <div style="margin-left:50px;">
-                    <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :height='25'/></div>
-                    <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /><span class="tooltiptext">Clear Filtering/Sorting</span></div>
-                </div>
-            </div>
 
-            <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center; margin-top:${gridWidthValue>600?0:20}px; justify-content:${gridWidthValue>600?'flex-end':'center'};`" class='pagination'>
-                <Pagination 
-                    v-if="gridConfig.Paging.EnablePaging"
-                    :cmpCanPagePrevious="cmpCanPagePrevious"
-                    :cmpCanPageNext="cmpCanPageNext"
-                    :pagination="pagination"
-                    @pageDataForward="handleNextClick"
-                    @pageDataBackwards="handlePreviousClick"
-                ></Pagination>
+                <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center; margin-top:${gridWidthValue>600?0:20}px; justify-content:${gridWidthValue>600?'flex-end':'center'};`" class='pagination'>
+                    <Pagination 
+                        v-if="gridConfig.Paging.EnablePaging"
+                        :cmpCanPagePrevious="cmpCanPagePrevious"
+                        :cmpCanPageNext="cmpCanPageNext"
+                        :pagination="pagination"
+                        @pageDataForward="handleNextClick"
+                        @pageDataBackwards="handlePreviousClick"
+                    ></Pagination>
+                </div>
             </div>
-        </div>
-        <div style="width:100%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
-        <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
+            <div style="width:100%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
+            <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" 
                              @columnSort="handleColumnSort" 
                              @filterClosed="handleFilterClosed" 
@@ -47,8 +49,10 @@
                              :gridWidth="gridWidthValue" 
                              :headers="virtualColumns">
             </HeaderRow>
+            </div>
         </div>
-        <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}px; overflow-x:hidden;  position:relative; height:${gridHeight}`">
+
+        <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}; overflow-x:hidden;  position:relative; height:${gridHeightValue-headerHeight}px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:relative; padding-bottom:62px; overflow-x:scroll; width:${gridWidth};`">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:97%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <div @mouseleave="debounceHover()" @mouseenter="debounceHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
@@ -73,6 +77,7 @@
         </div>
     </div>
     </div>
+</div>
 </template>
 <script>
 
@@ -117,6 +122,7 @@ export default {
             gridHeightValue:0,
             gridWidthValue:0,
             numberOfColumns:0,
+            headerHeight:0,
             highestScrollPosition:0,
             fullDS:[],
             weAreUsingTheSlider:false,
@@ -910,7 +916,7 @@ export default {
                             this.virtualHeight = (this.filteredData.length*29-950)<this.gridHeightValue?this.gridHeightValue:this.filteredData.length*29-950
                             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)                        
                     }
-3                } else {
+                } else {
                     //then clear a filter was called on a column but other filters are applied. 
                     this.clearAFilter(columnIndex)
                     this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
@@ -993,6 +999,11 @@ export default {
                                     columnsBeingFiltered:[]
                                   }
         },
+        calculateHeightOfDataRow(){
+            const field = this.$refs.gridHeader
+            this.headerHeight = field.offsetHeight
+            console.log('what is the field and stuff', field, this.headerHeight, field.offsetHeight)
+        }
     },
     props:{
         gridConfig:{
@@ -1020,7 +1031,8 @@ export default {
         this.setDefaultValues()
         this.deriveHeaders()
         this.initializePaging(this.getInitialRowsPerPage())
-        
+        this.calculateHeightOfDataRow()
+
         this.ww_forwardWorker = new forwardWorkerSetup(forwardWorker)
         this.ww_forwardWorker.addEventListener('message',event =>{this.handleMessage(event)})
         this.ww_forwardWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})

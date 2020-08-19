@@ -29,7 +29,7 @@ export default () => {
         console.log("reverse filter received a message ", message)
         switch (message.MessageType) {
             case 'data':
-                originalData = message.Data.splice(Math.ceil(message.Data.length/2),message.Data.length)
+                originalData = message.Data
                 console.log("reverse filter will handle ", originalData.length)
                 virtualColumns = message.Columns
                 break;

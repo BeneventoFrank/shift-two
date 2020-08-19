@@ -29,7 +29,7 @@ export default () => {
         console.log("forward filter received a message ", message)
         switch (message.MessageType) {
             case 'data':
-                originalData = message.Data.splice(0,(Math.ceil(message.Data.length/2)))
+                originalData = message.Data
                 console.log('forward filter will handle ', originalData.length)
                 virtualColumns = message.Columns
                 break;

@@ -41,6 +41,7 @@ export default () => {
     const sortAllColumns = ()=>{
         for (let i = 1; i < virtualColumns.length; i=i+2) {
             if(virtualColumns[i].isPreSortEnabled){
+                console.log("WE GOT ONE!")
                 let tmpAsc = originalData.slice(0,originalData.length)
                 let tmpDesc = originalData.slice(0,originalData.length)
                 sortedData[virtualColumns[i].dataProperty]= {}

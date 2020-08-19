@@ -3,7 +3,7 @@
     <div :style="`position:absolute; width:${gridWidth}; height:${gridHeight}; padding:5px;`">
     <div ref='grid' :style="`position:absolute; height:${gridHeight}; width:${gridWidth};`" >
         <div ref='gridHeader' id='gridHeader'>
-            <div :style="`display:flex; flex-direction:row; width:${gridWidth}; justify-content:center; align-items:flex-end; flex-wrap:wrap; padding-bottom:12px;`">
+            <div ref="pagination" :style="`display:flex; flex-direction:row; width:${gridWidth}; justify-content:center; align-items:flex-end; flex-wrap:wrap; padding-bottom:12px;`">
                 <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center;`">
                     <div :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridWidthValue>600?'flex-end':'center'};`">
                         <Slider @change="handleChangeNumberPerPage" 
@@ -33,8 +33,8 @@
                     ></Pagination>
                 </div>
             </div>
-            <div style="width:100%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
-            <div :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
+            <div ref="title" style="width:100%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
+            <div ref="headerRow" :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" 
                              @columnSort="handleColumnSort" 
                              @filterClosed="handleFilterClosed" 
@@ -54,21 +54,23 @@
 
         <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}; overflow-x:hidden;  position:relative; height:${gridHeightValue-headerHeight}px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:relative; padding-bottom:62px; overflow-x:scroll; width:${gridWidth};`">
-                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:97%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <div @mouseleave="debounceHover()" @mouseenter="debounceHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
+                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+                    <!-- <div @mouseleave="handleHover" @mouseenter="handleHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" > -->
+                    <div :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
                         <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
                             
-                                <span :style="`display:none; border:1px solid #C8C8C8; position:absolute;
+                                <!-- <span :style="`display:none; border:1px solid #C8C8C8; position:absolute;
                                         border-radius: 5px;
                                         width:200px;
                                         left:${((column.columnIndex)*column.widthValue)-200}px;
-                                        padding:10px;
+                                        padding:5px;
                                         botder:1px solid slategrey;
                                         box-shadow: black 0px 8px 6px -6px;
                                         background-color:#F5F5F5;  
-                                        height:50px;  
+                                        height:50px;
+                                        cursor:zoom-in;  
                                         z-index: 9999;`" v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">
-                                        <div style="display:flex; flex-direction:row; cursor:zoom-in; justify-content:center; width:100%; height:100%; align-items:center">{{dataRow[column.dataProperty]}}</div></span>
+                                        <div style="display:flex; flex-direction:row; justify-content:center; width:100%; height:100%; align-items:center">{{dataRow[column.dataProperty]}}</div></span> -->
                             
                   </div>
                 </tr>
@@ -83,9 +85,7 @@
 
 
 import HeaderRow from './components/HeaderRow'
-
 import { colors } from '../../../../assets/shiftTwo'
-import debounce from 'lodash.debounce'
 import forwardWorker from './webWorkers/forwardFilterWorker'
 import reverseWorker from './webWorkers/reverseFilterWorker'
 import evenSortWorker from './webWorkers/evenSortWorker'
@@ -236,9 +236,9 @@ export default {
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)   
             this.reConfigurePagination(this.sliderCount)                    
         },
-        debounceHover: debounce(function(row, cell, cellWidth, data){
+        handleHover(row, cell, cellWidth, data){
             console.log("data ", data, cellWidth )
-            if(data&&(data.toString().length)* 9.4 > parseInt(cellWidth.split('p')[0])-20){
+            if(data&&(data.toString().length)* 9.4 > parseInt(cellWidth.split('p')[0])-20){ //9.4 is the number px per character in the cell
                 this.curentlyHovering = cell;
                 this.rowCurrentlyHoveringOver = row;
                 this.cellCurrentlyHoveringOver = cell;
@@ -248,7 +248,7 @@ export default {
                 this.cellCurrentlyHoveringOver = null;
                 this.willOverflow=false;                
             }
-         },0),
+         },
         handleShowCancelEye(){
             this.isHovering = !this.isHovering
         },
@@ -779,11 +779,11 @@ export default {
             for (let i = 1; i <= 10000; i++) {
                 b.push(
                         {
-                        trim:Math.ceil(Math.random()*i*434353434434569364434), 
-                        make:Math.ceil(Math.random()*i*65343434343434334), 
-                        model:Math.ceil(Math.random()*i*5343434343433434), 
-                        year:Math.ceil(Math.random()*i*3434343343433443),
-                        color:Math.ceil(Math.random()*i*4346566566653465),
+                        trim:Math.ceil(Math.random()*i*434), 
+                        make:Math.ceil(Math.random()*i*6534), 
+                        model:Math.ceil(Math.random()*i*53434), 
+                        year:Math.ceil(Math.random()*i*343),
+                        color:Math.ceil(Math.random()*i*4346443333255),
                         // manufacturer:getAlpha(),
                         // plant:Math.ceil(Math.random()*i*3335),
                         // vin:Math.ceil(Math.random()*i*333333),
@@ -1000,9 +1000,13 @@ export default {
                                   }
         },
         calculateHeightOfDataRow(){
-            const field = this.$refs.gridHeader
-            this.headerHeight = field.offsetHeight
-            console.log('what is the field and stuff', field, this.headerHeight, field.offsetHeight)
+            const pagination = this.$refs.pagination.offsetHeight
+            const title = this.$refs.title.offsetHeight
+            const header = 56
+            console.log('values ', pagination,title,header)
+            this.headerHeight = pagination+title+header
+            console.log('what are you ', this.headerHeight)
+        
         }
     },
     props:{
@@ -1035,11 +1039,11 @@ export default {
 
         this.ww_forwardWorker = new forwardWorkerSetup(forwardWorker)
         this.ww_forwardWorker.addEventListener('message',event =>{this.handleMessage(event)})
-        this.ww_forwardWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
+        this.ww_forwardWorker.postMessage({'MessageType':'data','Data':this.fullDS.splice(0,(Math.ceil(this.fullDS.length/2))), 'Columns':this.virtualColumns})
 
         this.ww_reverseWorker = new reverseWorkerSetup(reverseWorker)
         this.ww_reverseWorker.addEventListener('message',event =>{this.handleMessage(event)})
-        this.ww_reverseWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
+        this.ww_reverseWorker.postMessage({'MessageType':'data','Data':this.fullDS.splice(Math.ceil(this.fullDS.length/2),this.fullDS.length), 'Columns':this.virtualColumns})
 
         this.ww_evenSortWorker = new evenSortWorkerSetup(evenSortWorker)
         this.ww_evenSortWorker.addEventListener('message',event => {this.handleMessage(event)})

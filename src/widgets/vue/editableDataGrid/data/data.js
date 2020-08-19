@@ -1,12 +1,12 @@
 
 let gridConfig =  {
-    GridWidth:'400px', //required
+    GridWidth:'800px', //required
     GridHeight:'400px', //required
     Paging:{
-        EnablePaging:true,
+        EnablePaging:true, //default to true
     },
     Slider:{
-        EnableSlider:true,
+        EnableSlider:true, //default to true
         Values:{
             UseDefaultValues:true, //default to true
             SliderWidth:300,
@@ -17,13 +17,13 @@ let gridConfig =  {
 
         }
     },
-    GridHeader:'New Race Cars - 2020',
+    //GridHeader:'New Race Cars - 2020',
     Columns:[
             {
                 header:{text:"Make"},
                 dataProperty:"make",
                 dataType:'number',
-                preSortColumn: false,
+                preSortColumn: true,
             },
             {
                 header:{text:"Model"},
@@ -46,6 +46,8 @@ let gridConfig =  {
             {
                 header:{text:"Color"},            
                 dataProperty:"color",
+                dataType:'number',
+                preSortColumn: true
             },            
             // {
             //     header:{text:"Manufacturer"},            

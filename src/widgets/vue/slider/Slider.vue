@@ -74,32 +74,26 @@ export default {
           this.updateValue(event.target);
           this.updateValuePosition(event.target);
           this.updateProgress(event.target);
-          setTimeout(() => {this.$emit('change',event)}, 1000);          
-      },50),  
+          setTimeout(() => {this.$emit('change',event)}, 500);          
+      },0),  
       updateValue(slider) {
           let value = document.getElementById(slider.dataset.valueId);
           value.innerHTML = "<div class='sliderIndicator'> " + slider.value + "</div>";
       },
       updateValuePosition(slider) {
           let value = document.getElementById(slider.dataset.valueId);
-          console.log('what is the value', value)
           const percent = this.getSliderPercent(slider);
-
           const sliderWidth = slider.getBoundingClientRect().width;
           const valueWidth = value.getBoundingClientRect().width;
           const handleSize = slider.dataset.handleSize;
-
           let left = percent * (sliderWidth - handleSize) + handleSize / 2 - valueWidth / 2;
-
           left = Math.min(left, sliderWidth - valueWidth);
           left = slider.value === slider.min ? 0 : left;
-
           value.style.left = left + "px";
       },
       updateProgress(slider) {
           let progress = document.getElementById(slider.dataset.progressId);
           const percent = this.getSliderPercent(slider);
-
           progress.style.width = percent * 100 + "%";
       },
       getSliderPercent(slider) {
@@ -111,15 +105,11 @@ export default {
       setTicks(slider) {
           let container = document.getElementById(slider.dataset.tickId);
           const spacing = parseFloat(slider.dataset.tickStep);
-          console.log("wtf is spacing', ", spacing)
           const sliderRange = (parseInt(slider.max)  - parseInt(slider.min));
-          console.log('slider range ', sliderRange, parseInt(slider.max), parseInt(slider.min))
           const tickCount = sliderRange / spacing + 1; // +1 to account for 0
           for (let ii = 0; ii < tickCount; ii++) {
               let tick = document.createElement("span");
-
               tick.className = "tick-slider-tick";
-
               container.appendChild(tick);
           }
       },

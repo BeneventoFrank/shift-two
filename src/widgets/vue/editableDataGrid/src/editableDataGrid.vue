@@ -55,11 +55,10 @@
         <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}; overflow-x:hidden;  position:relative; height:${gridHeightValue-headerHeight}px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:relative; padding-bottom:62px; overflow-x:scroll; width:${gridWidth};`">
                 <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <!-- <div @mouseleave="handleHover" @mouseenter="handleHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" > -->
-                    <div :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
+                    <div @mouseleave="handleHover" @mouseenter="handleHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
                         <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
                             
-                                <!-- <span :style="`display:none; border:1px solid #C8C8C8; position:absolute;
+                                <span :style="`display:none; border:1px solid #C8C8C8; position:absolute;
                                         border-radius: 5px;
                                         width:200px;
                                         left:${((column.columnIndex)*column.widthValue)-200}px;
@@ -70,8 +69,7 @@
                                         height:50px;
                                         cursor:zoom-in;  
                                         z-index: 9999;`" v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">
-                                        <div style="display:flex; flex-direction:row; justify-content:center; width:100%; height:100%; align-items:center">{{dataRow[column.dataProperty]}}</div></span> -->
-                            
+                                        <div style="display:flex; flex-direction:row; justify-content:center; width:100%; height:100%; align-items:center">{{dataRow[column.dataProperty]}}</div></span>
                   </div>
                 </tr>
             </table>
@@ -167,8 +165,10 @@ export default {
                 filters:[],
                 columnsBeingFiltered:[]
             },
-            ww_forwardWorker:null,
-            ww_reverseWorker:null,
+            ww_forwardWorker1:null,
+            ww_reverseWorker1:null,
+            ww_forwardWorker2:null,
+            ww_reverseWorker2:null,
             ww_evenSortWorker:null,
             ww_oddSortWorker:null,
             defaultValues:{
@@ -720,8 +720,10 @@ export default {
                 }
                 this.isDoneSorting = true;
                 if(this.filterStrategy.isCurrentlyFiltering){
-                    this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                    this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                 } else {
                     this.highestCountLoaded = this.getInitialRowsPerPage();
                     this.filteredData = []
@@ -869,13 +871,14 @@ export default {
                     break;
                 case 'filterTerminated':
                     this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
-                    if(this.numberOfTerminatedFilters===2)    
+                    if(this.numberOfTerminatedFilters===4)    
                     {
                         if(this.sortStrategy.isCurrentlySorting===true){
                             this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData', 'SortStrategy':this.sortStrategy.strategy, 'Data': this.tmpResults})
                             this.numberOfTerminatedFilters = 0
                             this.isDoneFiltering=true
                         } else {
+                            console.log('whats in it.. ', this.tmpResults)
                             this.filteredData = this.tmpResults
                             this.highestCountLoaded = this.getInitialRowsPerPage();
                             this.virtualHeight = (this.filteredData.length*29-950)<this.gridHeightValue?this.gridHeightValue:this.filteredData.length*29-950
@@ -919,8 +922,10 @@ export default {
                 } else {
                     //then clear a filter was called on a column but other filters are applied. 
                     this.clearAFilter(columnIndex)
-                    this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                    this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                 }
 
                 if(this.sortStrategy.isCurrentlySorting===true){
@@ -970,26 +975,34 @@ export default {
                     this.isDoneFiltering=false
 
                     if(this.filterStrategy.columnsBeingFiltered.length>1){ 
-                        this.ww_forwardWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                        this.ww_reverseWorker.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                     } 
                     if(this.filterStrategy.columnsBeingFiltered.length===1){ 
-                        this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
-                        this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
+                        this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                        this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                        this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
+                        this.ww_reverseWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
                     } 
    
                 } else {
                     addFilter(col,filter)
                     this.isDoneFiltering=false
-                    this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
-                    this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true}) 
+                    this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
+                    this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
+                    this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true}) 
+                    this.ww_reverseWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true}) 
                 }
             } else {
                 //then we are adding the only filter
                     addFilter(col,filter)
                     this.isDoneFiltering=false
-                    this.ww_forwardWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
-                    this.ww_reverseWorker.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
+                    this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                    this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                    this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
+                    this.ww_reverseWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
             }
         },
         clearFilters(){
@@ -1037,13 +1050,45 @@ export default {
         this.initializePaging(this.getInitialRowsPerPage())
         this.calculateHeightOfDataRow()
 
-        this.ww_forwardWorker = new forwardWorkerSetup(forwardWorker)
-        this.ww_forwardWorker.addEventListener('message',event =>{this.handleMessage(event)})
-        this.ww_forwardWorker.postMessage({'MessageType':'data','Data':this.fullDS.splice(0,(Math.ceil(this.fullDS.length/2))), 'Columns':this.virtualColumns})
+        let tmpFor1 = []
+        let tmpFor2 = []
+        let tmpRev1 = []
+        let tmpRev2 = []
+        let firstHalf = Math.ceil(Math.ceil(this.fullDS.length/2)/2)
+        let counter = 0
+        for (let i = 0; i < (Math.ceil(this.fullDS.length/2)); i++) {
+            if(i<firstHalf){
+                tmpFor1.push(this.fullDS[i])
+            }else{
+                tmpFor2.push(this.fullDS[i])
+            }
+        }
 
-        this.ww_reverseWorker = new reverseWorkerSetup(reverseWorker)
-        this.ww_reverseWorker.addEventListener('message',event =>{this.handleMessage(event)})
-        this.ww_reverseWorker.postMessage({'MessageType':'data','Data':this.fullDS.splice(Math.ceil(this.fullDS.length/2),this.fullDS.length), 'Columns':this.virtualColumns})
+        for (let i = Math.ceil(this.fullDS.length/2); i < this.fullDS.length; i++) {
+            counter++
+            if(counter<=firstHalf){
+                tmpRev1.push(this.fullDS[i])
+            }else{
+                tmpRev2.push(this.fullDS[i])
+            }
+        }
+        console.log(tmpFor1, tmpFor2, tmpRev1, tmpRev2)
+
+        this.ww_forwardWorker1 = new forwardWorkerSetup(forwardWorker)
+        this.ww_forwardWorker1.addEventListener('message',event =>{this.handleMessage(event)})
+        this.ww_forwardWorker1.postMessage({'MessageType':'data','Data':tmpFor1, 'Columns':this.virtualColumns})
+        
+        this.ww_forwardWorker2 = new forwardWorkerSetup(forwardWorker)
+        this.ww_forwardWorker2.addEventListener('message',event =>{this.handleMessage(event)})
+        this.ww_forwardWorker2.postMessage({'MessageType':'data','Data':tmpFor2, 'Columns':this.virtualColumns})
+
+        this.ww_reverseWorker1 = new reverseWorkerSetup(reverseWorker)
+        this.ww_reverseWorker1.addEventListener('message',event =>{this.handleMessage(event)})
+        this.ww_reverseWorker1.postMessage({'MessageType':'data','Data':tmpRev1, 'Columns':this.virtualColumns})
+
+        this.ww_reverseWorker2 = new reverseWorkerSetup(reverseWorker)
+        this.ww_reverseWorker2.addEventListener('message',event =>{this.handleMessage(event)})
+        this.ww_reverseWorker2.postMessage({'MessageType':'data','Data':tmpRev2, 'Columns':this.virtualColumns})
 
         this.ww_evenSortWorker = new evenSortWorkerSetup(evenSortWorker)
         this.ww_evenSortWorker.addEventListener('message',event => {this.handleMessage(event)})

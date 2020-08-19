@@ -1,7 +1,7 @@
 
 let gridConfig =  {
-    GridWidth:'800px', //required
-    GridHeight:'400px', //required
+    GridWidth:'1000px', //required
+    GridHeight:'600px', //required
     Paging:{
         EnablePaging:true, //default to true
     },
@@ -17,7 +17,7 @@ let gridConfig =  {
 
         }
     },
-    //GridHeader:'New Race Cars - 2020',
+    GridHeader:'New Race Cars - 2020',
     Columns:[
             {
                 header:{text:"Make"},

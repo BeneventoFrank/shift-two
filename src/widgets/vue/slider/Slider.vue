@@ -8,7 +8,7 @@
                   <div id="weightValue" class="tick-slider-value"></div>
               </div>
               <div class="tick-slider-background"></div>
-              <div id="weightProgress" class="tick-slider-progress"></div>
+              <div id="weightProgress" class="tick-slider-progress" :style="`background-color:${colorScheme.sliderFillColor} ;`"></div>
               <div id="weightTicks" class="tick-slider-tick-container"></div>
               <input
                   ref="sliderInput"
@@ -54,6 +54,9 @@ export default {
     },
     width:{
       type:Number
+    }, 
+    colorScheme:{
+        type:Object
     }
   }, 
   updated(){
@@ -78,7 +81,7 @@ export default {
       },0),  
       updateValue(slider) {
           let value = document.getElementById(slider.dataset.valueId);
-          value.innerHTML = "<div class='sliderIndicator'> " + slider.value + "</div>";
+          value.innerHTML = `<div style="background-color:${this.colorScheme.sliderFillColor}" class='sliderIndicator'>${slider.value}</div> `;
       },
       updateValuePosition(slider) {
           let value = document.getElementById(slider.dataset.valueId);
@@ -138,8 +141,7 @@ export default {
         --light-gray: #e3e4e8;
         --gray: #71738b;
         --light-blue: #7a7c93;
-        --blue: #34385a;
-
+        --blue: #34385a;        
         --slider-handle-size: 16px;
         --slider-handle-border-radius: 50%;
         --slider-handle-margin-top: -4px;
@@ -162,7 +164,6 @@ export default {
         align-items: center;
     }
     .sliderIndicator {
-      background-color: slategray;
       border-radius: 5px;
       color:white;
       width:50px;
@@ -181,11 +182,10 @@ export default {
 
     .tick-slider-header>h5 {
         margin: 0;
-
+        color: var(--gray);
         font-family: "Poppins", sans-serif;
         font-size: 18px;
         font-weight: 300;
-        color: var(--gray);
     }
 
     .tick-slider {
@@ -197,7 +197,6 @@ export default {
     .tick-slider-value-container {
         position: relative;
         width: 100%;
-
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -244,7 +243,7 @@ export default {
     }
 
     .tick-slider-progress {
-        background-color: var(--yellow);
+        background-color: green;
     }
 
     .tick-slider-tick-container {
@@ -287,7 +286,6 @@ export default {
             transform: scale(1);
         }
     }
-
     /*
 
         REMOVE SLIDER STYLE DEFAULTS
@@ -326,21 +324,14 @@ export default {
     */
     input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
-
         width: var(--slider-handle-size);
         height: var(--slider-handle-size);
-
-        background: var(--orange);
-
         border-radius: var(--slider-handle-border-radius);
-
         cursor: pointer;
-
+        background-color: silver;
         margin-top: var(--slider-handle-margin-top);
-      
         -webkit-transform: scale(1);
         transform: scale(1);
-
         transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
@@ -355,7 +346,7 @@ export default {
         width: var(--slider-handle-size);
         height: var(--slider-handle-size);
 
-        background: var(--orange);
+        
 
         border: none;
         border-radius: var(--slider-handle-border-radius);

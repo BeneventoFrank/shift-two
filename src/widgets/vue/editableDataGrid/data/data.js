@@ -14,8 +14,21 @@ let gridConfig =  {
             // MaxValue:100,
             // StepValue:10,
             // InitialValue:10,
-
         }
+    },
+    ColorScheme:{
+        // SliderFillColor:'blue',
+        // PagingTextColor:'green',
+        // GridTitleColor:'magenta',
+        // GridHeaderTextColor:'cyan',
+        // GridRowTextColor:'orange',
+        // GridHeaderBackgroundColor:'grey',
+        // GridHeaderBorderColor:'pink',
+        // GridRowOddBackgroundColor:'purple',
+        // GridRowEvenBackgroundColor:'lavender',
+        // ActiveIndicatorColor:'brown',
+        // FlyoutBackgroundColor:'rosybrown',
+        // FlyoutTextColor:'gold'
     },
     GridHeader:'New Race Cars - 2020',
     Columns:[
@@ -35,20 +48,20 @@ let gridConfig =  {
                 header:{text:"Year"},
                 dataProperty:"year",
                 dataType:'number',
-                preSortColumn: false
+                preSortColumn: true
             },
             {
                 header:{text:"Trim"},            
                 dataProperty:"trim",
                 dataType:'number',
-                preSortColumn: false,
+                preSortColumn: true,
             },
             {
                 header:{text:"Color"},            
                 dataProperty:"color",
                 dataType:'number',
-                preSortColumn: false,
-                width:'450px'
+                preSortColumn: true,
+                width:'250px'
             }            
         ]
 }

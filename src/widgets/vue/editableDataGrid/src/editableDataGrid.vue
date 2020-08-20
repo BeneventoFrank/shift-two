@@ -14,6 +14,7 @@
                                 :maxValue="maxValue"
                                 :stepValue="stepValue"
                                 :initialValue="initialValue"
+                                :colorScheme="colorScheme"
                         ></Slider>
                     </div>
                 </div>
@@ -25,16 +26,17 @@
                         :pagination="pagination"
                         @pageDataForward="handleNextClick"
                         @pageDataBackwards="handlePreviousClick"
+                        :colorScheme="colorScheme"
                     ></Pagination>
                 </div>
             </div>
             <div style='display:flex; flex-direction:row;'>
-                <div ref="title" style="width:33%;">
-                    <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :height='25'/></div>
-                    <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /><span class="tooltiptext">Clear Filtering/Sorting</span></div>
+                <div style="width:33%;">
+                    <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :color="colorScheme.activeIndicatorColor" :height='25'/></div>
+                    <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' :style="`border-radius:5px; background-color:${colorScheme.flyoutBackgroundColor}`" v-show="isHovering" ><CancelEye :height='25' /><span :style="`border:1px solid ${colorScheme.flyoutTextColor}; color:${colorScheme.flyoutTextColor}`" class="tooltiptext">Clear Filtering/Sorting</span></div>
                 </div>
-                <div ref="title" style="width:33%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
-                <div ref="title" style="width:33%;"></div>
+                <div ref="title" style="width:33%;"><span class='title' :style="`color:${colorScheme.gridTitleColor}`" v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
+                <div style="width:33%;"></div>
             </div>
             
 
@@ -51,16 +53,17 @@
                              :isDoneSorting="isDoneSorting" 
                              :currentFilters="filterStrategy" 
                              :gridWidth="gridWidthValue" 
-                             :headers="virtualColumns">
+                             :headers="virtualColumns"
+                             :colorScheme="colorScheme">
             </HeaderRow>
             </div>
         </div>
 
         <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}; overflow-x:hidden;  position:relative; height:${gridHeightValue-headerHeight}px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:relative; padding-bottom:62px; overflow-x:scroll; width:${gridWidth};`">
-                <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''}`" :style="`border-spacing:0px; cursor:pointer; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+                <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''}`" :style="`border-spacing:0px; background-color:${rowIndex%2===0?colorScheme.gridRowEvenBackgroundColor:colorScheme.gridRowOddBackgroundColor}; cursor:pointer; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <div :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
-                        <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
+                        <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;  color:${colorScheme.gridRowTextColor}` ">{{dataRow[column.dataProperty]}}</td>
                     </div>
                 </tr>
             </table>
@@ -178,10 +181,26 @@ export default {
                     maxValue:4000,
                     stepValue:0,
                     initialValue:2000,
+                },
+                colorScheme:{
+                    sliderFillColor:'slateGrey',
+                    pagingTextColor:'slateGrey',
+                    gridTitleColor:'slateGrey',
+                    gridHeaderTextColor:'slateGrey',
+                    gridRowTextColor:'slateGrey',
+                    gridHeaderBackgroundColor:'#F8F8F8',
+                    gridRowOddBackgroundColor:'#F8F8F8',
+                    gridRowEvenBackgroundColor:'white',
+                    activeIndicatorColor:'#C3D9F9',
+                    gridHeaderBorderColor:'slateGrey',
+                    flyoutBackgroundColor:'#F8F8F8',
+                    flyoutTextColor:'slateGrey'
+
                 }
-
             },
+            colorScheme:{
 
+            },            
             pagination:{
                 MinRecordsViewable:0,
                 MaxRecordsViewable:0,
@@ -598,10 +617,6 @@ export default {
                     tmp.isCustomWidth = this.gridConfig.Columns[i].width?true:false
                     tmp.widthValue = w
                     tmp.alignment = this.gridConfig.Columns[i].header.alignment?this.translateAlignment(this.gridConfig.Columns[i].header.alignment):this.translateAlignment(this.defaultValues.columnValues.alignment)
-                    tmp.backgroundColor=this.gridConfig.Columns[i].header.backgroundColor?this.gridConfig.Columns[i].header.backgroundColor:this.defaultValues.columnValues.backgroundColor
-                    tmp.textColor=this.gridConfig.Columns[i].header.textColor?this.gridConfig.Columns[i].header.textColor:this.defaultValues.columnValues.textColor
-                    tmp.borderWidth=this.gridConfig.Columns[i].header.borderWidth?this.gridConfig.Columns[i].header.borderWidth:this.defaultValues.columnValues.borderWidth
-                    tmp.borderColor=this.gridConfig.Columns[i].header.borderColor?this.gridConfig.Columns[i].header.borderColor:this.defaultValues.columnValues.borderColor     
                     tmp.dataProperty=this.gridConfig.Columns[i].dataProperty?this.gridConfig.Columns[i].dataProperty:''
                     tmp.dataAlignment=this.gridConfig.Columns[i].dataAlignment?this.gridConfig.Columns[i].dataAlignment:this.defaultValues.columnValues.dataAlignment
                     tmp.dataType=this.gridConfig.Columns[i].dataType?this.gridConfig.Columns[i].dataType:'string'
@@ -614,10 +629,6 @@ export default {
                     tmp.widthValue = 0
                     tmp.isCustomWidth = this.gridConfig.Columns[i].width?true:false
                     tmp.alignment = this.defaultValues.columnValues.alignment
-                    tmp.backgroundColor=''
-                    tmp.textColor=''
-                    tmp.borderWidth=''
-                    tmp.borderColor=''
                     tmp.dataProperty=''
                     tmp.dataAlignment=''
                     tmp.dataType = String
@@ -1004,6 +1015,24 @@ export default {
             this.headerHeight = pagination+title+header
             console.log('what are you ', this.headerHeight)
         
+        },
+        processColorScheme(){
+            let tmp = {}
+                tmp.sliderFillColor = this.gridConfig.ColorScheme.SliderFillColor?this.gridConfig.ColorScheme.SliderFillColor:this.defaultValues.colorScheme.sliderFillColor;
+                tmp.pagingTextColor = this.gridConfig.ColorScheme.PagingTextColor?this.gridConfig.ColorScheme.PagingTextColor:this.defaultValues.colorScheme.pagingTextColor
+                tmp.gridTitleColor = this.gridConfig.ColorScheme.GridTitleColor?this.gridConfig.ColorScheme.GridTitleColor:this.defaultValues.colorScheme.gridTitleColor
+                tmp.gridHeaderTextColor = this.gridConfig.ColorScheme.GridHeaderTextColor?this.gridConfig.ColorScheme.GridHeaderTextColor:this.defaultValues.colorScheme.gridHeaderTextColor
+                tmp.gridRowTextColor = this.gridConfig.ColorScheme.GridRowTextColor?this.gridConfig.ColorScheme.GridRowTextColor:this.defaultValues.colorScheme.gridRowTextColor
+                tmp.gridHeaderBackgroundColor= this.gridConfig.ColorScheme.GridHeaderBackgroundColor?this.gridConfig.ColorScheme.GridHeaderBackgroundColor:this.defaultValues.colorScheme.gridHeaderBackgroundColor
+                tmp.gridRowOddBackgroundColor= this.gridConfig.ColorScheme.GridRowOddBackgroundColor?this.gridConfig.ColorScheme.GridRowOddBackgroundColor:this.defaultValues.colorScheme.gridRowOddBackgroundColor
+                tmp.gridRowEvenBackgroundColor= this.gridConfig.ColorScheme.GridRowEvenBackgroundColor?this.gridConfig.ColorScheme.GridRowEvenBackgroundColor:this.defaultValues.colorScheme.gridRowEvenBackgroundColor
+                tmp.activeIndicatorColor= this.gridConfig.ColorScheme.ActiveIndicatorColor?this.gridConfig.ColorScheme.ActiveIndicatorColor:this.defaultValues.colorScheme.activeIndicatorColor
+                tmp.gridHeaderBorderColor= this.gridConfig.ColorScheme.GridHeaderBorderColor? this.gridConfig.ColorScheme.GridHeaderBorderColor: this.defaultValues.colorScheme.gridHeaderBorderColor
+                tmp.flyoutBackgroundColor=this.gridConfig.ColorScheme.FlyoutBackgroundColor?this.gridConfig.ColorScheme.FlyoutBackgroundColor: this.defaultValues.colorScheme.flyoutBackgroundColor
+                tmp.flyoutTextColor=this.gridConfig.ColorScheme.FlyoutTextColor?this.gridConfig.ColorScheme.FlyoutTextColor: this.defaultValues.colorScheme.flyoutTextColor
+
+
+            this.colorScheme = tmp
         }
     },
     props:{
@@ -1033,6 +1062,8 @@ export default {
         this.deriveHeaders()
         this.gridConfig.Paging.EnablePaging?this.initializePaging(this.getInitialRowsPerPage()):null
         this.calculateHeightOfDataRow()
+        this.processColorScheme()
+        console.log(this.colorScheme)
 
         let tmpFor1 = []
         let tmpFor2 = []
@@ -1107,7 +1138,7 @@ export default {
             background-color: #f8f8f8;
             height:auto;
             max-height:0px;
-            transition:max-height .75s; 
+            transition:max-height 350ms; 
             transition-timing-function: ease-out;
         }
         .animate{
@@ -1141,7 +1172,6 @@ export default {
         }
         .title{
             font-size:24px;
-            color:slategrey;
             font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
         }
         .pagination{
@@ -1156,22 +1186,18 @@ export default {
         }
 
         .tooltip .tooltiptext {
-        visibility: hidden;
-        width: 200px;
-        background-color:rgb(245, 245, 245);
-        text-align: center;
-        border-radius: 6px;
-        padding: 5px 0;
-
-        /* Position the tooltip */
-        position: absolute;
-        z-index: 1;
-        top: 0px;
-        left:50px;
-        
+            visibility: hidden;
+            width: 200px;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            top: 0px;
+            left:50px;
         }
         .tooltip:hover .tooltiptext {
-        visibility: visible;
+            visibility: visible;
         }
         .eye{
             display:flex;

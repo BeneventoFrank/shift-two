@@ -13,36 +13,39 @@
                     </span>
                     <span v-else>&nbsp;</span>
                     <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty">
-                        <SortSVG style="padding-right:20px" :height="11"></SortSVG>
+                        <SortSVG style="padding-right:20px" :color="colorScheme.activeIndicatorColor" :height="11"></SortSVG>
                     </span>
                     <span v-else>&nbsp;</span>
                 </div>
             </div>
         </div>
-        <div style='width:100%; background-color:rgb(245, 245, 245);'>
+        <div style='width: 100%; position: relative; background-color: rgb(245, 245, 245); z-index: 77; box-shadow: 0 6px 5px -8px black;'>
             <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
                     <div :id="`header-${header.columnIndex}`" :ref="`header-${header.columnIndex}`" 
-                        :style="`width:${header.width}; display:flex; flex-direction:row; justify-content:${header.alignment}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
+                        :style="`width:${header.width}; display:flex; flex-direction:row; 
+                                justify-content:${header.alignment}; 
+                                height:${header.height}; 
+                                border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};
+                                background-color:${ ((currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString())))||((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty.toString()))?colorScheme.activeIndicatorColor:colorScheme.gridHeaderBackgroundColor} 
+                                `"
                         :class="`headerCell 
-                                ${(currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString()))?'activeFilter':null} 
-                                ${(currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty.toString())?'activeFilter':null} 
                                 `" 
                         @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
                         @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
                         v-for="(header) in headers" :key="header.columnIndex">
-                        <span :style="`display:block; width:${header.width}; overflow:hidden; text-overflow:ellipsis`"> 
+                        <span :style="`display:block; color:${colorScheme.gridHeaderTextColor}; width:${header.width}; overflow:hidden; text-overflow:ellipsis`"> 
                             {{header.text}}
                         </span>
                         <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null}`">
-                            <div class='innerDiv' :style="`background-color:${bgColor}`">
+                            <div class='innerDiv' :style="`background-color:${colorScheme.flyoutBackgroundColor}`">
                                 <div class='flyoutHeader'>
                                     <div class='headerItem sort'> 
                                         <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'asc')}"><UpArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
                                         <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'desc')}"><DownArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
                                     </div>
                                     <div class='headerItem'>
-                                        <label class='filterHeader'>{{header.text}}</label>
+                                        <label class='filterHeader' :style="`color:${colorScheme.flyoutTextColor};`">{{header.text}}</label>
                                     </div>
                                     <div class='headerItem'>
                                         &nbsp;
@@ -62,7 +65,6 @@
     </div>
 </template>
 <script>
-import {colors} from '../../../../../assets/shiftTwo'
 import debounce from 'lodash.debounce'
 import FilterInput from '../components/filterInput'
 import UpArrow from '../images/UpArrow'
@@ -84,7 +86,6 @@ export default {
             showAFilter:false,
             isSorting:false,
             showFilter:{},
-            bgColor:'',
             isActiveSort:'',
             message:null,
             isSearching:false,
@@ -115,6 +116,9 @@ export default {
         },
         isDoneSorting:{
             type:Boolean
+        }, 
+        colorScheme:{
+            type:Object
         }
     },        
     methods: {
@@ -181,7 +185,7 @@ export default {
        }, 100),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
            if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 
-           return usersBorderWidth?`${usersBorderWidth} solid ${usersBorderColor}`:`${this.defaultValues.borderWidth} solid ${this.defaultValues.borderColor}`
+           return `1px solid ${this.colorScheme.gridHeaderBorderColor}`
        },
     },
     mounted(){
@@ -190,7 +194,6 @@ export default {
              tmp[i]=false
          }
          this.showFilter = tmp
-         this.bgColor = colors.editableDataGrid.defaultHeaderColor
   }
 };
 </script>
@@ -280,7 +283,7 @@ export default {
         text-overflow: ellipsis;
         display: inline-block;
         font-size:11px; 
-        color:slateGrey; 
+        color:red; 
         opacity:.5;
     }
 </style>

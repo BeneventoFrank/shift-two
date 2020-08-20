@@ -1,11 +1,11 @@
 <template>
-        <div style=''>
-            <span class='pagingText' style="margin-right:25px">{{`${pagination.MinRecordsViewable} to ${pagination.MaxRecordsViewable} of ${pagination.TotalNumberOfRecords}`}}</span>
+        <div :style="`color:${colorScheme.pagingTextColor};`">
+            <span class='pagingText' :style="`margin-right:25px`">{{`${pagination.MinRecordsViewable} to ${pagination.MaxRecordsViewable} of ${pagination.TotalNumberOfRecords}`}}</span>
             
             <span v-if="cmpCanPagePrevious" class='pagingText pointer' @click="()=>{this.handlePreviousClick(false)}">&#124;</span>
             <span v-else class='pagingText'>&#124;</span>
-            <span v-if="cmpCanPagePrevious" style='margin-left:1px;' class='pagingTextArrow pointer' @click="()=>{this.handlePreviousClick(false)}">&#60;</span>
-            <span v-else style='margin-left:1px; margin-right:3px' class='pagingTextArrow'>&#60;</span>
+            <span v-if="cmpCanPagePrevious" :style="`margin-left:1px;`" class='pagingTextArrow pointer' @click="()=>{this.handlePreviousClick(false)}">&#60;</span>
+            <span v-else :style="`margin-left:1px; margin-right:3px;`" class='pagingTextArrow'>&#60;</span>
             
             <span v-if="cmpCanPagePrevious" style='margin-left:1px;' class='pagingTextArrow pointer' @click="()=>{this.handlePreviousClick(true)}">&#60;</span>
             <span v-else style='margin-left:1px; margin-right:10px' class='pagingTextArrow'>&#60;</span>
@@ -61,6 +61,9 @@ export default {
         },
         virtualColumns:{
             type:Array
+        },
+        colorScheme:{
+            type:Object
         }
     },        
     mounted(){
@@ -91,7 +94,6 @@ export default {
   -ms-user-select: none; /* IE10+/Edge */
   user-select: none; /* Standard */    
   font-size:12px;
-  color:var(--ag-secondary-foreground-color,rgba(0,0,0,.54));
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
   line-height: normal;
 }
@@ -101,7 +103,6 @@ export default {
   -ms-user-select: none; /* IE10+/Edge */
   user-select: none; /* Standard */    
   font-size: 15px;
-  color:var(--ag-secondary-foreground-color,rgba(0,0,0,.54));
   font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif;
   line-height: normal;
 }

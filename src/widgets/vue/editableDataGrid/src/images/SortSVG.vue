@@ -19,11 +19,14 @@ export default {
     },
     isActiveSort:{
       type:String
+    },
+    color:{
+      type:String
     }
   }, 
   methods:{
     getFillColor(){
-      return this.isActiveSort==='asc'?'black':'#C3D9F9'
+      return this.isActiveSort==='asc'?'black':this.color
     }
   }
 }

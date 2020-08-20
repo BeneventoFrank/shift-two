@@ -1137,12 +1137,12 @@ export default {
             border-top: 1px solid #DCDCDC;    
             background-color: #f8f8f8;
             height:auto;
-            max-height:0px;
-            transition:max-height 350ms; 
-            transition-timing-function: ease-out;
+            max-height:30px;
+            transition:transform .5s;
+            
         }
         .animate{
-            max-height:30px
+            transform: translate(20px,20px)
         }
         .dataRow{
             width:100%; 

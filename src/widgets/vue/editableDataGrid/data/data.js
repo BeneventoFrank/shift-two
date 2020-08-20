@@ -35,7 +35,8 @@ let gridConfig =  {
                 header:{text:"Year"},
                 dataProperty:"year",
                 dataType:'number',
-                preSortColumn: true
+                preSortColumn: true,
+                width:'250px'
             },
             {
                 header:{text:"Trim"},            
@@ -47,31 +48,9 @@ let gridConfig =  {
                 header:{text:"Color"},            
                 dataProperty:"color",
                 dataType:'number',
+                width:'250px',
                 preSortColumn: true
-            },            
-            // {
-            //     header:{text:"Manufacturer"},            
-            //     dataProperty:"manufacturer",
-            // },
-            // {
-            //     header:{text:"Plant"},            
-            //     dataProperty:"plant"
-            // },
-            // {
-            //     header:{text:"Vin"},            
-            //     dataProperty:"vin",
-            //     dataType:'number'
-            // },
-            // {
-            //     header:{text:"Plate Number"},            
-            //     dataProperty:"plateNumber",
-            //     dataType:'number'
-            // },
-            // {
-            //     header:{text:"Price"},            
-            //     dataProperty:"price",
-            //     dataType:'number'
-            // }                                    
+            }            
         ]
 }
 

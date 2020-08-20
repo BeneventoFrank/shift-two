@@ -131,8 +131,6 @@ export default {
             scrollCount:0,
             tmpResults:[],
             boolGridWillScroll:false,
-            willOverflow:false,
-            totalWidthOfColumns:0,
             tmpResultsSort:{},
             highestCountLoaded:0,
             numberOfTerminatedFilters:0,
@@ -246,7 +244,6 @@ export default {
                 this.curentlyHovering = null
                 this.rowCurrentlyHoveringOver = null;
                 this.cellCurrentlyHoveringOver = null;
-                this.willOverflow=false;                
             }
          },
         handleShowCancelEye(){
@@ -609,6 +606,7 @@ export default {
                 if(Object.keys(this.gridConfig.Columns[i].header).length>0){
                     
                     let w = this.gridConfig.Columns[i].width?this.gridConfig.Columns[i].width.split('p')[0]-1:this.defaultValues.columnValues.width.split('p')[0]-1
+
                     totalWidth = totalWidth+w
 
                     hasHeader=true;
@@ -632,6 +630,7 @@ export default {
                     tmp.text=''
                     tmp.height=''
                     tmp.width = this.gridConfig.Columns[i].width?this.gridConfig.Columns[i].width:this.defaultValues.columnValues.width
+                    tmp.widthValue = 0
                     tmp.isCustomWidth = this.gridConfig.Columns[i].width?true:false
                     tmp.alignment = this.defaultValues.columnValues.alignment
                     tmp.backgroundColor=''
@@ -646,7 +645,6 @@ export default {
                 this.userHasHeaders=hasHeader
                 this.virtualColumns.push(tmp)
             }
-            this.totalWidthOfColumns = totalWidth
         },
         gridWillScroll(numberOfRows){
             let height = this.gridHeightValue
@@ -738,8 +736,16 @@ export default {
             this.filterCount = 0
         },
         setDefaultValues(){
-           const numColumns = Object.keys(this.fullDS[0]).length
-           const widthOfGrid = this.gridWidthValue
+            let tmp = 0
+            let customColCount = 0
+            for (let i = 0; i < this.gridConfig.Columns.length; i++) {
+                if (this.gridConfig.Columns[i].width) {
+                    tmp = tmp  + parseInt(this.gridConfig.Columns[i].width.split('p')[0])
+                    customColCount++
+                }
+            }
+           const numColumns = Object.keys(this.fullDS[0]).length-customColCount
+           const widthOfGrid = this.gridWidthValue - tmp
            console.log("widthof grid", widthOfGrid)
            const eachColumn = Math.ceil(widthOfGrid/numColumns)
            this.defaultValues.columnValues.backgroundColor = colors.editableDataGrid.defaultHeaderColor
@@ -778,7 +784,7 @@ export default {
             // }
 
 
-            for (let i = 1; i <= 10000; i++) {
+            for (let i = 1; i <= 100000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*434), 
@@ -1063,7 +1069,6 @@ export default {
                 tmpFor2.push(this.fullDS[i])
             }
         }
-
         for (let i = Math.ceil(this.fullDS.length/2); i < this.fullDS.length; i++) {
             counter++
             if(counter<=firstHalf){

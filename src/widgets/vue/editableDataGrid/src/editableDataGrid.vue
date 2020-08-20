@@ -8,7 +8,7 @@
                     <div :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridWidthValue>600?'flex-end':'center'};`">
                         <Slider @change="handleChangeNumberPerPage" 
                                 @initialValue="handleInitialValue" 
-                                v-if="gridConfig.Slider.EnableSlider" 
+                                v-show="gridConfig.Slider.EnableSlider" 
                                 :width="sliderWidth"
                                 :minValue="minValue"
                                 :maxValue="maxValue"
@@ -24,7 +24,7 @@
 
                 <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center; margin-top:${gridWidthValue>600?0:20}px; justify-content:${gridWidthValue>600?'flex-end':'center'};`" class='pagination'>
                     <Pagination 
-                        v-if="gridConfig.Paging.EnablePaging"
+                        v-show="gridConfig.Paging.EnablePaging"
                         :cmpCanPagePrevious="cmpCanPagePrevious"
                         :cmpCanPageNext="cmpCanPageNext"
                         :pagination="pagination"
@@ -761,7 +761,7 @@ export default {
             // }
 
 
-            for (let i = 1; i <= 1000; i++) {
+            for (let i = 1; i <= 100000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*434), 

@@ -1,9 +1,9 @@
 
 let gridConfig =  {
-    GridWidth:'400px', //required
+    GridWidth:'1000px', //required
     GridHeight:'600px', //required
     Paging:{
-        EnablePaging:true, //default to true
+        EnablePaging:true //default to true
     },
     Slider:{
         EnableSlider:true, //default to true
@@ -23,32 +23,32 @@ let gridConfig =  {
                 header:{text:"Make"},
                 dataProperty:"make",
                 dataType:'number',
-                preSortColumn: true,
+                preSortColumn: false,
             },
             {
                 header:{text:"Model"},
                 dataProperty:"model",
                 dataType:'number',
-                preSortColumn: true
+                preSortColumn: false
             },
             {
                 header:{text:"Year"},
                 dataProperty:"year",
                 dataType:'number',
-                preSortColumn: true,
-                width:'350px'
+                preSortColumn: false
             },
             {
                 header:{text:"Trim"},            
                 dataProperty:"trim",
                 dataType:'number',
-                preSortColumn: true,
+                preSortColumn: false,
             },
             {
                 header:{text:"Color"},            
                 dataProperty:"color",
                 dataType:'number',
-                preSortColumn: true
+                preSortColumn: false,
+                width:'450px'
             }            
         ]
 }

@@ -8,7 +8,7 @@
                     <div :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridWidthValue>600?'flex-end':'center'};`">
                         <Slider @change="handleChangeNumberPerPage" 
                                 @initialValue="handleInitialValue" 
-                                v-if="gridConfig.Slider.EnableSlider" 
+                                v-show="gridConfig.Slider.EnableSlider" 
                                 :width="sliderWidth"
                                 :minValue="minValue"
                                 :maxValue="maxValue"
@@ -19,7 +19,7 @@
                 </div>
                 <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center; margin-top:${gridWidthValue>600?0:20}px; justify-content:${gridWidthValue>600?'flex-end':'center'};`" class='pagination'>
                     <Pagination 
-                        v-if="gridConfig.Paging.EnablePaging"
+                        v-show="gridConfig.Paging.EnablePaging"
                         :cmpCanPagePrevious="cmpCanPagePrevious"
                         :cmpCanPageNext="cmpCanPageNext"
                         :pagination="pagination"

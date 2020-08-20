@@ -31,7 +31,7 @@
                         @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
                         @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
                         v-for="(header) in headers" :key="header.columnIndex">
-                        <span> 
+                        <span :style="`display:block; width:${header.width}; overflow:hidden; text-overflow:ellipsis`"> 
                             {{header.text}}
                         </span>
                         <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null}`">

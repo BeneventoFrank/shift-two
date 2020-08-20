@@ -1,6 +1,6 @@
 
 let gridConfig =  {
-    GridWidth:'1000px', //required
+    GridWidth:'400px', //required
     GridHeight:'600px', //required
     Paging:{
         EnablePaging:true, //default to true
@@ -36,7 +36,7 @@ let gridConfig =  {
                 dataProperty:"year",
                 dataType:'number',
                 preSortColumn: true,
-                width:'250px'
+                width:'350px'
             },
             {
                 header:{text:"Trim"},            
@@ -48,7 +48,6 @@ let gridConfig =  {
                 header:{text:"Color"},            
                 dataProperty:"color",
                 dataType:'number',
-                width:'250px',
                 preSortColumn: true
             }            
         ]

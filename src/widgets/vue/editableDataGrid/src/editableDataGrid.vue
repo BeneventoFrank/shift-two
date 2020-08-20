@@ -54,7 +54,7 @@
 
         <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}; overflow-x:hidden;  position:relative; height:${gridHeightValue-headerHeight}px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:relative; padding-bottom:62px; overflow-x:scroll; width:${gridWidth};`">
-                <tr :class="rowIndex%2===0?'evenRow':'oddRow'" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+                <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''}`" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <div @mouseleave="handleHover" @mouseenter="handleHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
                         <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
                             
@@ -116,6 +116,7 @@ export default {
                 hasHeaders:false
             },
             gridWidth:'',
+            shouldAnimate:false,
             gridHeight:'',
             gridHeightValue:0,
             gridWidthValue:0,
@@ -1107,7 +1108,8 @@ export default {
         this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
         this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
 
-
+        window.requestAnimationFrame(()=>{this.shouldAnimate = true})
+        
   },
   beforeDestroy(){
   }
@@ -1125,14 +1127,20 @@ export default {
         }
         .oddRow{
             border-top: 1px solid #DCDCDC;    
-            background-color: #F8F8F8;
+            background-color: #f8f8f8;
+            height:auto;
+            max-height:0px;
+            transition:max-height .5s ease-out; 
+        }
+        .animate{
+            max-height:30px
         }
         .dataRow{
             width:100%; 
             display:flex; 
             flex-direction:row;
             scroll-behavior: smooth;
-            border-bottom: 1px solid #DCDCDC;    
+            border-bottom: .5px solid #DCDCDC;    
         }
 
         .dataGrid{

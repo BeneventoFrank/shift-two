@@ -54,23 +54,10 @@
 
         <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}; overflow-x:hidden;  position:relative; height:${gridHeightValue-headerHeight}px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:relative; padding-bottom:62px; overflow-x:scroll; width:${gridWidth};`">
-                <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''}`" :style="`border-spacing:0px; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <div @mouseleave="handleHover" @mouseenter="handleHover(rowIndex,column.columnIndex, column.width, dataRow[column.dataProperty])" :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
+                <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''}`" :style="`border-spacing:0px; cursor:pointer; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+                    <div :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
                         <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;  text-align:${column.dataAlignment}` ">{{dataRow[column.dataProperty]}}</td>
-                            
-                                <span :style="`display:none; border:1px solid #C8C8C8; position:absolute;
-                                        border-radius: 5px;
-                                        width:200px;
-                                        left:${((column.columnIndex)*column.widthValue)-200}px;
-                                        padding:5px;
-                                        botder:1px solid slategrey;
-                                        box-shadow: black 0px 8px 6px -6px;
-                                        background-color:#F5F5F5;  
-                                        height:50px;
-                                        cursor:zoom-in;  
-                                        z-index: 9999;`" v-show="column.columnIndex===cellCurrentlyHoveringOver && rowIndex === rowCurrentlyHoveringOver" class="tooltiptext">
-                                        <div style="display:flex; flex-direction:row; justify-content:center; width:100%; height:100%; align-items:center">{{dataRow[column.dataProperty]}}</div></span>
-                  </div>
+                    </div>
                 </tr>
             </table>
            
@@ -235,24 +222,13 @@ export default {
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)   
             this.reConfigurePagination(this.sliderCount)                    
         },
-        handleHover(row, cell, cellWidth, data){
-            console.log("data ", data, cellWidth )
-            if(data&&(data.toString().length)* 9.4 > parseInt(cellWidth.split('p')[0])-20){ //9.4 is the number px per character in the cell
-                this.curentlyHovering = cell;
-                this.rowCurrentlyHoveringOver = row;
-                this.cellCurrentlyHoveringOver = cell;
-            } else {
-                this.curentlyHovering = null
-                this.rowCurrentlyHoveringOver = null;
-                this.cellCurrentlyHoveringOver = null;
-            }
-         },
         handleShowCancelEye(){
             this.isHovering = !this.isHovering
         },
         fetchRecordsFromDS(start,stop){
             return this.fullDS.slice(start,stop+1)
         },    
+        
         reConfigurePagination(count){
             let tmp = []
             if (this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting){
@@ -785,7 +761,7 @@ export default {
             // }
 
 
-            for (let i = 1; i <= 100000; i++) {
+            for (let i = 1; i <= 1000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*434), 
@@ -1108,7 +1084,7 @@ export default {
         this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
         this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
 
-        window.requestAnimationFrame(()=>{this.shouldAnimate = true})
+        this.shouldAnimate = true
         
   },
   beforeDestroy(){

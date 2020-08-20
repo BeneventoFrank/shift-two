@@ -1,6 +1,6 @@
 
 let gridConfig =  {
-    GridWidth:'400px', //required
+    GridWidth:'800px', //required
     GridHeight:'600px', //required
     Paging:{
         EnablePaging:true, //default to true
@@ -9,11 +9,11 @@ let gridConfig =  {
         EnableSlider:true, //default to true
         Values:{
             UseDefaultValues:true, //default to true
-            SliderWidth:300,
-            MinValue:10,
-            MaxValue:100,
-            StepValue:10,
-            InitialValue:10,
+            // SliderWidth:300,
+            // MinValue:10,
+            // MaxValue:100,
+            // StepValue:10,
+            // InitialValue:10,
 
         }
     },

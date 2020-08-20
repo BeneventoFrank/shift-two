@@ -20,7 +20,7 @@
             </div>
         </div>
         <div style='width:100%; background-color:rgb(245, 245, 245);'>
-            <div class='headerRow' :style="`width:${gridWillScroll?'99%':'100%'}`">
+            <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
                     <div :id="`header-${header.columnIndex}`" :ref="`header-${header.columnIndex}`" 
                         :style="`width:${header.width}; display:flex; flex-direction:row; justify-content:${header.alignment}; height:${header.height}; backgroundColor:${header.backgroundColor}; color:${header.textColor}; border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};`"
@@ -266,7 +266,8 @@ export default {
     .headerWrapper{
         display: flex;
         flex-direction: row;
-        width:100%
+        width:100%;
+        box-shadow:0 8px 10px -8px black;
     }
     .superHeader{
         display: flex;

@@ -16,12 +16,7 @@
                                 :initialValue="initialValue"
                         ></Slider>
                     </div>
-                    <div style="margin-left:50px;">
-                        <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :height='25'/></div>
-                        <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /><span class="tooltiptext">Clear Filtering/Sorting</span></div>
-                    </div>
                 </div>
-
                 <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center; margin-top:${gridWidthValue>600?0:20}px; justify-content:${gridWidthValue>600?'flex-end':'center'};`" class='pagination'>
                     <Pagination 
                         v-if="gridConfig.Paging.EnablePaging"
@@ -33,7 +28,16 @@
                     ></Pagination>
                 </div>
             </div>
-            <div ref="title" style="width:100%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
+            <div style='display:flex; flex-direction:row;'>
+                <div ref="title" style="width:33%;">
+                    <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :height='25'/></div>
+                    <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /><span class="tooltiptext">Clear Filtering/Sorting</span></div>
+                </div>
+                <div ref="title" style="width:33%;"><span class='title' v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
+                <div ref="title" style="width:33%;"></div>
+            </div>
+            
+
             <div ref="headerRow" :style="`width:100%; background-color:${virtualColumns[virtualColumns.length-1]?virtualColumns[virtualColumns.length-1].backgroundColor:null}`">
             <HeaderRow v-if="userHasHeaders" 
                              @columnSort="handleColumnSort" 
@@ -761,7 +765,7 @@ export default {
             // }
 
 
-            for (let i = 1; i <= 1000; i++) {
+            for (let i = 1; i <= 100000; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*434), 
@@ -875,16 +879,13 @@ export default {
                             } else {
                                 this.reConfigurePagination(this.filteredData.length)
                             }
-                            
                         }
-                        
                     }
                     break;
                 default:
                     break;
             }
         },
-
         handleClearFilter(columnIndex){
             if(this.filterStrategy.isCurrentlyFiltering){
                 if(this.filterStrategy.columnsBeingFiltered.length===1&&this.filterStrategy.columnsBeingFiltered[0] === columnIndex.toString()){
@@ -1030,7 +1031,7 @@ export default {
         }
         this.setDefaultValues()
         this.deriveHeaders()
-        this.initializePaging(this.getInitialRowsPerPage())
+        this.gridConfig.Paging.EnablePaging?this.initializePaging(this.getInitialRowsPerPage()):null
         this.calculateHeightOfDataRow()
 
         let tmpFor1 = []
@@ -1106,7 +1107,8 @@ export default {
             background-color: #f8f8f8;
             height:auto;
             max-height:0px;
-            transition:max-height .5s ease-out; 
+            transition:max-height .75s; 
+            transition-timing-function: ease-out;
         }
         .animate{
             max-height:30px
@@ -1156,7 +1158,7 @@ export default {
         .tooltip .tooltiptext {
         visibility: hidden;
         width: 200px;
-        background-color: #e3e4e8;
+        background-color:rgb(245, 245, 245);
         text-align: center;
         border-radius: 6px;
         padding: 5px 0;
@@ -1164,8 +1166,8 @@ export default {
         /* Position the tooltip */
         position: absolute;
         z-index: 1;
-        top: 30px;
-        left:30px;
+        top: 0px;
+        left:50px;
         
         }
         .tooltip:hover .tooltiptext {
@@ -1175,7 +1177,7 @@ export default {
             display:flex;
             flex-direction: row;
             align-items: flex-end;
-            height:20px
+            
         }
 
 </style>

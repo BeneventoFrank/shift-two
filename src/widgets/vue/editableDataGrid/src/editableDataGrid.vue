@@ -61,7 +61,7 @@
 
         <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}; overflow-x:hidden;  position:relative; height:${gridHeightValue-headerHeight}px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:relative; padding-bottom:62px; overflow-x:scroll; width:${gridWidth};`">
-                <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''}`" :style="`border-spacing:0px; background-color:${rowIndex%2===0?colorScheme.gridRowEvenBackgroundColor:colorScheme.gridRowOddBackgroundColor}; cursor:pointer; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+                <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''} ${shouldReverseAnimate?'reverseAnimation':''}`" :style="`border-spacing:0px; background-color:${rowIndex%2===0?colorScheme.gridRowEvenBackgroundColor:colorScheme.gridRowOddBackgroundColor}; cursor:pointer; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                     <div :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
                         <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;  color:${colorScheme.gridRowTextColor}` ">{{dataRow[column.dataProperty]}}</td>
                     </div>
@@ -111,6 +111,7 @@ export default {
             },
             gridWidth:'',
             shouldAnimate:false,
+            shouldReverseAnimate:false,
             gridHeight:'',
             gridHeightValue:0,
             gridWidthValue:0,
@@ -1117,6 +1118,9 @@ export default {
         this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.virtualColumns})
 
         this.shouldAnimate = true
+        setTimeout(() => {
+            this.shouldReverseAnimate = true   
+        }, 500);
         
   },
   beforeDestroy(){
@@ -1138,11 +1142,13 @@ export default {
             background-color: #f8f8f8;
             height:auto;
             max-height:30px;
-            transition:transform .5s;
-            
+            transition:transform .3s;
         }
         .animate{
-            transform: translate(20px,20px)
+            transform: translate(0px,20px)
+        }
+        .reverseAnimation{
+            transform: translate(0px,-20px)
         }
         .dataRow{
             width:100%; 

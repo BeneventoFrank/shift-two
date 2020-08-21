@@ -1,7 +1,7 @@
 
 let gridConfig =  {
-    GridWidth:'800px', //required
-    GridHeight:'600px', //required
+    GridWidth:'600px', //required
+    GridHeight:'900px', //required
     Paging:{
         EnablePaging:true //default to true
     },
@@ -37,6 +37,7 @@ let gridConfig =  {
                 dataProperty:"make",
                 dataType:'number',
                 preSortColumn: false,
+                width:'150px'
             },
             {
                 header:{text:"Model"},
@@ -61,7 +62,7 @@ let gridConfig =  {
                 dataProperty:"color",
                 dataType:'number',
                 preSortColumn: true,
-                width:'250px'
+                width:'150px'
             }            
         ]
 }

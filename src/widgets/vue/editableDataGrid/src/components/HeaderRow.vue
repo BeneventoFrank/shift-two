@@ -33,11 +33,12 @@
                                 `" 
                         @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
                         @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
+                        
                         v-for="(header) in headers" :key="header.columnIndex">
                         <span :style="`display:block; color:${colorScheme.gridHeaderTextColor}; width:${header.width}; overflow:hidden; text-overflow:ellipsis`"> 
                             {{header.text}}
                         </span>
-                        <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null}`">
+                        <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null};`">
                             <div class='innerDiv' :style="`background-color:${colorScheme.flyoutBackgroundColor}`">
                                 <div class='flyoutHeader'>
                                     <div class='headerItem sort'> 
@@ -144,9 +145,9 @@ export default {
             }
        },
        wouldCauseAScroll(index){
-            let retVal = '50px'
+            let retVal = '150px'
             let y = this.$refs[`header-${index}`]
-            if((y[0].offsetLeft+y[0].offsetWidth/2+350)>this.gridWidth){
+            if(((y[0].offsetLeft+y[0].offsetWidth/2)+300)>this.gridWidth){
                 retVal = '300px'
             }
             return retVal

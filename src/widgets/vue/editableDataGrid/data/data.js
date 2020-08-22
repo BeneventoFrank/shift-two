@@ -1,7 +1,7 @@
 
 let gridConfig =  {
-    GridWidth:'700px', //required
-    GridHeight:'950px', //required
+    GridWidth:'1000px', //required
+    GridHeight:'556px', //required
     Paging:{
         EnablePaging:true //default to true
     },
@@ -47,18 +47,18 @@ let gridConfig =  {
         // FlyoutTextColor:'#faf3f0'
 
 
-        SliderFillColor:'#495973',
-        PagingTextColor:'#495973',
-        GridTitleColor:'#495973',
-        GridHeaderTextColor:'white',
-        GridRowTextColor:'#495973',
-        GridHeaderBackgroundColor:'#626d80',
-        GridHeaderBorderColor:'white',
-        GridRowOddBackgroundColor:'#e6ebf5',
-        GridRowEvenBackgroundColor:'#c7ccd6',
-        ActiveIndicatorColor:'#c2c5d1',
-        FlyoutBackgroundColor:'#f0f1f5',
-        FlyoutTextColor:'#495973'
+        // SliderFillColor:'#495973',
+        // PagingTextColor:'#495973',
+        // GridTitleColor:'#495973',
+        // GridHeaderTextColor:'white',
+        // GridRowTextColor:'#495973',
+        // GridHeaderBackgroundColor:'#626d80',
+        // GridHeaderBorderColor:'white',
+        // GridRowOddBackgroundColor:'#e6ebf5',
+        // GridRowEvenBackgroundColor:'#c7ccd6',
+        // ActiveIndicatorColor:'#c2c5d1',
+        // FlyoutBackgroundColor:'#f0f1f5',
+        // FlyoutTextColor:'#495973'
     },
     GridHeader:'New Race Cars - 2020',
     Columns:[
@@ -79,6 +79,7 @@ let gridConfig =  {
                 dataProperty:"year",
                 dataType:'number',
                 preSortColumn: true
+                
             },
             {
                 header:{text:"Trim"},            
@@ -87,12 +88,55 @@ let gridConfig =  {
                 preSortColumn: true
             },
             {
-                header:{text:"Color"},            
-                dataProperty:"color",
-                dataType:'number',
-                preSortColumn: true
-            }            
+                header:{text:"manufacturer"},            
+                dataProperty:"manufacturer",
+            },            
+            {
+                header:{text:"plant2"},
+                dataProperty:"plant2",
+            },
+            {
+                header:{text:"vin2"},
+                dataProperty:"vin2",
+            },
+            {
+                header:{text:"plateNumber2"},
+                dataProperty:"plateNumber2",
+                
+            },
+            {
+                header:{text:"price2"},            
+                dataProperty:"price2",
+            },
+            {
+                header:{text:"manufacturer3"},            
+                dataProperty:"manufacturer3",
+            } 
+            ,
+            {
+                header:{text:"manufacturer3"},            
+                dataProperty:"manufacturer3",
+            },
+            {
+                header:{text:"price3"},            
+                dataProperty:"price3",
+            },
+            {
+                header:{text:"plant3"},            
+                dataProperty:"plant3",
+            },
+            {
+                header:{text:"plateNumber3"},            
+                dataProperty:"plateNumber3",
+            },
+            {
+                header:{text:"vin3"},            
+                dataProperty:"vin3",
+            } 
+
         ]
 }
+
+
 
 export default gridConfig;

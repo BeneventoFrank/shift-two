@@ -764,22 +764,22 @@ export default {
         },
          getTestData(){
             let b = []
-            // let alphaString = []
-            // let alpha = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
-            // const getAlpha = ()=>{
-            //     alphaString = ''
-            //     for (let i = 0; i < 4; i++) {
-            //         let index = Math.floor(Math.random() * 27)
-            //         if (index<1||index>26) {
-            //             index = Math.floor(Math.random() * 27)
-            //         }
-            //         alphaString += (alpha[index])
-            //     }
-            //     return alphaString.length>10?alphaString.substring(1,4):alphaString
-            // }
+            let alphaString = []
+            let alpha = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+            const getAlpha = ()=>{
+                alphaString = ''
+                for (let i = 0; i < 4; i++) {
+                    let index = Math.floor(Math.random() * 27)
+                    if (index<1||index>26) {
+                        index = Math.floor(Math.random() * 27)
+                    }
+                    alphaString += (alpha[index])
+                }
+                return alphaString.length>10?alphaString.substring(1,4):alphaString
+            }
 
 
-            for (let i = 1; i <= 10085; i++) {
+            for (let i = 1; i <= 335; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*434), 
@@ -787,11 +787,16 @@ export default {
                         model:Math.ceil(Math.random()*i*53434), 
                         year:Math.ceil(Math.random()*i*343),
                         color:Math.ceil(Math.random()*i*4346443333255),
-                        // manufacturer:getAlpha(),
-                        // plant:Math.ceil(Math.random()*i*3335),
-                        // vin:Math.ceil(Math.random()*i*333333),
-                        // plateNumber:Math.ceil(Math.random()*i*444444),
-                        // price:Math.ceil(Math.random()*i*9)
+                        manufacturer:getAlpha(),
+                        plant2:Math.ceil(Math.random()*i*3335),
+                        vin2:Math.ceil(Math.random()*i*333333),
+                        plateNumber2:Math.ceil(Math.random()*i*444444),
+                        price2:Math.ceil(Math.random()*i*9),
+                        manufacturer3:getAlpha(),
+                        plant3:Math.ceil(Math.random()*i*3335),
+                        vin3:Math.ceil(Math.random()*i*333333),
+                        plateNumber3:Math.ceil(Math.random()*i*444444),
+                        price3:Math.ceil(Math.random()*i*9)
                         })
             }   
             this.virtualHeight = b.length*29-950>0?b.length*29-950:this.gridHeightValue

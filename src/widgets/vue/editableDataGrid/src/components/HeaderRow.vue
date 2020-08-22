@@ -8,7 +8,7 @@
                             <FilterSVG style="padding-left:10px" :height="11"></FilterSVG>
                         </div>
                         <div style='padding-top:2px;'>
-                            <span class="filterText" style="text-align:left; margin-left:5px">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
+                            <span class="filterText" :style="`text-align:left; margin-left:5px; color:${colorScheme.activeIndicatorColor}`">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
                         </div>
                     </span>
                     <span v-else>&nbsp;</span>
@@ -160,10 +160,12 @@ export default {
                 this.$emit('columnSort',`${column}^^${direction}`)
            }
            
-           if(((column === this.headers[this.headers.length-1].dataProperty)&&(this.isActiveSort!==''))||(this.currentFilters.columnsBeingFiltered.includes((this.headers.length-1).toString()))){
-                this.applyBGColor = true   
+           if(((column === this.headers[this.headers.length-1].dataProperty)&&(this.isActiveSort!==''))){
+                this.applyBGColor = true 
            } else {
-               this.applyBGColor = false   
+               setTimeout(() => {
+                    this.applyBGColor = false                      
+               }, 500);
            }
        },
        wouldCauseAScroll(index){
@@ -206,8 +208,9 @@ export default {
             if(this.headers.length-1 === index) {this.applyBGColor = true}
 
            } else {
-               this.$emit('filterCleared',index)
-               console.log('this.currentFilters.columnsBeingFiltered.includes(this.headers.length', this.currentFilters.columnsBeingFiltered, this.headers.length)
+               if (this.currentFilters.columnsBeingFiltered.includes(index.toString())) {
+                    this.$emit('filterCleared',index)    
+               }
                this.applyBGColor = (this.currentSort.isCurrentlySorting&&this.currentSort.columnBeingSorted===this.headers[this.headers.length-1].dataProperty)
                                  ||((this.currentFilters.columnsBeingFiltered.includes((this.headers.length-1).toString()))&&(index !== this.headers.length-1))?true:false
            }
@@ -312,7 +315,6 @@ export default {
         text-overflow: ellipsis;
         display: inline-block;
         font-size:11px; 
-        color:red; 
         opacity:.5;
     }
 </style>

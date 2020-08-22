@@ -19,7 +19,7 @@
                 </div>
             </div>
         </div>
-        <div :style="`width: 100%; position: relative; background-color:${applyBGColor?colorScheme.activeIndicatorColor:colorScheme.gridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 5px -8px black;`">
+        <div :style="`width: 100%; position: relative; background-color:${applyBGColor&&!clearAllFilters?colorScheme.activeIndicatorColor:colorScheme.gridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 5px -8px black;`">
             <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
                     <div :id="`header-${header.columnIndex}`" :ref="`header-${header.columnIndex}`" 
@@ -121,6 +121,10 @@ export default {
         }, 
         colorScheme:{
             type:Object
+        },
+        clearAllFilters:{
+            type:Boolean,
+            default:true
         }
     },        
     methods: {

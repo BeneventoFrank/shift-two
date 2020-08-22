@@ -54,7 +54,8 @@
                              :currentFilters="filterStrategy" 
                              :gridWidth="gridWidthValue" 
                              :headers="virtualColumns"
-                             :colorScheme="colorScheme">
+                             :colorScheme="colorScheme"
+                             :clearAllFilters="clearAllFilters">
             </HeaderRow>
             </div>
         </div>
@@ -143,6 +144,7 @@ export default {
             isHoverOverCell:true,
             rowCurrentlyHoveringOver:null,
             cellCurrentlyHoveringOver:null,
+            clearAllFilters:false,
             curentlyHovering:0,
             filteredData:[],
             userHasHeaders:false,
@@ -240,6 +242,7 @@ export default {
                 filters:[],
                 columnsBeingFiltered:[]
             }
+            this.clearAllFilters = true
             this.highestCountLoaded = this.getInitialRowsPerPage();
             this.filteredData = []
             this.filteredData = this.fullDS 
@@ -776,7 +779,7 @@ export default {
             // }
 
 
-            for (let i = 1; i <= 1008; i++) {
+            for (let i = 1; i <= 10085; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*434), 
@@ -822,6 +825,7 @@ export default {
                         tmp = [...this.tmpResults, ...message.data.Data]
                         this.tmpResults = tmp
                     }
+                    this.clearAllFilters = false
                     this.filterStrategy.isCurrentlyFiltering=true
                     break;
                 case 'allFiltersApplied':
@@ -829,6 +833,7 @@ export default {
                         tmp = [...this.tmpResults, ...message.data.Data]
                         this.tmpResults = tmp
                     }
+                    this.clearAllFilters = false
                     this.filterStrategy.isCurrentlyFiltering=true
                     break;                                
                 case 'originalData': 
@@ -1008,10 +1013,7 @@ export default {
                                   }
         },
         calculateHeightOfDataRow(){
-
             this.headerHeight = this.$refs.gridHeader.offsetHeight
-            console.log('what are you ', this.headerHeight)
-        
         },
         processColorScheme(){
             let tmp = {}

@@ -1,7 +1,7 @@
 
 let gridConfig =  {
-    GridWidth:'600px', //required
-    GridHeight:'900px', //required
+    GridWidth:'700px', //required
+    GridHeight:'950px', //required
     Paging:{
         EnablePaging:true //default to true
     },
@@ -17,18 +17,48 @@ let gridConfig =  {
         }
     },
     ColorScheme:{
-        // SliderFillColor:'blue',
+
+
+        // SliderFillColor:'#3a4a4a',
+        // PagingTextColor:'#3a4a4a',
+        // GridTitleColor:'#6a7575',
+        // GridHeaderTextColor:'#e4f0f0',
+        // GridRowTextColor:'#52504f',
+        // GridHeaderBackgroundColor:'#20838a',
+        // GridHeaderBorderColor:'#181c1c',
+        // GridRowOddBackgroundColor:'#aebdbd',
+        // GridRowEvenBackgroundColor:'#e6f5f5',
+        // ActiveIndicatorColor:'#c7c3c1',
+        // FlyoutBackgroundColor:'#e8683a',
+        // FlyoutTextColor:'#faf3f0'
+
+
+        // SliderFillColor:'#e8683a',
         // PagingTextColor:'green',
-        // GridTitleColor:'magenta',
-        // GridHeaderTextColor:'cyan',
-        // GridRowTextColor:'orange',
-        // GridHeaderBackgroundColor:'grey',
-        // GridHeaderBorderColor:'pink',
-        // GridRowOddBackgroundColor:'purple',
-        // GridRowEvenBackgroundColor:'lavender',
-        // ActiveIndicatorColor:'brown',
-        // FlyoutBackgroundColor:'rosybrown',
-        // FlyoutTextColor:'gold'
+        // GridTitleColor:'#ba4920',
+        // GridHeaderTextColor:'#faf3f0',
+        // GridRowTextColor:'#52504f',
+        // GridHeaderBackgroundColor:'#e8683a',
+        // GridHeaderBorderColor:'green',
+        // GridRowOddBackgroundColor:'#d6c0b6',
+        // GridRowEvenBackgroundColor:'#fae9e1',
+        // ActiveIndicatorColor:'#c7c3c1',
+        // FlyoutBackgroundColor:'#e8683a',
+        // FlyoutTextColor:'#faf3f0'
+
+
+        SliderFillColor:'#495973',
+        PagingTextColor:'#495973',
+        GridTitleColor:'#495973',
+        GridHeaderTextColor:'white',
+        GridRowTextColor:'#495973',
+        GridHeaderBackgroundColor:'#626d80',
+        GridHeaderBorderColor:'white',
+        GridRowOddBackgroundColor:'#e6ebf5',
+        GridRowEvenBackgroundColor:'#c7ccd6',
+        ActiveIndicatorColor:'#c2c5d1',
+        FlyoutBackgroundColor:'#f0f1f5',
+        FlyoutTextColor:'#495973'
     },
     GridHeader:'New Race Cars - 2020',
     Columns:[
@@ -36,8 +66,7 @@ let gridConfig =  {
                 header:{text:"Make"},
                 dataProperty:"make",
                 dataType:'number',
-                preSortColumn: false,
-                width:'150px'
+                preSortColumn: false
             },
             {
                 header:{text:"Model"},
@@ -55,14 +84,13 @@ let gridConfig =  {
                 header:{text:"Trim"},            
                 dataProperty:"trim",
                 dataType:'number',
-                preSortColumn: true,
+                preSortColumn: true
             },
             {
                 header:{text:"Color"},            
                 dataProperty:"color",
                 dataType:'number',
-                preSortColumn: true,
-                width:'150px'
+                preSortColumn: true
             }            
         ]
 }

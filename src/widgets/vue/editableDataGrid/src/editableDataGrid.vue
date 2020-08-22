@@ -31,12 +31,12 @@
                 </div>
             </div>
             <div style='display:flex; flex-direction:row;'>
-                <div style="width:33%;">
+                <div style="width:20%;">
                     <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :color="colorScheme.activeIndicatorColor" :height='25'/></div>
-                    <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' :style="`border-radius:5px; background-color:${colorScheme.flyoutBackgroundColor}`" v-show="isHovering" ><CancelEye :height='25' /><span :style="`border:1px solid ${colorScheme.flyoutTextColor}; color:${colorScheme.flyoutTextColor}`" class="tooltiptext">Clear Filtering/Sorting</span></div>
+                    <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /></div>
                 </div>
-                <div ref="title" style="width:33%;"><span class='title' :style="`color:${colorScheme.gridTitleColor}`" v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
-                <div style="width:33%;"></div>
+                <div ref="title" style="width:60%;"><span class='title' :style="`color:${colorScheme.gridTitleColor}`" v-if="gridConfig.GridHeader&&gridConfig.GridHeader.length>0" >{{gridConfig.GridHeader}}</span></div>
+                <div style="width:20%;"></div>
             </div>
             
 
@@ -60,11 +60,12 @@
         </div>
 
         <div ref='dataRow' class='dataRow' :style="`width:${gridWidth}; overflow-x:hidden;  position:relative; height:${gridHeightValue-headerHeight}px`">
-            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:0px; position:relative; padding-bottom:62px; overflow-x:scroll; width:${gridWidth};`">
-                <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''} ${shouldReverseAnimate?'reverseAnimation':''}`" :style="`border-spacing:0px; background-color:${rowIndex%2===0?colorScheme.gridRowEvenBackgroundColor:colorScheme.gridRowOddBackgroundColor}; cursor:pointer; overflow:hidden; width:100%; border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                    <div :style="`display:flex; width:${column.widthValue-1}px;`" v-for="column in virtualColumns"  :key="column.columnIndex" >
-                        <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;  color:${colorScheme.gridRowTextColor}` ">{{dataRow[column.dataProperty]}}</td>
-                    </div>
+            <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; top:20px; position:relative; padding-bottom:5px; overflow-x:scroll; width:${gridWidth};`">
+                <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
+                :style="`border-spacing:0px; background-color:${rowIndex%2===0?colorScheme.gridRowEvenBackgroundColor:colorScheme.gridRowOddBackgroundColor};
+                         cursor:pointer; overflow:hidden; width:${gridWillScroll?'97.5%':'100%'} border-collapse: collapse; line-height:10px; display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
+                    <td :style="`width:${column.width}; text-overflow:ellipsis; overflow:hidden; display:block;
+                                 color:${colorScheme.gridRowTextColor}`" v-for="column in virtualColumns"  :key="column.columnIndex">{{dataRow[column.dataProperty]}}</td>
                 </tr>
             </table>
            
@@ -600,16 +601,12 @@ export default {
                 return true
             }
             let hasHeader=false
-            let totalWidth = 0
             for (let i = 0; i < this.gridConfig.Columns.length; i++) {
                 let tmp ={}
 
                 if(Object.keys(this.gridConfig.Columns[i].header).length>0){
                     
                     let w = this.gridConfig.Columns[i].width?this.gridConfig.Columns[i].width.split('p')[0]-1:this.defaultValues.columnValues.width.split('p')[0]-1
-
-                    totalWidth = totalWidth+w
-
                     hasHeader=true;
                     tmp.columnIndex = i;
                     tmp.text = this.gridConfig.Columns[i].header.text?this.gridConfig.Columns[i].header.text:''
@@ -738,9 +735,11 @@ export default {
                 }
             }
            const numColumns = Object.keys(this.fullDS[0]).length-customColCount
-           const widthOfGrid = this.gridWidthValue - tmp
+           let widthOfGrid = this.gridWidthValue - tmp
+           widthOfGrid = this.gridWillScroll()?(widthOfGrid*.975):widthOfGrid
            console.log("widthof grid", widthOfGrid)
-           const eachColumn = Math.ceil(widthOfGrid/numColumns)
+
+           const eachColumn = Math.round(widthOfGrid/numColumns)
            this.defaultValues.columnValues.backgroundColor = colors.editableDataGrid.defaultHeaderColor
            this.defaultValues.columnValues.borderColor = colors.editableDataGrid.defaultBorderColor
            this.defaultValues.columnValues.textColor = colors.editableDataGrid.defaultTextColor
@@ -777,7 +776,7 @@ export default {
             // }
 
 
-            for (let i = 1; i <= 100000; i++) {
+            for (let i = 1; i <= 1008; i++) {
                 b.push(
                         {
                         trim:Math.ceil(Math.random()*i*434), 
@@ -1009,11 +1008,8 @@ export default {
                                   }
         },
         calculateHeightOfDataRow(){
-            const pagination = this.$refs.pagination.offsetHeight
-            const title = this.$refs.title.offsetHeight
-            const header = 56
-            console.log('values ', pagination,title,header)
-            this.headerHeight = pagination+title+header
+
+            this.headerHeight = this.$refs.gridHeader.offsetHeight
             console.log('what are you ', this.headerHeight)
         
         },
@@ -1155,7 +1151,6 @@ export default {
             display:flex; 
             flex-direction:row;
             scroll-behavior: smooth;
-            border-bottom: .5px solid #DCDCDC;    
         }
 
         .dataGrid{
@@ -1172,9 +1167,6 @@ export default {
         td:hover {
             background-color: #DCDCDC;
 
-        }
-        td:hover::after {
-        background-color: #E8E8E8 !important;
         }
         .title{
             font-size:24px;

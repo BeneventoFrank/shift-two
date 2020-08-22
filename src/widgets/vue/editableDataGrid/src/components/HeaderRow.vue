@@ -19,7 +19,7 @@
                 </div>
             </div>
         </div>
-        <div style='width: 100%; position: relative; background-color: rgb(245, 245, 245); z-index: 77; box-shadow: 0 6px 5px -8px black;'>
+        <div :style="`width: 100%; position: relative; background-color:${applyBGColor?colorScheme.activeIndicatorColor:colorScheme.gridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 5px -8px black;`">
             <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
                     <div :id="`header-${header.columnIndex}`" :ref="`header-${header.columnIndex}`" 
@@ -90,6 +90,7 @@ export default {
             isActiveSort:'',
             message:null,
             isSearching:false,
+            applyBGColor:false,
         };
     },
     watch:{
@@ -136,13 +137,30 @@ export default {
 
        },
        handleSortClick(column, index, direction){
-            if(this.isActiveSort === direction){
-                this.$emit('columnSort','')
-                this.isActiveSort = ''
-            } else {
+
+            if(this.currentSort.isCurrentlySorting){
+                if (column === this.currentSort.columnBeingSorted) {
+                        if(this.isActiveSort === direction){
+                            this.$emit('columnSort','')
+                            this.isActiveSort = ''
+                        } else {
+                            this.isActiveSort=direction
+                            this.$emit('columnSort',`${column}^^${direction}`)
+                        }
+                } else {
+                    this.isActiveSort=direction
+                    this.$emit('columnSort',`${column}^^${direction}`)
+                }
+           } else {
                 this.isActiveSort=direction
                 this.$emit('columnSort',`${column}^^${direction}`)
-            }
+           }
+           
+           if(((column === this.headers[this.headers.length-1].dataProperty)&&(this.isActiveSort!==''))||(this.currentFilters.columnsBeingFiltered.includes((this.headers.length-1).toString()))){
+                this.applyBGColor = true   
+           } else {
+               this.applyBGColor = false   
+           }
        },
        wouldCauseAScroll(index){
             let retVal = '150px'
@@ -180,8 +198,14 @@ export default {
             this.isSearching = true
             const strategy = `${index}^^${evt.target.value}`
             this.$emit('filterApplied',strategy)
+
+            if(this.headers.length-1 === index) {this.applyBGColor = true}
+
            } else {
                this.$emit('filterCleared',index)
+               console.log('this.currentFilters.columnsBeingFiltered.includes(this.headers.length', this.currentFilters.columnsBeingFiltered, this.headers.length)
+               this.applyBGColor = (this.currentSort.isCurrentlySorting&&this.currentSort.columnBeingSorted===this.headers[this.headers.length-1].dataProperty)
+                                 ||((this.currentFilters.columnsBeingFiltered.includes((this.headers.length-1).toString()))&&(index !== this.headers.length-1))?true:false
            }
        }, 100),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){

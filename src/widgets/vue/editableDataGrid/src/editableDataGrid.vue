@@ -799,11 +799,11 @@ export default {
 
             this.ww_oddSortWorker = new oddSortWorkerSetup(oddSortWorker)
             this.ww_oddSortWorker.addEventListener('message',event => {this.handleMessage(event)})
-       //     this.ww_oddSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
+            this.ww_oddSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
 
             this.ww_sortWorker = new sortWorkerSetup(sortWorker)
             this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
-         //   this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
+            this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
         },
         initializeDevMode(){
             this.dataSlice = [...this.fullDS].slice(0,2)

@@ -1,7 +1,7 @@
 export default () => {
     let message = ''
     let originalData = []
-    let virtualColumns = []
+    let columns = []
     let sortStrategy=''
 
   
@@ -18,10 +18,10 @@ export default () => {
         {
             switch (dataType) {
                 case 'string':
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(a[column].toString()).toLowerCase()).localeCompare(setValue(b[column].toString()).toLowerCase());})
+                    tmp = dataset.sort(function (a, b) {return ('' + setValue(a.data[column].toString()).toLowerCase()).localeCompare(setValue(b.data[column].toString()).toLowerCase());})
                     break;
                 case 'number':
-                    tmp = dataset.sort(function (a, b) {return (a[column] - b[column])})
+                    tmp = dataset.sort(function (a, b) {return (a.data[column] - b.data[column])})
                     break;            
                 default:
                     break;
@@ -29,10 +29,10 @@ export default () => {
         } else {
             switch (dataType) {
                 case 'string':
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(b[column].toString()).toLowerCase()).localeCompare(setValue(a[column].toString()).toLowerCase());})
+                    tmp = dataset.sort(function (a, b) {return ('' + setValue(b.data[column].toString()).toLowerCase()).localeCompare(setValue(a.data[column].toString()).toLowerCase());})
                     break;
                 case 'number':
-                    tmp = dataset.sort(function (a, b) {return (b[column] - a[column])})
+                    tmp = dataset.sort(function (a, b) {return (b.data[column] - a.data[column])})
                     break;            
                 default:
                     break;
@@ -41,9 +41,9 @@ export default () => {
         return tmp
     }
     const getDataType = (index) => {
-        for (let i = 0; i < virtualColumns.length; i++) {
-            if(virtualColumns[i].dataProperty===index){
-                return virtualColumns[i].dataType
+        for (let i = 0; i < columns.length; i++) {
+            if(columns[i].Index===index){
+                return columns[i].DataType
             }
         }
         return 'string'
@@ -54,25 +54,25 @@ export default () => {
         message = event.data 
         console.log("sort worker received a message ", message)
         
-        let split='',property='', data=[]
+        let split='',index=0, data=[]
         switch (message.MessageType) {
             case 'data':
                 originalData = message.Data
-                virtualColumns = message.Columns
+                columns = message.Columns
                 break;
             case 'applySort':
                 sortStrategy = message.SortStrategy //should come in as dataProperty^^direction
                 split = sortStrategy.split('^^')
-                property = split[0]
-                postMessage({'MessageType':'sortComplete', 'Data':sortDataset(sortStrategy, null, getDataType(property)), 'Column':property, 'Strategy':sortStrategy})
+                index = split[0]
+                postMessage({'MessageType':'sortComplete', 'Data':sortDataset(sortStrategy, null, getDataType(index)), 'Column':index, 'Strategy':sortStrategy})
                 break;
             case 'sortFilteredData':
                 console.log("wtf ", message.SortStrategy)
                 sortStrategy = message.SortStrategy
                 data = message.Data
                 split = sortStrategy.split('^^')
-                property = split[0]
-                postMessage({'MessageType':'sortComplete', 'Column':property, 'Strategy':sortStrategy,  'Data':sortDataset(sortStrategy, data, getDataType(property))})
+                index = split[0]
+                postMessage({'MessageType':'sortComplete', 'Column':index, 'Strategy':sortStrategy,  'Data':sortDataset(sortStrategy, data, getDataType(index))})
                 break;
             default:
                 break;

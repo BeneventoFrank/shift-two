@@ -12,7 +12,7 @@
                         </div>
                     </span>
                     <span v-else>&nbsp;</span>
-                    <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === gridSettings.columns[index].DataProperty">
+                    <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === gridSettings.columns[index].Index">
                         <SortSVG style="padding-right:20px" :color="gridSettings.colorScheme.ActiveIndicatorColor" :height="11"></SortSVG>
                     </span>
                     <span v-else>&nbsp;</span>
@@ -149,18 +149,18 @@ export default {
                             this.isActiveSort = ''
                         } else {
                             this.isActiveSort=direction
-                            this.$emit('columnSort',`${column}^^${direction}`)
+                            this.$emit('columnSort',`${index}^^${direction}`)
                         }
                 } else {
                     this.isActiveSort=direction
-                    this.$emit('columnSort',`${column}^^${direction}`)
+                    this.$emit('columnSort',`${index}^^${direction}`)
                 }
            } else {
                 this.isActiveSort=direction
-                this.$emit('columnSort',`${column}^^${direction}`)
+                this.$emit('columnSort',`${index}^^${direction}`)
            }
            
-           if(((column === this.gridSettings.columns[index].DataProperty)&&(this.isActiveSort!==''))){
+           if(((column === this.gridSettings.columns[index].Index)&&(this.isActiveSort!==''))){
                 this.applyBGColor = true 
            } else {
                setTimeout(() => {

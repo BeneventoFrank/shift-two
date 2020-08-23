@@ -1,7 +1,7 @@
 export default () => {
     let message = ''
     let originalData = []
-    let virtualColumns = []
+    let columns = []
     let sortedData={}
     let sortStrategy=''
 
@@ -16,10 +16,10 @@ export default () => {
         {
             switch (dataType) {
                 case 'string':
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(a[column].toString()).toLowerCase()).localeCompare(setValue(b[column].toString()).toLowerCase());})
+                    tmp = dataset.sort(function (a, b) {return ('' + setValue(a.data[column].toString()).toLowerCase()).localeCompare(setValue(b.data[column].toString()).toLowerCase());})
                     break;
                 case 'number':
-                    tmp = dataset.sort(function (a, b) {return (a[column] - b[column])})
+                    tmp = dataset.sort(function (a, b) {return (a.data[column] - b.data[column])})
                     break;            
                 default:
                     break;
@@ -27,10 +27,10 @@ export default () => {
         } else {
             switch (dataType) {
                 case 'string':
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(b[column].toString()).toLowerCase()).localeCompare(setValue(a[column].toString()).toLowerCase());})
+                    tmp = dataset.sort(function (a, b) {return ('' + setValue(b.data[column].toString()).toLowerCase()).localeCompare(setValue(a.data[column].toString()).toLowerCase());})
                     break;
                 case 'number':
-                    tmp = dataset.sort(function (a, b) {return (b[column] - a[column])})
+                    tmp = dataset.sort(function (a, b) {return (b.data[column] - a.data[column])})
                     break;            
                 default:
                     break;
@@ -39,14 +39,14 @@ export default () => {
         return tmp
     }
     const sortAllColumns = ()=>{
-        for (let i = 1; i < virtualColumns.length; i=i+2) {
-            if(virtualColumns[i].isPreSortEnabled){
+        for (let i = 1; i < columns.length; i=i+2) {
+            if(columns[i].IsPreSortEnabled){
                 console.log("WE GOT ONE!")
                 let tmpAsc = originalData.slice(0,originalData.length)
                 let tmpDesc = originalData.slice(0,originalData.length)
-                sortedData[virtualColumns[i].dataProperty]= {}
-                sortedData[virtualColumns[i].dataProperty].asc = sortDataset(`${virtualColumns[i].dataProperty}^^asc`,tmpAsc, virtualColumns[i].dataType)
-                sortedData[virtualColumns[i].dataProperty].desc = sortDataset(`${virtualColumns[i].dataProperty}^^desc`,tmpDesc, virtualColumns[i].dataType)
+                sortedData[columns[i].Index]= {}
+                sortedData[columns[i].Index].asc = sortDataset(`${columns[i].Index}^^asc`,tmpAsc, columns[i].DataType)
+                sortedData[columns[i].Index].desc = sortDataset(`${columns[i].Index}^^desc`,tmpDesc, columns[i].DataType)
             }
                 
         }
@@ -55,9 +55,9 @@ export default () => {
     }
 
     const getDataType = (index) => {
-        for (let i = 0; i < virtualColumns.length; i++) {
-            if(virtualColumns[i].dataProperty===index){
-                return virtualColumns[i].dataType
+        for (let i = 0; i < columns.length; i++) {
+            if(columns[i].Index===index){
+                return columns[i].DataType
             }
         }
         return 'string'
@@ -68,34 +68,34 @@ export default () => {
         message = event.data 
         console.log("sort worker received a message ", message)
         
-        let split='',property='',direction='', data=[]
+        let split='',index=0,direction='', data=[]
         let retVal=[]
         switch (message.MessageType) {
             case 'data':
                 originalData = message.Data
-                virtualColumns = message.Columns
+                columns = message.Columns
                 sortAllColumns()
                 break;
             case 'applySort':
                 sortStrategy = message.SortStrategy //should come in as dataProperty^^direction
                 split = sortStrategy.split('^^')
-                property = split[0]
+                index = split[0]
                 direction = split[1]
                 
-                if(sortedData[property][direction].length>message.Limit){
-                    retVal = sortedData[property][direction].slice(0,2)
+                if(sortedData[index][direction].length>message.Limit){
+                    retVal = sortedData[index][direction].slice(0,2)
                 } else 
                 {
-                    retVal = sortedData[property][direction]
+                    retVal = sortedData[index][direction]
                 }
-                postMessage({'MessageType':'sortComplete', 'Data':retVal, 'Column':property})
+                postMessage({'MessageType':'sortComplete', 'Data':retVal, 'Column':index})
                 break;
             case 'sortFilteredData':
                 sortStrategy = message.SortStrategy 
                 data = message.Data
                 split = sortStrategy.split('^^')
-                property = split[0]
-                postMessage({'MessageType':'sortComplete', 'Column':property, 'Data':sortDataset(sortStrategy, data, getDataType(property))})
+                index = split[0]
+                postMessage({'MessageType':'sortComplete', 'Column':index, 'Data':sortDataset(sortStrategy, data, getDataType(index))})
                 break;
             default:
                 break;

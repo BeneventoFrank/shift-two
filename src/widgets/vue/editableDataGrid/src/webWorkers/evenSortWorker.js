@@ -16,10 +16,10 @@ export default () => {
         {
             switch (dataType) {
                 case 'string':
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(a[column].toString()).toLowerCase()).localeCompare(setValue(b[column].toString()).toLowerCase());})
+                    tmp = dataset.sort(function (a, b) {return ('' + setValue(a.data[column].toString()).toLowerCase()).localeCompare(setValue(b.data[column].toString()).toLowerCase());})
                     break;
                 case 'number':
-                    tmp = dataset.sort(function (a, b) {return (a[column] - b[column])})
+                    tmp = dataset.sort(function (a, b) {return (a.data[column] - b.data[column])})
                     break;            
                 default:
                     break;
@@ -27,10 +27,10 @@ export default () => {
         } else {
             switch (dataType) {
                 case 'string':
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(b[column].toString()).toLowerCase()).localeCompare(setValue(a[column].toString()).toLowerCase());})
+                    tmp = dataset.sort(function (a, b) {return ('' + setValue(b.data[column].toString()).toLowerCase()).localeCompare(setValue(a.data[column].toString()).toLowerCase());})
                     break;
                 case 'number':
-                    tmp = dataset.sort(function (a, b) {return (b[column] - a[column])})
+                    tmp = dataset.sort(function (a, b) {return (b.data[column] - a.data[column])})
                     break;            
                 default:
                     break;

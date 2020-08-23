@@ -178,7 +178,8 @@ export default {
             sortStrategy:{
                 isCurrentlySorting:false,
                 strategy:'',
-                columnBeingSorted:''
+                direction:'',
+                columnBeingSorted:null
             },
             filterStrategy:{
                 isCurrentlyFiltering:false,
@@ -429,35 +430,27 @@ export default {
         },
         handleColumnSort(strategy){
             this.isDoneSorting = false
-            const checkColumn = (column)=>{
-                for (let i = 0; i < this.gridSettings.columns.length; i++) {
-                    if(this.gridSettings.columns[i].DataProperty===column){
-                        return this.gridSettings.columns[i].IsPreSortEnabled
-                    }
-                }
-            }
+           
             if(strategy !== ''){
                     if(this.filterStrategy.isCurrentlyFiltering){
-                    this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})
+                        this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})
                     } else {
-                        let split = strategy.split('^^')
-                        let isApplicable = checkColumn(split[0])
-                        if(this.isDonePreSorting&&isApplicable)
+                        const split = strategy.split('^^')
+                        const tmp = parseInt(split[0])
+                        if(this.isDonePreSorting&&this.gridSettings.columns[tmp].IsPreSortEnabled)
                         {
-                            try {
-                                this.sortStrategy = {}
-                                this.sortStrategy.strategy = strategy
-                                this.sortStrategy.isCurrentlySorting = true
-                                this.sortStrategy.columnBeingSorted = split[0]
-                                this.highestCountLoaded = this.getInitialRowsPerPage();
-                                this.filteredData = []
-                                this.filteredData = this.sortedData[split[0]][split[1]] 
-                                this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                                this.isDoneSorting = true;
-                            } catch (error) {
-                                this.isDoneSorting = true;
-                                //do nothing
-                            }
+                            console.log('what is the sorted data', this.sortedData)
+                            this.sortStrategy = {}
+                            this.sortStrategy.strategy = strategy
+                            this.sortStrategy.isCurrentlySorting = true
+                            this.sortStrategy.columnBeingSorted = tmp
+                            this.sortStrategy.direction = split[1]
+                            this.filteredData = []
+                            this.filteredData = this.sortedData[tmp][split[1]]
+                            console.log("fjsd;lfjdsffuck you", this.filteredData) 
+                            this.dataSlice = this.filteredData.slice(0,this.getInitialRowsPerPage())
+                            console.log("fjsd;lfjdsffuck you") 
+                            this.isDoneSorting = true;
                         } else {
                             this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
                         }
@@ -466,7 +459,7 @@ export default {
                 this.sortStrategy={
                     isCurrentlySorting:false,
                     strategy:'',
-                    columnBeingSorted:''
+                    columnBeingSorted:null
                 }
                 this.isDoneSorting = true;
                 if(this.filterStrategy.isCurrentlyFiltering){
@@ -773,6 +766,7 @@ export default {
                 if(counter<=firstHalf){
                     tmpRev1.push(this.fullDS[i])
                 }else{
+                    console.log('8888888888888888888888888888888888888888888888888888888888> ', this.fullDS[i])
                     tmpRev2.push(this.fullDS[i])
                 }
             }
@@ -795,6 +789,7 @@ export default {
 
             this.ww_evenSortWorker = new evenSortWorkerSetup(evenSortWorker)
             this.ww_evenSortWorker.addEventListener('message',event => {this.handleMessage(event)})
+            console.log("what the hell is the data", this.fullDS)
             this.ww_evenSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
 
             this.ww_oddSortWorker = new oddSortWorkerSetup(oddSortWorker)

@@ -27,7 +27,7 @@
                                 justify-content:${gridSettings.columns[index].DataAlignment}; 
                                 height:${gridSettings.columns[index].ColumnHeaderHeight}; 
                                 border-right:${getBorder(header.borderWidth, gridSettings.columns[index].BorderWidth, index)};
-                                background-color:${ ((currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(index.toString())))||((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === gridSettings.columns[index].DataProperty.toString()))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor} 
+                                background-color:${ ((currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(index.toString())))||((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === gridSettings.columns[index].Index))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor} 
                                 `"
                         :class="`headerCell 
                                 `" 
@@ -42,8 +42,8 @@
                             <div class='innerDiv' :style="`background-color:${gridSettings.colorScheme.FlyoutBackgroundColor}`">
                                 <div class='flyoutHeader'>
                                     <div class='headerItem sort'> 
-                                        <span @click="()=>{handleSortClick(header.dataProperty,index,'asc')}"><UpArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
-                                        <span @click="()=>{handleSortClick(gridSettings.columns[index].DataProperty,index,'desc')}"><DownArrow :isActiveColumn="gridSettings.columns[index].DataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
+                                        <span @click="()=>{handleSortClick(index,'asc')}"><UpArrow :isActiveColumn="header.Index===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
+                                        <span @click="()=>{handleSortClick(index,'desc')}"><DownArrow :isActiveColumn="gridSettings.columns[index].Index===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
                                     </div>
                                     <div class='headerItem'>
                                         <label class='filterHeader' :style="`color:${gridSettings.colorScheme.FlyoutTextColor};`">{{gridSettings.columns[index].ColumnHeader}}</label>
@@ -140,10 +140,10 @@ export default {
            return retVal
 
        },
-       handleSortClick(column, index, direction){
+       handleSortClick(index, direction){
 
             if(this.currentSort.isCurrentlySorting){
-                if (column === this.currentSort.columnBeingSorted) {
+                if (index === this.currentSort.columnBeingSorted) {
                         if(this.isActiveSort === direction){
                             this.$emit('columnSort','')
                             this.isActiveSort = ''
@@ -160,7 +160,7 @@ export default {
                 this.$emit('columnSort',`${index}^^${direction}`)
            }
            
-           if(((column === this.gridSettings.columns[index].Index)&&(this.isActiveSort!==''))){
+           if(((index === this.gridSettings.columns[index].Index)&&(this.isActiveSort!==''))){
                 this.applyBGColor = true 
            } else {
                setTimeout(() => {
@@ -211,7 +211,7 @@ export default {
                if (this.currentFilters.columnsBeingFiltered.includes(index.toString())) {
                     this.$emit('filterCleared',index)    
                }
-               this.applyBGColor = (this.currentSort.isCurrentlySorting&&this.currentSort.columnBeingSorted===this.gridSettings.columns[this.gridSettings.columns.length-1].DataProperty)
+               this.applyBGColor = (this.currentSort.isCurrentlySorting&&this.currentSort.columnBeingSorted===this.gridSettings.columns[this.gridSettings.columns.length-1].Index)
                                  ||((this.currentFilters.columnsBeingFiltered.includes((this.gridSettings.columns.length-1).toString()))&&(index !== this.gridSettings.columns.length-1))?true:false
            }
        }, 100),

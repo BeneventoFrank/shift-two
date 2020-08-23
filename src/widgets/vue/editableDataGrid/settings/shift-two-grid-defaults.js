@@ -52,7 +52,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
-            DataType:'',
+            DataType:'string',
             IsPreSortEnabled:true
         },
         {
@@ -69,7 +69,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
-            DataType:'',
+            DataType:'string',
             IsPreSortEnabled:true
         },
         {
@@ -86,7 +86,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
-            DataType:'',
+            DataType:'string',
             IsPreSortEnabled:true
         },
         {
@@ -103,7 +103,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
-            DataType:'',
+            DataType:'string',
             IsPreSortEnabled:true
         },
         {
@@ -120,7 +120,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
-            DataType:'',
+            DataType:'string',
             IsPreSortEnabled:true
         },
         {
@@ -137,7 +137,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
-            DataType:'',
+            DataType:'string',
             IsPreSortEnabled:true
         },
         {
@@ -154,7 +154,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
-            DataType:'',
+            DataType:'string',
             IsPreSortEnabled:true
         },
         {
@@ -171,7 +171,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
-            DataType:'',
+            DataType:'string',
             IsPreSortEnabled:true
         },
 

@@ -8,7 +8,7 @@
                   <div id="weightValue" class="tick-slider-value"></div>
               </div>
               <div class="tick-slider-background"></div>
-              <div id="weightProgress" class="tick-slider-progress" :style="`background-color:${colorScheme.sliderFillColor} ;`"></div>
+              <div id="weightProgress" class="tick-slider-progress" :style="`background-color:${colorScheme.SliderFillColor} ;`"></div>
               <div id="weightTicks" class="tick-slider-tick-container"></div>
               <input
                   ref="sliderInput"
@@ -81,7 +81,7 @@ export default {
       },0),  
       updateValue(slider) {
           let value = document.getElementById(slider.dataset.valueId);
-          value.innerHTML = `<div style="background-color:${this.colorScheme.sliderFillColor}" class='sliderIndicator'>${slider.value}</div> `;
+          value.innerHTML = `<div style="background-color:${this.colorScheme.SliderFillColor}" class='sliderIndicator'>${slider.value}</div> `;
       },
       updateValuePosition(slider) {
           let value = document.getElementById(slider.dataset.valueId);
@@ -110,6 +110,7 @@ export default {
           const spacing = parseFloat(slider.dataset.tickStep);
           const sliderRange = (parseInt(slider.max)  - parseInt(slider.min));
           const tickCount = sliderRange / spacing + 1; // +1 to account for 0
+            console.log("fj;asldkf;kdsjfdkfjdsf', ", spacing, sliderRange, tickCount, container, slider)
           for (let ii = 0; ii < tickCount; ii++) {
               let tick = document.createElement("span");
               tick.className = "tick-slider-tick";
@@ -125,7 +126,7 @@ export default {
       }
   },
   mounted(){
-    
+    console.log(this)
   this.init();
   window.addEventListener("resize", this.onResize);   
   }

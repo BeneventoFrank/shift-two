@@ -1,20 +1,13 @@
 <template>
   <div id="app" style='width:100%;'>
-    <!-- <slider 
-      :width="300"
-      :minValue="500"
-      :maxValue="4000"
-      :stepValue="500"
-      :initialValue="500"    
-    /> -->
-    <EditableDataGrid :gridConfig="localData" />
+    <EditableDataGrid />
   </div>
 </template>
 
 <script> 
 //import Slider from './widgets/vue/slider/Slider'
 import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
-import gridConfig from './widgets/vue/editableDataGrid/data/data.js'
+//import gridConfig from './widgets/vue/editableDataGrid/settings/shift-two-grid-defaults'
 
 export default {
   name: 'App',
@@ -24,7 +17,7 @@ export default {
   },
   data(){
     return {
-        localData:gridConfig
+       // localData:gridConfig
     }
   }
 }
@@ -35,6 +28,5 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: red !important;
 }
 </style>

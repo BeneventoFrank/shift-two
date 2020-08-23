@@ -2,58 +2,58 @@
     <div>
         <div style='width:100%; background-color:white;'>
             <div class="superHeader" :style="`width:${gridWillScroll?'99%':'100%'}`">
-                <div :style="`width:${header.width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header) in headers" :key="header.columnIndex">
-                    <span style='display:flex;flex-direction:row;' v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString())">
+                <div :style="`width:${header.Width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header,index) in gridSettings.columns" :key="index">
+                    <span style='display:flex;flex-direction:row;' v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(index.toString())">
                         <div>
                             <FilterSVG style="padding-left:10px" :height="11"></FilterSVG>
                         </div>
                         <div style='padding-top:2px;'>
-                            <span class="filterText" :style="`text-align:left; margin-left:5px; color:${colorScheme.activeIndicatorColor}`">{{getFilterText(currentFilters.filters, header.columnIndex)}}</span>
+                            <span class="filterText" :style="`text-align:left; margin-left:5px; color:${gridSettings.colorScheme.ActiveIndicatorColor}`">{{getFilterText(currentFilters.filters, index)}}</span>
                         </div>
                     </span>
                     <span v-else>&nbsp;</span>
-                    <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty">
-                        <SortSVG style="padding-right:20px" :color="colorScheme.activeIndicatorColor" :height="11"></SortSVG>
+                    <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === gridSettings.columns[index].DataProperty">
+                        <SortSVG style="padding-right:20px" :color="gridSettings.colorScheme.ActiveIndicatorColor" :height="11"></SortSVG>
                     </span>
                     <span v-else>&nbsp;</span>
                 </div>
             </div>
         </div>
-        <div :style="`width: 100%; position: relative; background-color:${applyBGColor&&!clearAllFilters?colorScheme.activeIndicatorColor:colorScheme.gridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 5px -8px black;`">
+        <div :style="`width: 100%; position: relative; background-color:${applyBGColor&&!clearAllFilters?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 5px -8px black;`">
             <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
-                    <div :id="`header-${header.columnIndex}`" :ref="`header-${header.columnIndex}`" 
-                        :style="`width:${header.width}; display:flex; flex-direction:row; 
-                                justify-content:${header.alignment}; 
-                                height:${header.height}; 
-                                border-right:${getBorder(header.borderWidth, header.borderColor, header.columnIndex)};
-                                background-color:${ ((currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(header.columnIndex.toString())))||((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === header.dataProperty.toString()))?colorScheme.activeIndicatorColor:colorScheme.gridHeaderBackgroundColor} 
+                    <div :id="`header-${index}`" :ref="`header-${index}`" 
+                        :style="`width:${gridSettings.columns[index].Width}; display:flex; flex-direction:row; 
+                                justify-content:${gridSettings.columns[index].DataAlignment}; 
+                                height:${gridSettings.columns[index].ColumnHeaderHeight}; 
+                                border-right:${getBorder(header.borderWidth, gridSettings.columns[index].BorderWidth, index)};
+                                background-color:${ ((currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(index.toString())))||((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === gridSettings.columns[index].DataProperty.toString()))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor} 
                                 `"
                         :class="`headerCell 
                                 `" 
-                        @mouseenter="()=>{handleFlyout(header.columnIndex,true)}"  
-                        @mouseleave="()=>{handleFlyout(header.columnIndex,false)}"  
+                        @mouseenter="()=>{handleFlyout(index,true)}"  
+                        @mouseleave="()=>{handleFlyout(index,false)}"  
                         
-                        v-for="(header) in headers" :key="header.columnIndex">
-                        <span :style="`display:block; color:${colorScheme.gridHeaderTextColor}; width:${header.width}; overflow:hidden; text-overflow:ellipsis`"> 
-                            {{header.text}}
+                        v-for="(header,index) in gridSettings.columns" :key="index">
+                        <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].Width}; overflow:hidden; text-overflow:ellipsis`"> 
+                            {{gridSettings.columns[index].ColumnHeader}}
                         </span>
-                        <div :ref="`flyout-${header.columnIndex}`" class='flyout' v-if="showAFilter&&showFilter[header.columnIndex]===true" :style="`right:${wouldCauseAScroll(header.columnIndex)?wouldCauseAScroll(header.columnIndex):null};`">
-                            <div class='innerDiv' :style="`background-color:${colorScheme.flyoutBackgroundColor}`">
+                        <div :ref="`flyout-${index}`" class='flyout' v-if="showAFilter&&showFilter[index]===true" :style="`right:${wouldCauseAScroll(index)?wouldCauseAScroll(index):null};`">
+                            <div class='innerDiv' :style="`background-color:${gridSettings.colorScheme.FlyoutBackgroundColor}`">
                                 <div class='flyoutHeader'>
                                     <div class='headerItem sort'> 
-                                        <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'asc')}"><UpArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
-                                        <span @click="()=>{handleSortClick(header.dataProperty,header.columnIndex,'desc')}"><DownArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
+                                        <span @click="()=>{handleSortClick(header.dataProperty,index,'asc')}"><UpArrow :isActiveColumn="header.dataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
+                                        <span @click="()=>{handleSortClick(gridSettings.columns[index].DataProperty,index,'desc')}"><DownArrow :isActiveColumn="gridSettings.columns[index].DataProperty===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
                                     </div>
                                     <div class='headerItem'>
-                                        <label class='filterHeader' :style="`color:${colorScheme.flyoutTextColor};`">{{header.text}}</label>
+                                        <label class='filterHeader' :style="`color:${gridSettings.colorScheme.FlyoutTextColor};`">{{gridSettings.columns[index].ColumnHeader}}</label>
                                     </div>
                                     <div class='headerItem'>
                                         &nbsp;
                                     </div>       
                                 </div>
                                 <br>
-                                <FilterInput :defaultValue="cmpFilter(header.columnIndex)" :ref="`filterInput-${header.columnIndex}`" @filterInputChanged="(evt)=>{debounceInput(evt,header.columnIndex)}" :columnIndex="header.columnIndex"></FilterInput>
+                                <FilterInput :defaultValue="cmpFilter(index)" :ref="`filterInput-${index}`" @filterInputChanged="(evt)=>{debounceInput(evt,index)}" :columnIndex="index"></FilterInput>
                                 <br>
                                 <img v-show="(!isDoneFiltering)||(!isDoneSorting)" src='../images/loader.gif' style='height:auto; width:50px;'>
                                 <br>
@@ -98,8 +98,8 @@ export default {
     computed: {
     },
     props:{
-        headers:{
-            type:Array
+        gridSettings:{
+            type:Object
         },
         gridWillScroll:{
             type:Boolean
@@ -160,7 +160,7 @@ export default {
                 this.$emit('columnSort',`${column}^^${direction}`)
            }
            
-           if(((column === this.headers[this.headers.length-1].dataProperty)&&(this.isActiveSort!==''))){
+           if(((column === this.gridSettings.columns[index].DataProperty)&&(this.isActiveSort!==''))){
                 this.applyBGColor = true 
            } else {
                setTimeout(() => {
@@ -171,7 +171,7 @@ export default {
        wouldCauseAScroll(index){
             let retVal = '150px'
             let y = this.$refs[`header-${index}`]
-            if(((y[0].offsetLeft+y[0].offsetWidth/2)+300)>this.gridWidth){
+            if(((y[0].offsetLeft+y[0].offsetWidth/2)+300)>this.gridSettings.size.GridWidthValue){
                 retVal = '300px'
             }
             return retVal
@@ -205,27 +205,22 @@ export default {
             const strategy = `${index}^^${evt.target.value}`
             this.$emit('filterApplied',strategy)
 
-            if(this.headers.length-1 === index) {this.applyBGColor = true}
+            if(this.gridSettings.columns.length-1 === index) {this.applyBGColor = true}
 
            } else {
                if (this.currentFilters.columnsBeingFiltered.includes(index.toString())) {
                     this.$emit('filterCleared',index)    
                }
-               this.applyBGColor = (this.currentSort.isCurrentlySorting&&this.currentSort.columnBeingSorted===this.headers[this.headers.length-1].dataProperty)
-                                 ||((this.currentFilters.columnsBeingFiltered.includes((this.headers.length-1).toString()))&&(index !== this.headers.length-1))?true:false
+               this.applyBGColor = (this.currentSort.isCurrentlySorting&&this.currentSort.columnBeingSorted===this.gridSettings.columns[this.gridSettings.columns.length-1].DataProperty)
+                                 ||((this.currentFilters.columnsBeingFiltered.includes((this.gridSettings.columns.length-1).toString()))&&(index !== this.gridSettings.columns.length-1))?true:false
            }
        }, 100),
        getBorder(usersBorderWidth, usersBorderColor, columnIndex){
-           if(columnIndex===this.headers.length-1){return null} //no left border on the first column or the last one 
-           return `1px solid ${this.colorScheme.gridHeaderBorderColor}`
+           if(columnIndex===this.gridSettings.columns.length-1){return null} //no left border on the first column or the last one 
+           return `1px solid ${this.gridSettings.colorScheme.GridHeaderBorderColor}`
        },
     },
     mounted(){
-        let tmp = {}
-         for (let i = 0; i < this.headers.length; i++) {
-             tmp[i]=false
-         }
-         this.showFilter = tmp
   }
 };
 </script>

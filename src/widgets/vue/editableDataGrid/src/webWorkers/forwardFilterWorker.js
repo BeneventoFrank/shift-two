@@ -2,15 +2,15 @@ export default () => {
     let message = ''
     let originalData = []
     let filteredData = []
-    let virtualColumns = null
     let filterStrategy = {}
     const filterDS = (ds,strategy,runningMode)=>{
         const strat = strategy.split('^^')
         const col = strat[0]
         const keyword = strat[1]
          let tmp = []
+         console.log('ds..........................................................', ds)
         for (let i = 0; i <= ds.length-1; i++) {
-            if(ds[i][virtualColumns[col].dataProperty].toString().includes(keyword)){
+            if(ds[i].data[col].toString().toLowerCase().includes(keyword.toLowerCase())){
                 tmp.push(ds[i])
             } 
         }
@@ -31,7 +31,6 @@ export default () => {
             case 'data':
                 originalData = message.Data
                 console.log('forward filter will handle ', originalData.length)
-                virtualColumns = message.Columns
                 break;
             case 'filter':
                 if(message.IsCurrentlyFiltering){

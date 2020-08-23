@@ -1,11 +1,11 @@
 <template>
-<div :style="`position:relative; display:flex; min-width:${gridSettings.size.GridWidth}; height:${gridSettings.size.gridHeight}; flex-direction:column; align-items:center; justify-content:center;`">
+<div :style="`position:relative; display:flex; min-width:${gridSettings.size.GridWidth}; height:${gridSettings.size.GridHeight}; flex-direction:column; align-items:center;`">
     <div :style="`position:absolute; width:${gridSettings.size.GridWidth}; height:${gridSettings.size.gridHeight}; padding:5px;`">
-    <div ref='grid' :style="`position:absolute; height:${gridSettings.size.gridHeight}; width:${gridSettings.size.GridWidth};`" >
+    <div ref='grid' :style="`position:absolute; height:${gridSettings.size.GridHeight}; width:${gridSettings.size.GridWidth};`" >
         <div ref='gridHeader' id='gridHeader'>
             <div ref="pagination" :style="`display:flex; flex-direction:row; width:${gridSettings.size.GridWidth}; justify-content:center; align-items:flex-end; flex-wrap:wrap; padding-bottom:12px;`">
                 <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center;`">
-                    <div :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridSettings.size.GridWidthValue>600?'flex-end':'center'};`">
+                    <div :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`">
                         <Slider @change="handleChangeNumberPerPage" 
                                 @initialValue="handleInitialValue" 
                                 v-show="gridSettings.slider.Enabled" 
@@ -18,7 +18,7 @@
                         ></Slider>
                     </div>
                 </div>
-                <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:flex-end; margin-top:${gridSettings.size.GridWidthValue>600?0:20}px; justify-content:${gridSettings.size.GridWidthValue>600?'flex-end':'center'};`" class='pagination'>
+                <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:flex-end; margin-top:${gridSettings.size.GridWidthValue>=600?0:20}px; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`" class='pagination'>
                     <Pagination 
                         v-show="gridSettings.pagination.Enabled"
                         :cmpCanPagePrevious="cmpCanPagePrevious"
@@ -35,12 +35,12 @@
                     <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :color="gridSettings.colorScheme.ActiveIndicatorColor" :height='25'/></div>
                     <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /></div>
                 </div>
-                <div ref="title" style="width:60%;"><span class='title' :style="`color:${gridSettings.colorScheme.GridTitleColor}`" v-if="gridSettings.title.text" >{{gridSettings.title.text}}</span></div>
+                <div ref="title" style="width:60%;"><span class='title' :style="`color:${gridSettings.colorScheme.GridTitleColor}`" v-if="gridSettings.title.Text" >{{gridSettings.title.Text}}</span></div>
                 <div style="width:20%;"></div>
             </div>
             
 
-            <div ref="headerRow" v-if="gridSettings.header.Enabled"  :style="`width:100%;`">
+            <div ref="headerRow" v-if="gridSettings.header.Enabled" :style="`width:100%;`">
             <HeaderRow 
                              @columnSort="handleColumnSort" 
                              @filterClosed="handleFilterClosed" 
@@ -56,7 +56,7 @@
             </HeaderRow>
             </div>
         </div>
-        <div ref='dataRow' class='dataRow' :style="`width:${gridSettings.size.GridWidth}; overflow-x:hidden;  position:relative; height:${gridSettings.size.GridHeightValue-headerHeight}px`">
+        <div ref='dataRow' class='dataRow' :style="`width:${gridSettings.size.GridWidth}; overflow-x:hidden;  position:relative; height:${gridSettings.developmentMode.Enabled?100:gridSettings.size.GridHeightValue-headerHeight}px`">
             <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; padding-top:20px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
                 <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
                 :style="`border-spacing:0px; 
@@ -72,8 +72,43 @@
                                  color:${gridSettings.colorScheme.GridRowTextColor}`" v-for="(column,colIndex) in gridSettings.columns"  :key="colIndex">{{dataRow.data[colIndex]}}</td>
                 </tr>
             </table>
-           
         </div>
+        <div v-if="gridSettings.developmentMode.Enabled" style="border-radius:5px; background-color:#F8F8F8; height:380px; border:1px solid grey;">
+            <div style="height:5%; border-top-right-radius:5px; border-top-left-radius:5px; background-color:chocolate; display:flex;flex-direction:row; justify-content:center;">
+                <span style="color:white;">Developer Mode</span>
+            </div>
+            <div style="height:95%; display:flex;flex-direction:row; justify-content:center;">
+                <div style="width:25%; display:flex; flex-direction:column;">
+                    <div @click="setCurrentTab('welcome')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='welcome'?'#F8F8F8':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Welcome</span></div>
+                    <div @click="setCurrentTab('size')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='size'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Size</span></div>
+                    <div @click="setCurrentTab('header')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='header'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Header</span></div>
+                    <div @click="setCurrentTab('colorScheme')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='colorScheme'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Color Scheme</span></div>
+                    <div @click="setCurrentTab('paging')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='paging'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Slider/Paging</span></div>
+                    <div :style="`border-right:1px solid slateGrey;flex-grow:1;`">
+                        &nbsp;
+                    </div>
+                </div>
+                <div v-show="currentTab==='welcome'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <span style="padding-bottom:40px; font-size:20px;">Welcome to the grid configuration tool.</span>
+                    <span style="padding-bottom:20px; font-size:16px;">This tool will allow you to customize the look and feel of your grid. Each tab contains a button that will allow you to download the config needed to generate the grid you see. </span>
+                    <span style="padding-bottom:20px; font-size:16px;">You may re-open this tool at any point by turning on developmentMode in your config</span>
+                    <span style="font-size:16px;">Thanks for picking Shift-Grid, tell us what you think. <a href='www.shift-two.com'>www.shift-two.com</a></span>
+                </div>
+                <div v-show="currentTab==='size'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <span style="padding-bottom:40px; font-size:20px;">super size me</span>
+                </div>
+                <div v-show="currentTab==='paging'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <span style="padding-bottom:40px; font-size:20px;">page me</span>
+                </div>
+                <div v-show="currentTab==='colorScheme'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <span style="padding-bottom:40px; font-size:20px;">color me</span>
+                </div>
+                <div v-show="currentTab==='header'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <span style="padding-bottom:40px; font-size:20px;">enable me</span>
+                </div>
+
+            </div>
+        </div>        
     </div>
     </div>
 </div>
@@ -110,17 +145,19 @@ export default {
         return {
             shouldAnimate:false,
             shouldReverseAnimate:false,
-            
+            developmentMode:false,
+
 
             headerHeight:0, //calculated total of the header use to dictate the height of datarow.
             highestScrollPosition:0,
             fullDS:[],
-                                                            weAreUsingTheSlider:false,
+            weAreUsingTheSlider:false,
                                                             sliderCount:false,
             sortedData:{},
             isDonePreSorting:false,
             filterCount:0,
             scrollCount:0,
+            currentTab:'welcome',
             tmpResults:[],
             boolGridWillScroll:false,
             tmpResultsSort:{},
@@ -155,11 +192,9 @@ export default {
             ww_evenSortWorker:null,
             ww_oddSortWorker:null,
             gridSettings:{
+                developmentMode:{
+                },
                 size:{
-                    GridWidth:'',
-                    GridWidthValue:0,
-                    GridHeight:'', 
-                    GridHeightValue:0, 
                 },
                 colorScheme:{
                 },
@@ -183,6 +218,9 @@ export default {
         }        
     },
     methods: {
+        setCurrentTab(tab){
+            this.currentTab = tab
+        },
         handleInitialValue(event){
             this.sliderCount = event
         },
@@ -675,7 +713,12 @@ export default {
                                   }
         },
         calculateHeightOfDataRow(){
-            this.headerHeight = this.$refs.gridHeader.offsetHeight
+            let tmp=0;
+            const height = this.gridSettings.size.GridWidthValue<600?91:51;
+            this.gridSettings.header.Enabled?tmp=tmp+51:null
+            this.gridSettings.pagination.Enabled?tmp=tmp+height:null
+            this.gridSettings.title.Text.length>0?tmp=tmp+28:null
+            return tmp
         },
         processConfig(){
             let tmp = null
@@ -736,33 +779,36 @@ export default {
 
             this.ww_forwardWorker1 = new forwardWorkerSetup(forwardWorker)
             this.ww_forwardWorker1.addEventListener('message',event =>{this.handleMessage(event)})
-            this.ww_forwardWorker1.postMessage({'MessageType':'data','Data':tmpFor1, 'Columns':this.gridSettings})
+            this.ww_forwardWorker1.postMessage({'MessageType':'data','Data':tmpFor1, 'Columns':this.gridSettings.columns})
             
             this.ww_forwardWorker2 = new forwardWorkerSetup(forwardWorker)
             this.ww_forwardWorker2.addEventListener('message',event =>{this.handleMessage(event)})
-            this.ww_forwardWorker2.postMessage({'MessageType':'data','Data':tmpFor2, 'Columns':this.gridSettings})
+            this.ww_forwardWorker2.postMessage({'MessageType':'data','Data':tmpFor2, 'Columns':this.gridSettings.columns})
 
             this.ww_reverseWorker1 = new reverseWorkerSetup(reverseWorker)
             this.ww_reverseWorker1.addEventListener('message',event =>{this.handleMessage(event)})
-            this.ww_reverseWorker1.postMessage({'MessageType':'data','Data':tmpRev1, 'Columns':this.gridSettings})
+            this.ww_reverseWorker1.postMessage({'MessageType':'data','Data':tmpRev1, 'Columns':this.gridSettings.columns})
 
             this.ww_reverseWorker2 = new reverseWorkerSetup(reverseWorker)
             this.ww_reverseWorker2.addEventListener('message',event =>{this.handleMessage(event)})
-            this.ww_reverseWorker2.postMessage({'MessageType':'data','Data':tmpRev2, 'Columns':this.gridSettings})
+            this.ww_reverseWorker2.postMessage({'MessageType':'data','Data':tmpRev2, 'Columns':this.gridSettings.columns})
 
             this.ww_evenSortWorker = new evenSortWorkerSetup(evenSortWorker)
             this.ww_evenSortWorker.addEventListener('message',event => {this.handleMessage(event)})
-            this.ww_evenSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings})
+            this.ww_evenSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
 
             this.ww_oddSortWorker = new oddSortWorkerSetup(oddSortWorker)
             this.ww_oddSortWorker.addEventListener('message',event => {this.handleMessage(event)})
-            this.ww_oddSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings})
+       //     this.ww_oddSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
 
             this.ww_sortWorker = new sortWorkerSetup(sortWorker)
             this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
-            this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings})
+         //   this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
         },
-
+        initializeDevMode(){
+            this.dataSlice = [...this.fullDS].slice(0,2)
+            console.log("this.dta', ", this.dataSlice)
+        }
     },
     props:{
         gridConfig:{
@@ -779,18 +825,20 @@ export default {
     async mounted(){
         this.processConfig();
         this.processData();
-         this.boolGridWillScroll = this.gridWillScroll()
-
-         this.calculateColumnWidths()
-         this.gridSettings.pagination.Enabled?this.initializePaging(this.getInitialRowsPerPage()):null
-         this.calculateHeightOfDataRow()
-         this.configureWebWorkers()
-
-         this.shouldAnimate = true //make this a config setting.
-         setTimeout(() => {
-             this.shouldReverseAnimate = true   
-         }, 500);
-  }
+        this.boolGridWillScroll = this.gridWillScroll()
+        this.calculateColumnWidths()
+        this.gridSettings.pagination.Enabled?this.initializePaging(this.getInitialRowsPerPage()):null
+        this.headerHeight = this.calculateHeightOfDataRow()
+        if(this.gridSettings.developmentMode.Enabled){
+            this.initializeDevMode()
+        } else {
+            this.configureWebWorkers()
+            this.shouldAnimate = true //make this a config setting.
+            setTimeout(() => {
+                this.shouldReverseAnimate = true   
+            }, 500);
+        }
+    }
 };
 </script>
 <style >

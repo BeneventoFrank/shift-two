@@ -1,7 +1,10 @@
 let shiftSettings = {
+    developmentMode:{
+        Enabled:false
+    },
     size:{
-        GridWidth:'800px', //px value of width
-        GridWidthValue:800,
+        GridWidth:'600px', //px value of width
+        GridWidthValue:600,
         GridHeight:'600px', //px value of height
         GridHeightValue:600, //int value used for calculations
     },
@@ -32,7 +35,7 @@ let shiftSettings = {
         InitialNumberOfRowsPerPage:0,
     },
     title:{
-        text:'Whats my name!'
+        Text:'Whats my name!'
     },
     columns:[
         {
@@ -49,6 +52,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
+            DataType:'',
             IsPreSortEnabled:true
         },
         {
@@ -65,6 +69,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
+            DataType:'',
             IsPreSortEnabled:true
         },
         {
@@ -81,6 +86,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
+            DataType:'',
             IsPreSortEnabled:true
         },
         {
@@ -97,6 +103,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
+            DataType:'',
             IsPreSortEnabled:true
         },
         {
@@ -113,6 +120,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
+            DataType:'',
             IsPreSortEnabled:true
         },
         {
@@ -129,6 +137,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
+            DataType:'',
             IsPreSortEnabled:true
         },
         {
@@ -145,6 +154,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
+            DataType:'',
             IsPreSortEnabled:true
         },
         {
@@ -161,6 +171,7 @@ let shiftSettings = {
             Alignment:'',
             DataAlignment:'',
             DataProperty:'',
+            DataType:'',
             IsPreSortEnabled:true
         },
 

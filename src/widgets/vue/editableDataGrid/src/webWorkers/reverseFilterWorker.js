@@ -2,7 +2,6 @@ export default () => {
     let message = ''
     let originalData = []
     let filteredData = []
-    let virtualColumns = null
     let filterStrategy = {}
     const filterDS = (ds,strategy,runningMode)=>{
         const strat = strategy.split('^^')
@@ -10,7 +9,7 @@ export default () => {
         const keyword = strat[1]
         let tmp = []
         for (let i = ds.length-1; i >= 0 ; i--) {
-            if(ds[i][virtualColumns[col].dataProperty].toString().includes(keyword)){
+            if(ds[i].data[col].toString().toLowerCase().includes(keyword.toLowerCase())){
                 tmp.push(ds[i])
             } 
         }
@@ -31,7 +30,7 @@ export default () => {
             case 'data':
                 originalData = message.Data
                 console.log("reverse filter will handle ", originalData.length)
-                virtualColumns = message.Columns
+
                 break;
             case 'filter':
                 if(message.IsCurrentlyFiltering){

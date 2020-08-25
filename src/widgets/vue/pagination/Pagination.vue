@@ -1,5 +1,5 @@
 <template>
-        <div :style="`color:${colorScheme.pagingTextColor};`">
+        <div :style="`color:${colorScheme.PagingTextColor};`">
             <span class='pagingText' :style="`margin-right:25px`">{{`${pagination.MinRecordsViewable} to ${pagination.MaxRecordsViewable} of ${pagination.TotalNumberOfRecords}`}}</span>
             
             <span v-if="cmpCanPagePrevious" class='pagingText pointer' @click="()=>{this.handlePreviousClick(false)}">&#124;</span>

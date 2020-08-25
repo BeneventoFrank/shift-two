@@ -73,42 +73,51 @@
                 </tr>
             </table>
         </div>
-        <div v-if="gridSettings.developmentMode.Enabled" style="border-radius:5px; background-color:#F8F8F8; height:380px; border:1px solid grey;">
-            <div style="height:5%; border-top-right-radius:5px; border-top-left-radius:5px; background-color:chocolate; display:flex;flex-direction:row; justify-content:center;">
-                <span style="color:white;">Developer Mode</span>
-            </div>
-            <div style="height:95%; display:flex;flex-direction:row; justify-content:center;">
-                <div style="width:25%; display:flex; flex-direction:column;">
-                    <div @click="setCurrentTab('welcome')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='welcome'?'#F8F8F8':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Welcome</span></div>
-                    <div @click="setCurrentTab('size')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='size'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Size</span></div>
-                    <div @click="setCurrentTab('header')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='header'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Header</span></div>
-                    <div @click="setCurrentTab('colorScheme')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='colorScheme'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Color Scheme</span></div>
-                    <div @click="setCurrentTab('paging')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='paging'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Slider/Paging</span></div>
-                    <div :style="`border-right:1px solid slateGrey;flex-grow:1;`">
-                        &nbsp;
+        <div v-if="gridSettings.developmentMode.Enabled" style="display:flex; flex-direction:row; width:100%; justify-content:center;">
+            <div style="border-radius:5px; background-color:#F8F8F8; min-width:600px; max-width:600px; height:380px; border:1px solid grey;">
+                <div style="height:5%; border-top-right-radius:5px; border-top-left-radius:5px; background-color:chocolate; display:flex;flex-direction:row; justify-content:center;">
+                    <span style="color:white;">Developer Mode</span>
+                </div>
+                <div style="height:95%; display:flex;flex-direction:row; justify-content:center;">
+                    <div style="width:25%; display:flex; flex-direction:column;">
+                        <div @click="setCurrentTab('welcome')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='welcome'?'#F8F8F8':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Welcome</span></div>
+                        <div @click="setCurrentTab('size')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='size'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Size</span></div>
+                        <div @click="setCurrentTab('header')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='header'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Header</span></div>
+                        <div @click="setCurrentTab('colorScheme')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='colorScheme'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Color Scheme</span></div>
+                        <div @click="setCurrentTab('paging')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='paging'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Slider/Paging</span></div>
+                        <div :style="`border-right:1px solid slateGrey;flex-grow:1;`">
+                            &nbsp;
+                        </div>
                     </div>
-                </div>
-                <div v-show="currentTab==='welcome'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                    <span style="padding-bottom:40px; font-size:20px;">Welcome to the grid configuration tool.</span>
-                    <span style="padding-bottom:20px; font-size:16px;">This tool will allow you to customize the look and feel of your grid. Each tab contains a button that will allow you to download the config needed to generate the grid you see. </span>
-                    <span style="padding-bottom:20px; font-size:16px;">You may re-open this tool at any point by turning on developmentMode in your config</span>
-                    <span style="font-size:16px;">Thanks for picking Shift-Grid, tell us what you think. <a href='www.shift-two.com'>www.shift-two.com</a></span>
-                </div>
-                <div v-show="currentTab==='size'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                    <span style="padding-bottom:40px; font-size:20px;">super size me</span>
-                </div>
-                <div v-show="currentTab==='paging'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                    <span style="padding-bottom:40px; font-size:20px;">page me</span>
-                </div>
-                <div v-show="currentTab==='colorScheme'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                    <span style="padding-bottom:40px; font-size:20px;">color me</span>
-                </div>
-                <div v-show="currentTab==='header'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                    <span style="padding-bottom:40px; font-size:20px;">enable me</span>
-                </div>
+                    <div v-show="currentTab==='welcome'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <span style="padding-bottom:40px; font-size:20px;">Welcome to the grid configuration tool.</span>
+                        <span style="padding-bottom:20px; font-size:16px;">This tool will allow you to customize the look and feel of your grid. Each tab contains a button that will allow you to download the config needed to generate the grid you see. </span>
+                        <span style="padding-bottom:20px; font-size:16px;">You may re-open this tool at any point by turning on developmentMode in your config</span>
+                        <span style="font-size:16px;">Thanks for picking Shift-Grid, tell us what you think. <a href='www.shift-two.com'>www.shift-two.com</a></span>
+                    </div>
+                    <div v-show="currentTab==='size'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <div style="width:100%; height:100%; border: 1px solid red;">
+                            <span style="font-size:20px;">Configure Grid Size</span>
+                            <div style="display:flex; margin-top:40px; flex-direction:column; justify-content:flex-start;">
+                                <div><span style="width:150px">Grid Width</span><input type='text' style="width:75px" height="30px"></div>
+                                <div><span style="width:150px">Grid Height</span><input type='text' style="width:75px" height="30px"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-show="currentTab==='paging'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <span style="padding-bottom:40px; font-size:20px;">page me</span>
+                    </div>
+                    <div v-show="currentTab==='colorScheme'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <span style="padding-bottom:40px; font-size:20px;">color me</span>
+                    </div>
+                    <div v-show="currentTab==='header'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                        <span style="padding-bottom:40px; font-size:20px;">enable me</span>
+                    </div>
 
-            </div>
-        </div>        
+                </div>
+            </div> 
+        </div>
+       
     </div>
     </div>
 </div>
@@ -446,7 +455,6 @@ export default {
                             this.sortStrategy.columnBeingSorted = tmp
                             this.sortStrategy.direction = split[1]
                             this.filteredData = []
-                            console.log('this.sortedData', this.sortedData)
                             this.filteredData = this.sortedData[tmp][split[1]]
                             console.log("fjsd;lfjdsffuck you", this.filteredData) 
                             this.dataSlice = this.filteredData.slice(0,this.getInitialRowsPerPage())
@@ -484,13 +492,15 @@ export default {
             let tmp = 0
             const numCols = this.fullDS[0].data.length
             let custCols = [] 
-            for (let i = 0; i < numCols; i++) {
-                if (this.gridSettings.columns[i].WidthValue>0) {
-                    custCols.push(i)
-                    console.log(this.gridSettings.columns[i].WidthValue)
-                    tmp = tmp + this.gridSettings.columns[i].WidthValue
+            if(!this.gridSettings.developmentMode.Enabled){
+                for (let i = 0; i < numCols; i++) {
+                    if (this.gridSettings.columns[i].WidthValue>0) {
+                        custCols.push(i)
+                        tmp = tmp + this.gridSettings.columns[i].WidthValue
+                    }
                 }
             }
+
            const numColumns = numCols-custCols.length
            let widthOfGrid = this.gridSettings.size.GridWidthValue - tmp
            widthOfGrid = this.boolGridWillScroll?(widthOfGrid*.975):widthOfGrid
@@ -834,6 +844,11 @@ export default {
                 this.shouldReverseAnimate = true   
             }, 500);
         }
+        setTimeout(() => {
+            this.gridSettings.size.GridWidth = '1000px'
+            this.gridSettings.size.GridWidthValue = 1000
+            this.calculateColumnWidths()
+        }, 5000);
     }
 };
 </script>

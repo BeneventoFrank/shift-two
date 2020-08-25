@@ -446,6 +446,7 @@ export default {
                             this.sortStrategy.columnBeingSorted = tmp
                             this.sortStrategy.direction = split[1]
                             this.filteredData = []
+                            console.log('this.sortedData', this.sortedData)
                             this.filteredData = this.sortedData[tmp][split[1]]
                             console.log("fjsd;lfjdsffuck you", this.filteredData) 
                             this.dataSlice = this.filteredData.slice(0,this.getInitialRowsPerPage())

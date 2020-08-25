@@ -1,6 +1,6 @@
 let shiftSettings = {
     developmentMode:{
-        Enabled:false
+        Enabled:true
     },
     size:{
         GridWidth:'600px', //px value of width

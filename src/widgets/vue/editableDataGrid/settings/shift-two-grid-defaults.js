@@ -35,7 +35,7 @@ let shiftSettings = {
         InitialNumberOfRowsPerPage:0,
     },
     title:{
-        Text:'Whats my name!'
+        Text:'Title'
     },
     columns:[
         {

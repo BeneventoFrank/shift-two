@@ -57,8 +57,8 @@
                 </div>
             </div>
             <div ref='dataRow' class='dataRow' :style="`width:${gridSettings.size.GridWidth}; overflow-x:hidden;  position:relative; height:${gridSettings.developmentMode.Enabled?100:gridSettings.size.GridHeightValue-headerHeight}px`">
-                <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; padding-top:20px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
-                    <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${shouldAnimate?'animate':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
+                <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; padding-top:${gridSettings.developmentMode.Enabled?0:0}px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
+                    <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${rowIndex%2!=0&&shouldAnimate?'animate':''} ${rowIndex%2!=0&&shouldReverseAnimate?'reverseAnimation':''}`" 
                     :style="`border-spacing:0px; 
                             background-color:${rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor};
                             cursor:pointer; 
@@ -75,7 +75,7 @@
             </div>
         </div>
     </div>
-    <div v-if="gridSettings.developmentMode.Enabled" :class="`configTool ${shouldAnimateConfigTool?'animateConfigTool':null}`" style="display:flex; flex-direction:row; box-shadow: 0px 0px 27px -13px black; min-width:600px; position:absolute; margin-top:270px; justify-content:center; ">
+    <div v-if="gridSettings.developmentMode.Enabled" :class="`configTool ${shouldAnimateConfigTool?'animateConfigTool':null}`" style="display:flex; flex-direction:row; box-shadow: 0px 0px 27px -13px black; min-width:600px; position:absolute; z-index:10000; margin-top:270px; justify-content:center; ">
         <div style="border-radius:5px; background-color:#F8F8F8; min-width:600px; max-width:600px; height:380px; border:1px solid grey; ">
             <div style="height:5%; border-top-right-radius:5px; border-top-left-radius:5px; background-color:chocolate; display:flex;flex-direction:row; justify-content:center;">
                 <span style="color:white;">{{developerModeText}}</span>
@@ -112,26 +112,26 @@
                         </div>
                     </div>
                 </div>
-                <div v-show="currentTab==='paging'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                    <span style="padding-bottom:40px; font-size:20px;">page me</span>
-                    <div style="display:flex; width:100%; justify-content:flex-start;">
-                        <div style="width:150px; display:flex; justify-content:flex-start"><span>Slider Fill Color</span></div>
-                        <div><input @input="(event)=>{debounceColorChange(event,'sfc')}" type='text' style="width:100px" height="30px"></div>
-                    </div>   
-                    <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
-                        <div style="width:150px; display:flex; justify-content:flex-start"><span></span>Paging Text Color</div>
-                        <div><input @input="(event)=>{debounceColorChange(event,'ptc')}" type='text' style="width:100px" height="30px"></div>
-                    </div>                         
-                </div>
-                <div v-show="currentTab==='colorScheme'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
 
+                <div v-show="currentTab==='paging'" style="width:75%; padding-left:40px; padding-right:40px; padding-top:20px; padding-bottom:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <div style="width:100%; height:100%;">
+                        <span style="font-size:20px;">Slider/Pager Settings</span>
+                        <div style="display:flex; margin-top:40px; flex-direction:column; justify-content:flex-start;">
+                        <div style="display:flex; width:100%; justify-content:flex-start;">
+                            <div style="width:150px; display:flex; justify-content:flex-start"><span>Slider Fill Color</span></div>
+                            <div><input @input="(event)=>{debounceColorChange(event,'sfc')}" type='text' style="width:100px" height="30px"></div>
+                        </div>   
+                        <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
+                            <div style="width:150px; display:flex; justify-content:flex-start"><span></span>Paging Text Color</div>
+                            <div><input @input="(event)=>{debounceColorChange(event,'ptc')}" type='text' style="width:100px" height="30px"></div>
+                        </div>                         
+                        </div>
+                    </div>
+                </div>
+                <div v-show="currentTab==='colorScheme'" style="width:75%; display:flex; padding-left:40px; padding-right:40px; padding-top:20px; padding-bottom:20px; flex-direction:column; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
                         <span style="font-size:20px;">Color Scheme</span>
                         <div style="display:flex; margin-top:20px; flex-direction:column; justify-content:flex-start;">
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Row Text Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'grtc')}" type='text' style="width:100px" height="30px"></div>
-                            </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Background Color</div>
                                 <div><input @input="(event)=>{debounceColorChange(event,'ghbc')}" type='text' style="width:100px" height="30px"></div>
@@ -139,7 +139,11 @@
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Text Color</div>
                                 <div><input @input="(event)=>{debounceColorChange(event,'ghtc')}" type='text' style="width:100px" height="30px"></div>
-                            </div>                                    
+                            </div>  
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Header Divider Color</span></div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'ghboc')}" type='text' style="width:100px" height="30px"></div>
+                            </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Row Odd Background Color</div>
                                 <div><input @input="(event)=>{debounceColorChange(event,'grobc')}" type='text' style="width:100px" height="30px"></div>
@@ -149,12 +153,8 @@
                                 <div><input @input="(event)=>{debounceColorChange(event,'grebc')}" type='text' style="width:100px" height="30px"></div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Active Indicator Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'aic')}" type='text' style="width:100px" height="30px"></div>
-                            </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Header Border Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ghboc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Row Text Color</span></div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'grtc')}" type='text' style="width:100px" height="30px"></div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Background Color</span></div>
@@ -164,16 +164,19 @@
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Text Color</span></div>
                                 <div><input @input="(event)=>{debounceColorChange(event,'ftc')}" type='text' style="width:100px" height="30px"></div>
                             </div>   
-
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Active Indicator Color</span></div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'aic')}" type='text' style="width:100px" height="30px"></div>
+                            </div>   
                         </div>
                     </div>
 
                 </div>
-                <div v-show="currentTab==='header'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='header'" style="width:75%; display:flex; flex-direction:column; padding-left:40px; padding-right:40px; padding-top:20px; padding-bottom:20px; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
                         <span style="font-size:20px;">Grid Title</span>
                         <div style="display:flex; margin-top:40px; flex-direction:column; justify-content:flex-start;">
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start;">
                                 <div style="width:100px; display:flex; justify-content:flex-start"><span>Title Text</span></div>
                                 <div><input @input="debounceHeaderChange" type='text' style="width:200px" height="30px"></div>
                             </div>   
@@ -978,15 +981,15 @@ export default {
                         await this.timeout(250)
                     }
                     
-                }, 1500);                
+                }, 0);                
             }, 0);
 
         } else {
             this.configureWebWorkers()
-            this.shouldAnimate = true //make this a config setting.
-            setTimeout(() => {
-                this.shouldReverseAnimate = true   
-            }, 500);
+            // this.shouldAnimate = true //make this a config setting.
+            // setTimeout(() => {
+            //     this.shouldReverseAnimate = true   
+            // }, 500);
         }
     }
 };
@@ -1079,7 +1082,7 @@ export default {
             height:auto;
             overflow:hidden;
             max-height:30px;
-            transition:max-height 1s;            
+            transition:max-height 1.5s;            
         }
         .animateConfigTool{
             max-height:380px;

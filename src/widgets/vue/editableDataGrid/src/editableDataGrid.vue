@@ -84,8 +84,8 @@
                 <div style="width:25%; display:flex; flex-direction:column;">
                     <div @click="setCurrentTab('welcome')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='welcome'?'#F8F8F8':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Welcome</span></div>
                     <div @click="setCurrentTab('size')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='size'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Size</span></div>
-                    <div @click="setCurrentTab('header')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='header'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Title</span></div>
-                    <div @click="setCurrentTab('colorScheme')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='colorScheme'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Color Scheme</span></div>
+                    <div @click="setCurrentTab('header')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='header'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Header</span></div>
+                    <div @click="setCurrentTab('row')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='colorScheme'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Row</span></div>
                     <div @click="setCurrentTab('paging')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='paging'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Slider/Paging</span></div>
                     <div :style="`border-right:1px solid slateGrey;flex-grow:1;`">
                         &nbsp;
@@ -128,22 +128,10 @@
                         </div>
                     </div>
                 </div>
-                <div v-show="currentTab==='colorScheme'" style="width:75%; display:flex; padding-left:40px; padding-right:40px; padding-top:20px; padding-bottom:20px; flex-direction:column; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='row'" style="width:75%; display:flex; padding-left:40px; padding-right:40px; padding-top:20px; padding-bottom:20px; flex-direction:column; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
-                        <span style="font-size:20px;">Color Scheme</span>
+                        <span style="font-size:20px;">Row</span>
                         <div style="display:flex; margin-top:20px; flex-direction:column; justify-content:flex-start;">
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Background Color</div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ghbc')}" type='text' style="width:100px" height="30px"></div>
-                            </div>  
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Text Color</div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ghtc')}" type='text' style="width:100px" height="30px"></div>
-                            </div>  
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Header Divider Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ghboc')}" type='text' style="width:100px" height="30px"></div>
-                            </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Row Odd Background Color</div>
                                 <div><input @input="(event)=>{debounceColorChange(event,'grobc')}" type='text' style="width:100px" height="30px"></div>
@@ -156,18 +144,7 @@
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Row Text Color</span></div>
                                 <div><input @input="(event)=>{debounceColorChange(event,'grtc')}" type='text' style="width:100px" height="30px"></div>
                             </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Background Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'fbc')}" type='text' style="width:100px" height="30px"></div>
-                            </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Text Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ftc')}" type='text' style="width:100px" height="30px"></div>
-                            </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Active Indicator Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'aic')}" type='text' style="width:100px" height="30px"></div>
-                            </div>   
+  
                         </div>
                     </div>
 
@@ -184,6 +161,30 @@
                                 <div style="width:100px; display:flex; justify-content:flex-start"><span>Title Color</span></div>
                                 <div><input @input="(event)=>{debounceColorChange(event,'title')}" type='text' style="width:100px" height="30px"></div>
                             </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Background Color</div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'ghbc')}" type='text' style="width:100px" height="30px"></div>
+                            </div>  
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Text Color</div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'ghtc')}" type='text' style="width:100px" height="30px"></div>
+                            </div>  
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Header Divider Color</span></div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'ghboc')}" type='text' style="width:100px" height="30px"></div>
+                            </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Background Color</span></div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'fbc')}" type='text' style="width:100px" height="30px"></div>
+                            </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Text Color</span></div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'ftc')}" type='text' style="width:100px" height="30px"></div>
+                            </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Active Indicator Color</span></div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'aic')}" type='text' style="width:100px" height="30px"></div>
+                            </div> 
                         </div>
                     </div>
                 </div>

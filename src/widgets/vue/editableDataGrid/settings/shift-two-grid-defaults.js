@@ -18,10 +18,10 @@ let shiftSettings = {
     slider:{
         Enabled:true,
         SliderWidth:300,
-        MinValue:500,
-        MaxValue:4000,
-        StepValue:500,
-        InitialValue:500,
+        MinValue:0,
+        MaxValue:0,
+        StepValue:0,
+        InitialValue:0,
     },
     pagination:{
         Enabled:true,

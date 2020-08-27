@@ -20,7 +20,7 @@
                   :step="stepValue"
                   :value="initialValue"
                   :data-tick-step="stepValue"
-                  data-tick-id="weightTicks"
+                  data-tick-id=""
                   data-value-id="weightValue"
                   data-progress-id="weightProgress"
                   data-handle-size="18"

@@ -77,7 +77,7 @@
     </div>
     <div v-if="gridSettings.developmentMode.Enabled" :class="`configTool ${shouldAnimateConfigTool?'animateConfigTool':null}`" style="display:flex; flex-direction:row; box-shadow: 0px 0px 27px -13px black; min-width:600px; position:absolute; z-index:10000; margin-top:270px; justify-content:center; ">
         <div style="border-radius:5px; background-color:#F8F8F8; min-width:600px; max-width:600px; height:380px; border:1px solid grey; ">
-            <div style="height:5%; border-top-right-radius:5px; border-top-left-radius:5px; background-color:#bfae7a; display:flex;flex-direction:row; justify-content:center;">
+            <div style="height:5%; border-top-right-radius:5px; border-top-left-radius:5px; background-color:#577594; display:flex;flex-direction:row; justify-content:center;">
                 <span style="color:white;">{{developerModeText}}</span>
             </div>
             <div style="height:95%; display:flex;flex-direction:row; justify-content:center;">
@@ -815,6 +815,8 @@ let config = `let gridConfig = {
             this.pagination = paging          
         },
         handleChangeNumberPerPage(event){
+            if(this.gridSettings.developmentMode.Enabled){return} 
+
             this.weAreUsingTheSlider=true
             let count = parseInt(event.target.value)
             this.sliderCount = count
@@ -973,6 +975,7 @@ let config = `let gridConfig = {
         
         },
         handleColumnSort(strategy){
+            if(this.gridSettings.developmentMode.Enabled){return} 
             this.isDoneSorting = false
            
             if(strategy !== ''){
@@ -1021,6 +1024,7 @@ let config = `let gridConfig = {
 
         },
         handleFilterClosed(){
+            if(this.gridSettings.developmentMode.Enabled){return} 
             this.filterCount = 0
         },
         calculateColumnWidths(){
@@ -1144,6 +1148,7 @@ let config = `let gridConfig = {
             }
         },
         handleClearFilter(columnIndex){
+            if(this.gridSettings.developmentMode.Enabled){return} 
             if(this.filterStrategy.isCurrentlyFiltering){
                 if(this.filterStrategy.columnsBeingFiltered.length===1&&this.filterStrategy.columnsBeingFiltered[0] === columnIndex.toString()){
                     this.clearFilters()
@@ -1190,6 +1195,7 @@ let config = `let gridConfig = {
                                   }
         },
         handleApplyFilter(strategy){
+            if(this.gridSettings.developmentMode.Enabled){return} 
             const addFilter = (col,filter) =>{ 
                 this.filterStrategy.isCurrentlyFiltering = true
                 this.filterStrategy.filters.push(`${col}^^${filter}`)

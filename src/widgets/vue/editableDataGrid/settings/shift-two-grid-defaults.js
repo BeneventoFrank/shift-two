@@ -5,16 +5,15 @@ let shiftSettings = {
     size:{
         GridWidth:'600px', //px value of width
         GridWidthValue:600,
-        GridHeight:'600px', //px value of height
-        GridHeightValue:600, //int value used for calculations
+        GridHeight:'270px', //px value of height
+        GridHeightValue:270, //int value used for calculations
     },
     header:{
         Enabled:true
     },
     rows:{
-        index:0,
-        height:'30px',
-        heightValue:30
+        Height:'30px',
+        HeightValue:30
     },
     slider:{
         Enabled:true,
@@ -120,18 +119,18 @@ let shiftSettings = {
         }
     ],
     colorScheme:{
-        SliderFillColor:'slateGrey',
-        PagingTextColor:'slateGrey',
-        GridTitleColor:'slateGrey',
-        GridHeaderTextColor:'slateGrey',
-        GridRowTextColor:'slateGrey',
+        SliderFillColor:'#708090',
+        PagingTextColor:'#708090',
+        GridTitleColor:'#708090',
+        GridHeaderTextColor:'#708090',
+        GridRowTextColor:'#708090',
         GridHeaderBackgroundColor:'#F8F8F8',
         GridRowOddBackgroundColor:'#F8F8F8',
-        GridRowEvenBackgroundColor:'white',
+        GridRowEvenBackgroundColor:'#FFFFFF',
         ActiveIndicatorColor:'#C3D9F9',
-        GridHeaderBorderColor:'slateGrey',
+        GridHeaderBorderColor:'#708090',
         FlyoutBackgroundColor:'#F8F8F8',
-        FlyoutTextColor:'slateGrey'
+        FlyoutTextColor:'#708090'
     }
 
 }

@@ -77,28 +77,28 @@
     </div>
     <div v-if="gridSettings.developmentMode.Enabled" :class="`configTool ${shouldAnimateConfigTool?'animateConfigTool':null}`" style="display:flex; flex-direction:row; box-shadow: 0px 0px 27px -13px black; min-width:600px; position:absolute; z-index:10000; margin-top:270px; justify-content:center; ">
         <div style="border-radius:5px; background-color:#F8F8F8; min-width:600px; max-width:600px; height:380px; border:1px solid grey; ">
-            <div style="height:5%; border-top-right-radius:5px; border-top-left-radius:5px; background-color:chocolate; display:flex;flex-direction:row; justify-content:center;">
+            <div style="height:5%; border-top-right-radius:5px; border-top-left-radius:5px; background-color:#bfae7a; display:flex;flex-direction:row; justify-content:center;">
                 <span style="color:white;">{{developerModeText}}</span>
             </div>
             <div style="height:95%; display:flex;flex-direction:row; justify-content:center;">
                 <div style="width:25%; display:flex; flex-direction:column;">
-                    <div @click="setCurrentTab('welcome')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='welcome'?'#F8F8F8':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Welcome</span></div>
-                    <div @click="setCurrentTab('size')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='size'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Size</span></div>
-                    <div @click="setCurrentTab('header')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='header'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Header</span></div>
-                    <div @click="setCurrentTab('rows')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='rows'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Rows</span></div>
-                    <div @click="setCurrentTab('columns')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='columns'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Columns</span></div>
-                    <div @click="setCurrentTab('paging')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='paging'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Slider/Paging</span></div>
-                    <div :style="`border-right:1px solid slateGrey;flex-grow:1;`">
-                        <button style="margin-top:50px;" @click="download">Generate Config</button>
+                    <div @click="setCurrentTab('welcome')" class='tab' :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='welcome'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='welcome'?'#F8F8F8':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex;`"><span style="width:100%">Welcome</span></div>
+                    <div @click="setCurrentTab('size')" class='tab' :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='size'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='size'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Size</span></div>
+                    <div @click="setCurrentTab('header')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='header'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='header'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Header</span></div>
+                    <div @click="setCurrentTab('rows')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='rows'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='rows'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Rows</span></div>
+                    <div @click="setCurrentTab('columns')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='columns'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='columns'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Columns</span></div>
+                    <div @click="setCurrentTab('paging')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='paging'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='paging'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Slider/Paging</span></div>
+                    <div @click="setCurrentTab('generate')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='generate'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='generate'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Generate Config</span></div>
+                    <div :style="`background-color:#dbd9d3; border-right:1px solid slateGrey;flex-grow:1;`">
                     </div>
                 </div>
-                <div v-show="currentTab==='welcome'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='welcome'" style="width:75%; background-color:#f2ecdc; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                     <span style="padding-bottom:40px; font-size:20px;">Welcome to the grid configuration tool.</span>
                     <span style="padding-bottom:20px; font-size:16px;">This tool will allow you to customize the look and feel of your grid. Each tab contains a button that will allow you to download the config needed to generate the grid you see. </span>
                     <span style="padding-bottom:20px; font-size:16px;">You may re-open this tool at any point by turning on developmentMode in your config</span>
                     <span style="font-size:16px;">Thanks for picking Shift-Grid, tell us what you think. <a href='www.shift-two.com'>www.shift-two.com</a></span>
                 </div>
-                <div v-show="currentTab==='size'" style="width:75%; padding:35px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='size'" style="width:75%; padding:35px; background-color:#f2ecdc; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
                             <div style="display:flex; width:100%; justify-content:flex-start;">
@@ -107,12 +107,12 @@
                             </div>    
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
                                 <div style="width:100px; display:flex; justify-content:flex-start"><span>Grid Height</span></div>
-                                <div><input type='number' v-model="devModeHeightValue" style="width:75px" height="30px"><span> px</span></div>
+                                <div><input type='number' @input="debounceHeightInput" v-model="devModeHeightValue" style="width:75px" height="30px"><span> px</span></div>
                             </div>   
                         </div>
                     </div>
                 </div>
-                <div v-show="currentTab==='columns'" style="width:75%; padding:35px; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start;">
+                <div v-show="currentTab==='columns'" style="width:75%; padding:35px; display:flex; flex-direction:column; align-items:flex-start; background-color:#f2ecdc; justify-content:flex-start;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
                             <div style="display:flex; flex-direction:row; align-items:center; justify-content:flex-start;">
@@ -167,7 +167,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-show="currentTab==='paging'" style="width:75%; padding:35px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='paging'" style="width:75%; padding:35px; display:flex; flex-direction:column; background-color:#f2ecdc; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
 
@@ -179,7 +179,10 @@
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
                                 <div style="width:150px; display:flex; justify-content:flex-start"><span></span>Paging Text Color</div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ptc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'ptc')}" v-model="activeColorScheme.pagingTextColor" type='text' style="width:100px" height="30px">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'ptc')}" class='colorPicker' :value='activeColorScheme.pagingTextColor'>
+                                </div>
                             </div>                         
                             <br>
                             <hr style="height: 1px; width: 100%;">
@@ -192,61 +195,117 @@
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start;margin-top:15px;">
                                 <div style="width:150px; display:flex; justify-content:flex-start;"><span>Slider Fill Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'sfc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'sfc')}" v-model="activeColorScheme.sliderFillColor" type='text' style="width:100px" height="30px">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'sfc')}" class='colorPicker' :value='activeColorScheme.sliderFillColor'>
+                                </div>
                             </div>   
                         </div>
                     </div>
                 </div>
-                <div v-show="currentTab==='rows'" style="width:75%; display:flex; padding:35px; flex-direction:column; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='rows'" style="width:75%; display:flex; padding:35px; background-color:#f2ecdc; flex-direction:column; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
                             <div style="display:flex; width:100%; justify-content:flex-start;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Row Odd Background Color</div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'grobc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'grobc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.gridRowOddBackgroundColor">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'grobc')}" class='colorPicker' :value='activeColorScheme.gridRowOddBackgroundColor'>
+                                </div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Row Even Background Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'grebc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'grebc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.gridRowEvenBackgroundColor">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'grebc')}" class='colorPicker' :value='activeColorScheme.gridRowEvenBackgroundColor'>
+                                </div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Row Text Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'grtc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'grtc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.gridRowTextColor">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'grtc')}" class='colorPicker' :value='activeColorScheme.gridRowTextColor'>
+                                </div>
                             </div>   
   
                         </div>
                     </div>
-
                 </div>
-                <div v-show="currentTab==='header'" style="width:75%; display:flex; flex-direction:column; padding:35px; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='generate'" style="width:75%; background-color:#f2ecdc; display:flex; padding:35px; flex-direction:column; align-items:center; justify-content:center;">
+                    <div style='display:flex; justify-content:center; margin-bottom:25px'>
+                        <span>Choose Download Option</span>
+                    </div>
+                    <div style="width:100%; height:100%;">
+                        <div style="display:flex; flex-direction:column; justify-content:flex-start;">
+                            <div style="display:flex; width:100%; justify-content:flex-start;">
+                                <div style="width:300px; display:flex; justify-content:flex-start"><span></span>Download as .js - ready to drop in.</div>
+                                <div><button @click="download">Download</button></div>
+                            </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:300px; display:flex; justify-content:flex-start"><span>Download as a renamable .js.txt file</span></div>
+                                <div><button @click="(event)=>{download(event,'txt')}">Download</button></div>
+                            </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:300px; display:flex; justify-content:flex-start"><span>Download as a .zip file</span></div>
+                                <div><button @click="(event)=>{download(event,'zip')}">Download</button></div>
+                            </div>   
+                          </div>
+                    </div>
+                </div>
+                <div v-show="currentTab==='header'" style="width:75%; background-color:#f2ecdc; display:flex; flex-direction:column; padding:35px; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
                             <div style="display:flex; width:100%; justify-content:flex-start;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Title Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'title')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'title')}" v-model="activeColorScheme.gridTitleColor"  type='text' style="width:100px" height="30px">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'title')}" class='colorPicker' :value='activeColorScheme.gridTitleColor'>
+                                </div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Background Color</div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ghbc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'ghbc')}" v-model="activeColorScheme.gridHeaderBackgroundColor" type='text' style="width:100px" height="30px">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'ghbc')}" class='colorPicker' :value='activeColorScheme.gridHeaderBackgroundColor'>
+                                </div>
                             </div>  
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Text Color</div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ghtc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'ghtc')}" v-model="activeColorScheme.gridHeaderTextColor" type='text' style="width:100px" height="30px">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'ghtc')}" class='colorPicker' :value='activeColorScheme.gridHeaderTextColor'>
+                                </div>
+
                             </div>  
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Header Divider Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ghboc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'ghboc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.gridHeaderBorderColor">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'ghboc')}" class='colorPicker' :value='activeColorScheme.gridHeaderBorderColor'>
+                                </div>
+
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Background Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'fbc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'fbc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.flyoutBackgroundColor">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'fbc')}" class='colorPicker' :value='activeColorScheme.flyoutBackgroundColor'>
+                                </div>
+
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Text Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'ftc')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'ftc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.flyoutTextColor">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'ftc')}" class='colorPicker' :value='activeColorScheme.flyoutTextColor'>
+                                </div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Active Indicator Color</span></div>
-                                <div><input @input="(event)=>{debounceColorChange(event,'aic')}" type='text' style="width:100px" height="30px"></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'aic')}" v-model="activeColorScheme.activeIndicatorColor" type='text' style="width:100px" height="30px">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'aic')}" class='colorPicker' :value='activeColorScheme.activeIndicatorColor'>
+                                </div>
                             </div> 
                         </div>
                     </div>
@@ -258,6 +317,8 @@
 </div>
 </template>
 <script>
+import JSZip from 'jszip'
+import FileSaver from 'file-saver'
 import sampleGridData from '../data/sampleRowData'
 import debounce from 'lodash.debounce'
 import shiftSettings from '../settings/shift-two-grid-defaults'
@@ -288,6 +349,20 @@ export default {
     },
     data() {
         return {
+            activeColorScheme:{
+                sliderFillColor:'',
+                pagingTextColor:'',
+                gridTitleColor:'',
+                gridHeaderTextColor:'',
+                gridRowTextColor:'',
+                gridHeaderBackgroundColor:'',
+                gridRowOddBackgroundColor:'',
+                gridRowEvenBackgroundColor:'',
+                activeIndicatorColor:'',
+                gridHeaderBorderColor:'',
+                flyoutBackgroundColor:'',
+                flyoutTextColor:''
+            },
             devModeWidthValue:0,
             devModeHeightValue:0,
             activeColumnEdit:{
@@ -379,19 +454,171 @@ export default {
         }        
     },
     methods: {
+        handleColorPickerChange(event, code){
+            switch (code) {
+                case 'ftc':
+                    this.activeColorScheme.flyoutTextColor = event.target.value
+                    this.gridSettings.colorScheme.FlyoutTextColor = event.target.value
+                    break;
+                case 'fbc':
+                    this.activeColorScheme.flyoutBackgroundColor = event.target.value
+                    this.gridSettings.colorScheme.FlyoutBackgroundColor = event.target.value
+                    break;
+                case 'ghboc':
+                    this.activeColorScheme.gridHeaderBorderColor = event.target.value
+                    this.gridSettings.colorScheme.GridHeaderBorderColor = event.target.value
+                    break;
+                case 'aic':
+                    this.activeColorScheme.activeIndicatorColor = event.target.value
+                    this.gridSettings.colorScheme.ActiveIndicatorColor = event.target.value
+                    break;
+                case 'grebc':
+                    this.activeColorScheme.gridRowEvenBackgroundColor = event.target.value
+                    this.gridSettings.colorScheme.GridRowEvenBackgroundColor = event.target.value
+                    break;
+                case 'grobc':
+                    this.activeColorScheme.gridRowOddBackgroundColor = event.target.value
+                    this.gridSettings.colorScheme.GridRowOddBackgroundColor = event.target.value
+                    break;
+                case 'grtc':
+                    this.activeColorScheme.gridRowTextColor = event.target.value
+                    this.gridSettings.colorScheme.GridRowTextColor = event.target.value
+                    break;
+                case 'ghbc':
+                    this.activeColorScheme.gridHeaderBackgroundColor = event.target.value
+                    this.gridSettings.colorScheme.GridHeaderBackgroundColor = event.target.value
+                    break;
+                case 'ghtc':
+                    this.activeColorScheme.gridHeaderTextColor = event.target.value
+                    this.gridSettings.colorScheme.GridHeaderTextColor = event.target.value
+                    break;
+                case 'title':
+                    this.activeColorScheme.gridTitleColor = event.target.value
+                    console.log('setting the GTC to . ', event.target.value)
+                    this.gridSettings.colorScheme.GridTitleColor = event.target.value
+                    break;
+                case 'sfc':
+                    this.activeColorScheme.sliderFillColor = event.target.value
+                    this.gridSettings.colorScheme.SliderFillColor = event.target.value
+                    break;
+                case 'ptc':
+                    this.activeColorScheme.pagingTextColor = event.target.value
+                    this.gridSettings.colorScheme.PagingTextColor = event.target.value
+                    break;
 
-
-        download() {
-            var element = document.createElement('a');
-            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.parse(JSON.stringify(this.gridSettings))));
-            element.setAttribute('download', 'shift-grid-config.js');
-
-            element.style.display = 'none';
-            document.body.appendChild(element);
-
-            element.click();
-
-            document.body.removeChild(element);
+                default:
+                    console.log('are you getting here?')
+                    break;
+            }            
+        },
+        generateConfig(){
+let config = `let gridConfig = {
+    developmentMode:{
+        Enabled:false
+    },
+    size:{
+        GridWidth:'${this.gridSettings.size.GridWidthValue}px', //px value of width
+        GridWidthValue:${this.gridSettings.size.GridWidthValue},
+        GridHeight:'${this.gridSettings.size.GridHeightValue}px', //px value of height
+        GridHeightValue:${this.gridSettings.size.GridHeightValue}, //int value used for calculations
+    },
+    header:{
+        Enabled:${this.gridSettings.header.Enabled}
+    },
+    rows:{
+        Height:'${this.gridSettings.rows.HeightValue}px',
+        HeightValue:${this.gridSettings.rows.HeightValue}
+    },
+    slider:{
+        Enabled:${this.gridSettings.slider.Enabled},
+        SliderWidth:${this.gridSettings.slider.SliderWidth},
+        MinValue:${this.gridSettings.slider.MinValue},
+        MaxValue:${this.gridSettings.slider.MaxValue},
+        StepValue:${this.gridSettings.slider.StepValue},
+        InitialValue:${this.gridSettings.slider.InitialValue}
+    },
+    pagination:{
+        Enabled:${this.gridSettings.pagination.Enabled},
+        MinRecordsViewable:0,
+        MaxRecordsViewable:0,
+        TotalNumberOfRecords:0,
+        PageNumberCurrentlyViewing:0,        
+        MaxPageNumberPossible:0,
+        NumberOfApplicibleRowsPerPage:0,
+        InitialNumberOfRowsPerPage:0
+    },
+    title:{
+        Text:'${this.gridSettings.title.Text}'
+    },
+    colorScheme:{
+        SliderFillColor:'${this.gridSettings.colorScheme.SliderFillColor}',
+        PagingTextColor:'${this.gridSettings.colorScheme.PagingTextColor}',
+        GridTitleColor:'${this.gridSettings.colorScheme.GridTitleColor}',
+        GridHeaderTextColor:'${this.gridSettings.colorScheme.GridHeaderTextColor}',
+        GridRowTextColor:'${this.gridSettings.colorScheme.GridRowTextColor}',
+        GridHeaderBackgroundColor:'${this.gridSettings.colorScheme.GridHeaderBackgroundColor}',
+        GridRowOddBackgroundColor:'${this.gridSettings.colorScheme.GridRowOddBackgroundColor}',
+        GridRowEvenBackgroundColor:'${this.gridSettings.colorScheme.GridRowEvenBackgroundColor}',
+        ActiveIndicatorColor:'${this.gridSettings.colorScheme.ActiveIndicatorColor}',
+        GridHeaderBorderColor:'${this.gridSettings.colorScheme.GridHeaderBorderColor}',
+        FlyoutBackgroundColor:'${this.gridSettings.colorScheme.FlyoutBackgroundColor}',
+        FlyoutTextColor:'${this.gridSettings.colorScheme.FlyoutTextColor}'
+    },
+    columns:[
+`           
+            let column = ``
+            for (let i = 0; i < this.gridSettings.columns.length; i++) {
+                column = 
+`        {
+            ColumnHeader:'${this.gridSettings.columns[i].ColumnHeader}',
+            Index:${this.gridSettings.columns[i].Index},
+            Width:'${this.gridSettings.columns[i].Width}',
+            WidthValue:${this.gridSettings.columns[i].WidthValue},
+            IsUsingACustomWidth:${this.gridSettings.columns[i].IsUsingACustomWidth},
+            Alignment:'${this.gridSettings.columns[i].Alignment}',
+            DataType:'${this.gridSettings.columns[i].DataType}',
+            IsPreSortEnabled:${this.gridSettings.columns[i].IsPreSortEnabled}                            
+        },
+`                
+            config += column
+            }
+            config += `
+    ]
+}
+`    
+            return config        
+        },
+        
+        download(event,downloadAs) {
+            let element
+            let zip = new JSZip();
+            switch (downloadAs) {
+                
+                case 'zip':
+                        zip.file("shift-grid-config.js", this.generateConfig());
+                        zip.generateAsync({type: "blob"}).then(function(content) {
+                            FileSaver.saveAs(content, "Config.zip");
+                            });                    
+                    break;
+                case 'txt':
+                        element = document.createElement('a');
+                        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(this.generateConfig()));
+                        element.setAttribute('download', 'shift-grid-config.js.txt')
+                        element.style.display = 'none';
+                        document.body.appendChild(element);
+                        element.click();
+                        document.body.removeChild(element);
+                    break;
+                default:
+                        element = document.createElement('a');
+                        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(this.generateConfig()));
+                        element.setAttribute('download', 'shift-grid-config.js')
+                        element.style.display = 'none';
+                        document.body.appendChild(element);
+                        element.click();
+                        document.body.removeChild(element);
+                    break;
+            }
         },
          
         handleCustomWidth(event){
@@ -512,7 +739,11 @@ export default {
             this.gridSettings.size.GridWidth = `${event.target.value}px`
             this.gridSettings.size.GridWidthValue = parseInt(event.target.value)
             this.calculateColumnWidths()
-        },750),      
+        },750),     
+        debounceHeightInput: debounce(function (event){
+            this.gridSettings.size.GridHeight = `${event.target.value}px`
+            this.gridSettings.size.GridHeightValue = parseInt(event.target.value)
+        },750),               
         debounceHeaderChange: debounce(function (event){
             this.gridSettings.title.Text = event.target.value
         },750),      
@@ -1116,8 +1347,20 @@ export default {
             this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
         },
         initializeDevMode(){
-           this.devModeWidthValue = this.gridSettings.size.GridWidthValue
-           this.devModeHeightValue = this.gridSettings.size.GridHeightValue
+            this.devModeWidthValue = this.gridSettings.size.GridWidthValue
+            this.devModeHeightValue = this.gridSettings.size.GridHeightValue
+            this.activeColorScheme.sliderFillColor = this.gridSettings.colorScheme.SliderFillColor,
+            this.activeColorScheme.pagingTextColor = this.gridSettings.colorScheme.PagingTextColor,
+            this.activeColorScheme.gridTitleColor = this.gridSettings.colorScheme.GridTitleColor,
+            this.activeColorScheme.gridHeaderTextColor = this.gridSettings.colorScheme.GridHeaderTextColor,
+            this.activeColorScheme.gridRowTextColor = this.gridSettings.colorScheme.GridRowTextColor,
+            this.activeColorScheme.gridHeaderBackgroundColor = this.gridSettings.colorScheme.GridHeaderBackgroundColor,
+            this.activeColorScheme.gridRowOddBackgroundColor = this.gridSettings.colorScheme.GridRowOddBackgroundColor,
+            this.activeColorScheme.gridRowEvenBackgroundColor = this.gridSettings.colorScheme.GridRowEvenBackgroundColor,
+            this.activeColorScheme.activeIndicatorColor = this.gridSettings.colorScheme.ActiveIndicatorColor,
+            this.activeColorScheme.gridHeaderBorderColor = this.gridSettings.colorScheme.GridHeaderBorderColor,
+            this.activeColorScheme.flyoutBackgroundColor = this.gridSettings.colorScheme.FlyoutBackgroundColor,
+            this.activeColorScheme.flyoutTextColor = this.gridSettings.colorScheme.FlyoutTextColor
 
            this.dataSlice = [...this.fullDS].slice(0,2)
            
@@ -1266,6 +1509,22 @@ export default {
         }
         .animateConfigTool{
             max-height:380px;
+        }
+        .tab{
+            justify-content: flex-start;
+            align-items:center;
+        }
+        .tab :hover{
+            transform: scale(1.1);
+        }
+        .colorPicker{
+            border:none;
+            cursor: pointer;
+            height:30px; 
+            background-color:transparent;
+            width:30px;
+            border-radius:5px;
+            outline: none;
         }
 
 </style>

@@ -19,7 +19,7 @@
                 </div>
             </div>
         </div>
-        <div :style="`width: 100%; position: relative; background-color:${applyBGColor&&!clearAllFilters?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 5px -8px black;`">
+        <div :style="`width: 100%; position: relative; background-color:${applyBGColor&&!clearAllFilters?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 6px -5px black;`">
             <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
                     <div :id="`header-${index}`" :ref="`header-${index}`" 

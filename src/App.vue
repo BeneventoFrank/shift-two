@@ -1,13 +1,13 @@
 <template>
   <div id="app" style='width:100%;'>
-    <EditableDataGrid />
+    <EditableDataGrid :gridConfig="localConfig"/>
   </div>
 </template>
 
 <script> 
 //import Slider from './widgets/vue/slider/Slider'
 import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
-//import gridConfig from './widgets/vue/editableDataGrid/settings/shift-two-grid-defaults'
+import gridConfig from './widgets/vue/editableDataGrid/settings/custom/shift-grid-config'
 
 export default {
   name: 'App',
@@ -17,7 +17,7 @@ export default {
   },
   data(){
     return {
-       // localData:gridConfig
+       localConfig:gridConfig
     }
   }
 }

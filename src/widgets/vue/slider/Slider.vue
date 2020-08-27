@@ -65,7 +65,6 @@ export default {
   methods:{
       init(){
           const slider = this.$refs.sliderInput;
-          console.log(slider)
           slider.oninput = this.debounceSlider;
           this.updateValue(slider);
           this.updateValuePosition(slider);
@@ -106,15 +105,16 @@ export default {
           return absValue / range;
       },
       setTicks(slider) {
-          let container = document.getElementById(slider.dataset.tickId);
-          const spacing = parseFloat(slider.dataset.tickStep);
-          const sliderRange = (parseInt(slider.max)  - parseInt(slider.min));
-          const tickCount = sliderRange / spacing + 1; // +1 to account for 0
-            console.log("fj;asldkf;kdsjfdkfjdsf', ", spacing, sliderRange, tickCount, container, slider)
-          for (let ii = 0; ii < tickCount; ii++) {
-              let tick = document.createElement("span");
-              tick.className = "tick-slider-tick";
-              container.appendChild(tick);
+          if (slider.dataset.tickId){
+            let container = document.getElementById(slider.dataset.tickId);
+            const spacing = parseFloat(slider.dataset.tickStep);
+            const sliderRange = (parseInt(slider.max)  - parseInt(slider.min));
+            const tickCount = sliderRange / spacing + 1; // +1 to account for 0
+            for (let ii = 0; ii < tickCount; ii++) {
+                let tick = document.createElement("span");
+                tick.className = "tick-slider-tick";
+                container.appendChild(tick);
+            }
           }
       },
       onResize() {
@@ -126,7 +126,6 @@ export default {
       }
   },
   mounted(){
-    console.log(this)
   this.init();
   window.addEventListener("resize", this.onResize);   
   }

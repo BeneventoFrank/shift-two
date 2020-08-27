@@ -52,7 +52,6 @@ export default () => {
 
     onmessage = (event)=>{ 
         message = event.data 
-        console.log("sort worker received a message ", message)
         
         let split='',index=0, data=[]
         switch (message.MessageType) {
@@ -67,7 +66,6 @@ export default () => {
                 postMessage({'MessageType':'sortComplete', 'Data':sortDataset(sortStrategy, null, getDataType(index)), 'Column':index, 'Strategy':sortStrategy})
                 break;
             case 'sortFilteredData':
-                console.log("wtf ", message.SortStrategy)
                 sortStrategy = message.SortStrategy
                 data = message.Data
                 split = sortStrategy.split('^^')

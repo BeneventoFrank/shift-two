@@ -324,8 +324,8 @@ import JSZip from 'jszip'
 import FileSaver from 'file-saver'
 import sampleGridData from '../data/sampleRowData'
 import debounce from 'lodash.debounce'
-import shiftSettings from '../settings/shift-two-grid-defaults'
 import HeaderRow from './components/HeaderRow'
+import ShiftSettings from '../settings/shift-two-grid-defaults'
 import forwardWorker from './webWorkers/forwardFilterWorker'
 import reverseWorker from './webWorkers/reverseFilterWorker'
 import evenSortWorker from './webWorkers/evenSortWorker'
@@ -497,7 +497,6 @@ export default {
                     break;
                 case 'title':
                     this.activeColorScheme.gridTitleColor = event.target.value
-                    console.log('setting the GTC to . ', event.target.value)
                     this.gridSettings.colorScheme.GridTitleColor = event.target.value
                     break;
                 case 'sfc':
@@ -510,12 +509,11 @@ export default {
                     break;
 
                 default:
-                    console.log('are you getting here?')
                     break;
             }            
         },
         generateConfig(){
-let config = `let gridConfig = {
+let config = `let shiftSettings = {
     developmentMode:{
         Enabled:false
     },
@@ -588,6 +586,7 @@ let config = `let gridConfig = {
             config += `
     ]
 }
+export default shiftSettings
 `    
             return config        
         },
@@ -686,7 +685,6 @@ let config = `let gridConfig = {
                     for (let i = 0; i < this.fullDS.length; i++) {
                         this.fullDS[i].data.push('Data')
                     }
-
                 }
             } else {
                 let currentCount = this.gridSettings.columns.length
@@ -694,7 +692,6 @@ let config = `let gridConfig = {
                 let tmp = [...this.gridSettings.columns]
                 this.gridSettings.columns = tmp.splice(0,currentCount-numToPop)
             }
-            console.log(this.gridSettings)
             this.calculateColumnWidths()            
         },
         handleEnablePaging(event){
@@ -989,7 +986,6 @@ let config = `let gridConfig = {
                         const tmp = parseInt(split[0])
                         if(this.isDonePreSorting&&this.gridSettings.columns[tmp].IsPreSortEnabled)
                         {
-                            console.log('what is the sorted data', this.sortedData)
                             this.sortStrategy = {}
                             this.sortStrategy.strategy = strategy
                             this.sortStrategy.isCurrentlySorting = true
@@ -997,9 +993,7 @@ let config = `let gridConfig = {
                             this.sortStrategy.direction = split[1]
                             this.filteredData = []
                             this.filteredData = this.sortedData[tmp][split[1]]
-                            console.log("fjsd;lfjdsffuck you", this.filteredData) 
                             this.dataSlice = this.filteredData.slice(0,this.getInitialRowsPerPage())
-                            console.log("fjsd;lfjdsffuck you") 
                             this.isDoneSorting = true;
                         } else {
                             this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
@@ -1036,7 +1030,6 @@ let config = `let gridConfig = {
             let custCols = [] 
             for (let i = 0; i < numCols; i++) {
                 if (this.gridSettings.columns[i].IsUsingACustomWidth) {
-                    console.log("pushing something?? ", this.gridSettings.columns[i].WidthValue)
                     custCols.push(i)
                     tmp = tmp + this.gridSettings.columns[i].WidthValue
                 }
@@ -1046,10 +1039,7 @@ let config = `let gridConfig = {
            const numColumns = numCols-custCols.length
            let widthOfGrid = this.gridSettings.size.GridWidthValue - tmp
            widthOfGrid = this.boolGridWillScroll?(widthOfGrid*.975):widthOfGrid
-           
            const eachColumn = Math.round(widthOfGrid/numColumns)
-           console.log("calculating the columns ", widthOfGrid, numCols, tmp, numColumns,eachColumn, this.boolGridWillScroll)
-
             for (let i = 0; i < numCols; i++) {
                 if (!custCols.includes(i)) {
                     this.gridSettings.columns[i].Width = `${eachColumn}px`
@@ -1130,7 +1120,6 @@ let config = `let gridConfig = {
                             this.numberOfTerminatedFilters = 0
                             this.isDoneFiltering=true
                         } else {
-                            console.log('whats in it.. ', this.tmpResults)
                             this.filteredData = this.tmpResults
                             this.highestCountLoaded = this.getInitialRowsPerPage();
                             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
@@ -1270,14 +1259,13 @@ let config = `let gridConfig = {
         },
         processConfig(){
             let tmp = null
-            if (Object.keys(this.gridConfig)>0) {
+            if (Object.keys(this.gridConfig).length>0) {
                 //then we have a config object to process.
                 tmp = {...this.gridConfig}
             } else {
                 //here b/c we have no config object so we need to load all Shift Defaults into the grid settings object.
-                tmp = {...shiftSettings}
+                tmp = {...ShiftSettings}
             }
-            console.log("setting this up", tmp)
             this.gridSettings = tmp
         },
         processData(){
@@ -1297,7 +1285,6 @@ let config = `let gridConfig = {
                 //load some random data.
                 tmp = GetRandomDataSet()
             }
-            console.log("setting full ds to ", tmp)
             this.fullDS = tmp            
             this.dataSlice = tmp.slice(0,this.getInitialRowsPerPage())
 
@@ -1321,7 +1308,6 @@ let config = `let gridConfig = {
                 if(counter<=firstHalf){
                     tmpRev1.push(this.fullDS[i])
                 }else{
-                    console.log('8888888888888888888888888888888888888888888888888888888888> ', this.fullDS[i])
                     tmpRev2.push(this.fullDS[i])
                 }
             }
@@ -1344,7 +1330,6 @@ let config = `let gridConfig = {
 
             this.ww_evenSortWorker = new evenSortWorkerSetup(evenSortWorker)
             this.ww_evenSortWorker.addEventListener('message',event => {this.handleMessage(event)})
-            console.log("what the hell is the data", this.fullDS)
             this.ww_evenSortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
 
             this.ww_oddSortWorker = new oddSortWorkerSetup(oddSortWorker)
@@ -1418,10 +1403,10 @@ let config = `let gridConfig = {
 
         } else {
             this.configureWebWorkers()
-            // this.shouldAnimate = true //make this a config setting.
-            // setTimeout(() => {
-            //     this.shouldReverseAnimate = true   
-            // }, 500);
+            this.shouldAnimate = true //make this a config setting.
+            setTimeout(() => {
+                this.shouldReverseAnimate = true   
+            }, 500);
         }
     }
 };

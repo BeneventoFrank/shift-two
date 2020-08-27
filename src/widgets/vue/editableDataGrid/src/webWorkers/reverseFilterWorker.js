@@ -25,19 +25,14 @@ export default () => {
     onmessage = (event)=>{ 
         message = event.data 
         let tmp = []
-        console.log("reverse filter received a message ", message)
         switch (message.MessageType) {
             case 'data':
                 originalData = message.Data
-                console.log("reverse filter will handle ", originalData.length)
-
                 break;
             case 'filter':
                 if(message.IsCurrentlyFiltering){
-                    console.log("using filteredData")
                     tmp = filteredData
                 } else {
-                    console.log("using original data")
                     tmp = originalData
                 }
                 filterDS(tmp, message.Strategy)

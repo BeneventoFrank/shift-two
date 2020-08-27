@@ -36,30 +36,6 @@ export default () => {
                     break;
             }
         }
-        console.log("what is temp being returned from the sort", tmp)
-
-        console.log("tmp............................", tmp[0].data)
-        console.log("tmp............................", tmp[1].data)
-        console.log("tmp............................", tmp[2].data)
-        console.log("tmp............................", tmp[3].data)
-        console.log("tmp............................", tmp[4].data)
-        console.log("tmp............................", tmp[5].data)
-        console.log("tmp............................", tmp[6].data)
-        console.log("tmp............................", tmp[7].data)
-        console.log("tmp............................", tmp[8].data)
-        console.log("tmp............................", tmp[9].data)
-        console.log("tmp............................", tmp[10].data)
-        console.log("tmp............................", tmp[11].data)
-        console.log("tmp............................", tmp[12].data)
-        console.log("tmp............................", tmp[13].data)
-        console.log("tmp............................", tmp[14].data)
-        console.log("tmp............................", tmp[15].data)
-        console.log("tmp............................", tmp[16].data)
-        console.log("tmp............................", tmp[17].data)
-        console.log("tmp............................", tmp[18].data)
-        console.log("tmp............................", tmp[19].data)
-        console.log("tmp............................", tmp[20].data)
-        console.log("tmp............................", tmp[21].data)
         return tmp
     }
     const sortAllColumns = ()=>{
@@ -70,7 +46,6 @@ export default () => {
                     sortedData[columns[i].Index].desc = sortDataset(`${columns[i].Index}^^desc`, columns[i].DataType)
                 }
         }
-        console.log("sorted data about to come back is.................................................................................",sortedData)
         postMessage({'MessageType':'dataSorted', 'Data':sortedData })
         postMessage({'MessageType':'sortTerminated'})
     }
@@ -86,8 +61,6 @@ export default () => {
     }
     onmessage = (event)=>{ 
         message = event.data 
-        console.log("sort worker received a message ", message)
-        
         let split='',index=0,direction='', data=[]
         let retVal=[]
         switch (message.MessageType) {
@@ -108,7 +81,6 @@ export default () => {
                 {
                     retVal = sortedData[index][direction]
                 }
-                console.log("retval?", retVal)
                 postMessage({'MessageType':'dataSorted', 'Data':retVal, 'Column':index})
                 break;
             case 'sortFilteredData':

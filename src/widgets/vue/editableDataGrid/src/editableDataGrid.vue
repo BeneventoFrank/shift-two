@@ -80,15 +80,15 @@
             <div style="height:5%; border-top-right-radius:5px; border-top-left-radius:5px; background-color:#577594; display:flex;flex-direction:row; justify-content:center;">
                 <span style="color:white;">{{developerModeText}}</span>
             </div>
-            <div style="height:95%; display:flex;flex-direction:row; justify-content:center;">
+            <div style="height:93%; display:flex;flex-direction:row; justify-content:center;">
                 <div style="width:25%; display:flex; flex-direction:column;">
-                    <div @click="setCurrentTab('welcome')" class='tab' :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='welcome'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='welcome'?'#F8F8F8':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex;`"><span style="width:100%">Welcome</span></div>
-                    <div @click="setCurrentTab('size')" class='tab' :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='size'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='size'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Size</span></div>
-                    <div @click="setCurrentTab('header')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='header'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='header'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Header</span></div>
-                    <div @click="setCurrentTab('rows')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='rows'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='rows'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Rows</span></div>
-                    <div @click="setCurrentTab('columns')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='columns'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='columns'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Columns</span></div>
-                    <div @click="setCurrentTab('paging')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='paging'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='paging'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Slider/Paging</span></div>
-                    <div @click="setCurrentTab('generate')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='generate'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='generate'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Generate Config</span></div>
+                    <div @click="setCurrentTab('welcome')" class='tab' :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='welcome'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='welcome'?'#f2ecdc':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex;`"><span style="width:100%">Welcome</span></div>
+                    <div @click="setCurrentTab('size')" class='tab' :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='size'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='size'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Size</span></div>
+                    <div @click="setCurrentTab('header')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='header'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='header'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Header</span></div>
+                    <div @click="setCurrentTab('rows')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='rows'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='rows'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Rows</span></div>
+                    <div @click="setCurrentTab('columns')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='columns'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='columns'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Columns</span></div>
+                    <div @click="setCurrentTab('paging')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='paging'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='paging'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Slider/Paging</span></div>
+                    <div @click="setCurrentTab('generate')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='generate'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='generate'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Generate Config</span></div>
                     <div :style="`background-color:#dbd9d3; border-right:1px solid slateGrey;flex-grow:1;`">
                     </div>
                 </div>
@@ -311,6 +311,9 @@
                     </div>
                 </div>
 
+            </div>
+            <div style="height:2%; border-bottom-right-radius:5px; border-bottom-left-radius:5px; background-color:#577594;">
+                &nbsp;
             </div>
         </div> 
     </div>

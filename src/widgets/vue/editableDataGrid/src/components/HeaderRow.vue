@@ -35,7 +35,7 @@
                         @mouseleave="()=>{handleFlyout(index,false)}"  
                         
                         v-for="(header,index) in gridSettings.columns" :key="index">
-                        <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].Width}; overflow:hidden; text-overflow:ellipsis`"> 
+                        <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].Width}; overflow:hidden; white-space:nowrap; text-overflow:ellipsis`"> 
                             {{gridSettings.columns[index].ColumnHeader}}
                         </span>
                         <div :ref="`flyout-${index}`" class='flyout' v-if="showAFilter&&showFilter[index]===true" :style="`right:${wouldCauseAScroll(index)?wouldCauseAScroll(index):null};`">

@@ -85,10 +85,11 @@
                     <div @click="setCurrentTab('welcome')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='welcome'?'#F8F8F8':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Welcome</span></div>
                     <div @click="setCurrentTab('size')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='size'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Size</span></div>
                     <div @click="setCurrentTab('header')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='header'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Header</span></div>
-                    <div @click="setCurrentTab('row')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='colorScheme'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Row</span></div>
+                    <div @click="setCurrentTab('rows')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='rows'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Rows</span></div>
+                    <div @click="setCurrentTab('columns')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='columns'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Columns</span></div>
                     <div @click="setCurrentTab('paging')" :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; border-right:1px solid ${currentTab==='paging'?'#F8F8F8':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; justify-content:center; align-items:flex-end;`"><span>Slider/Paging</span></div>
                     <div :style="`border-right:1px solid slateGrey;flex-grow:1;`">
-                        &nbsp;
+                        <button style="margin-top:50px;" @click="download">Generate Config</button>
                     </div>
                 </div>
                 <div v-show="currentTab==='welcome'" style="width:75%; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
@@ -97,42 +98,109 @@
                     <span style="padding-bottom:20px; font-size:16px;">You may re-open this tool at any point by turning on developmentMode in your config</span>
                     <span style="font-size:16px;">Thanks for picking Shift-Grid, tell us what you think. <a href='www.shift-two.com'>www.shift-two.com</a></span>
                 </div>
-                <div v-show="currentTab==='size'" style="width:75%; padding-left:40px; padding-right:40px; padding-top:20px; padding-bottom:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='size'" style="width:75%; padding:35px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
-                        <span style="font-size:20px;">Configure Grid Size</span>
-                        <div style="display:flex; margin-top:40px; flex-direction:column; justify-content:flex-start;">
+                        <div style="display:flex; flex-direction:column; justify-content:flex-start;">
                             <div style="display:flex; width:100%; justify-content:flex-start;">
                                 <div style="width:100px; display:flex; justify-content:flex-start"><span>Grid Width</span></div>
-                                <div><input @input="debounceInput" type='text' style="width:75px" height="30px"><span> px</span></div>
+                                <div><input @input="debounceInput" v-model="devModeWidthValue"  type='number' style="width:75px" height="30px"><span> px</span></div>
                             </div>    
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
                                 <div style="width:100px; display:flex; justify-content:flex-start"><span>Grid Height</span></div>
-                                <div><input type='text' style="width:75px" height="30px"><span> px</span></div>
+                                <div><input type='number' v-model="devModeHeightValue" style="width:75px" height="30px"><span> px</span></div>
                             </div>   
                         </div>
                     </div>
                 </div>
-
-                <div v-show="currentTab==='paging'" style="width:75%; padding-left:40px; padding-right:40px; padding-top:20px; padding-bottom:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='columns'" style="width:75%; padding:35px; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-start;">
                     <div style="width:100%; height:100%;">
-                        <span style="font-size:20px;">Slider/Pager Settings</span>
-                        <div style="display:flex; margin-top:40px; flex-direction:column; justify-content:flex-start;">
-                        <div style="display:flex; width:100%; justify-content:flex-start;">
-                            <div style="width:150px; display:flex; justify-content:flex-start"><span>Slider Fill Color</span></div>
-                            <div><input @input="(event)=>{debounceColorChange(event,'sfc')}" type='text' style="width:100px" height="30px"></div>
-                        </div>   
-                        <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
-                            <div style="width:150px; display:flex; justify-content:flex-start"><span></span>Paging Text Color</div>
-                            <div><input @input="(event)=>{debounceColorChange(event,'ptc')}" type='text' style="width:100px" height="30px"></div>
-                        </div>                         
+                        <div style="display:flex; flex-direction:column; justify-content:flex-start;">
+                            <div style="display:flex; flex-direction:row; align-items:center; justify-content:flex-start;">
+                                <span style="margin-right:15px;">Number Of Columns</span>
+                                <input type="number" id="quantity" @change="handleColNumChange" name="quantity" v-model="numColumns" min="1" max='25' style="width:45px" height="30px">
+                            </div>
+                            <div style='width:100%; margin-top:15px; display:flex; flex-direction:row; align-items:center; justify-content:flex-start;'>
+                                <label style="margin-right:36px;" for="columns">Choose a column</label>
+                                <select @change="handleColumnEdit" style="width:200px;" name="columns" id="columns">
+                                    <option :value="-1">Select To Edit</option>
+                                    <option v-for="(column, index) in gridSettings.columns" :key="index" :value="index">{{`header - ${column.ColumnHeader}`}}</option>
+                                </select>                                
+                            </div>
+                            <br>
+                            <hr v-show="columnSelected!==-1" style="width:100%; height:1px;">
+                            <br>
+                            <div v-show="columnSelected!==-1" style='width:100%; display:flex; flex-direction:column; align-items:center;'>
+                                <div style="display:flex; width:100%;">
+                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span>Column Header</span></div>
+                                    <div style="width:50%; display:flex;justify-content:flex-start;"><input @input="handleHeaderChange" type='text' v-model="activeColumnEdit.ColumnHeader" style='width:100%'></div>
+                                </div>
+                                <div style="display:flex; width:100%; margin-top:15px;">
+                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span>Custom Width</span></div>
+                                    <div style="width:50%; display:flex;justify-content:flex-start;"><input @input="handleCustomWidth" type='number' v-model="activeColumnEdit.WidthValue" style='width:100px;'><span>px</span></div>
+                                </div>
+                                <div style="display:flex; width:100%; margin-top:15px;">
+                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span>Data Alignment</span></div>
+                                    <div style="width:50%; display:flex;justify-content:flex-start;">
+                                        <select v-model="activeColumnEdit.Alignment" style="width:100px;" name="alignment" id="alignment">
+                                            <option value='left'>left</option>
+                                            <option value='middle'>center</option>
+                                            <option value='right'>right</option>
+                                        </select>                                        
+                                    </div>
+                                </div>
+                                <div style="display:flex; width:100%; margin-top:15px;">
+                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span>Data Type</span></div>
+                                    <div style="width:50%; display:flex;justify-content:flex-start;">
+                                        <select v-model="activeColumnEdit.DataType" style="width:100px;" name="dataType" id="dataType">
+                                            <option value='string'>string</option>
+                                            <option value='number'>number</option>
+                                        </select>                                        
+                                    </div>
+                                </div>
+                                <div style="display:flex; width:100%; margin-top:15px;">
+                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span>Enable Pre-sort</span></div>
+                                    <div style="width:50%; display:flex;justify-content:flex-start;">
+                                        <input @change="handleEnablePreSort" v-model="activeColumnEdit.IsPreSortEnabled" style="margin:0;" type="checkbox" id="enablePresort" name="enablePresort" value="true">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div v-show="currentTab==='row'" style="width:75%; display:flex; padding-left:40px; padding-right:40px; padding-top:20px; padding-bottom:20px; flex-direction:column; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='paging'" style="width:75%; padding:35px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
-                        <span style="font-size:20px;">Row</span>
-                        <div style="display:flex; margin-top:20px; flex-direction:column; justify-content:flex-start;">
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                        <div style="display:flex; flex-direction:column; justify-content:flex-start;">
+
+                            <div style="display:flex; width:100%; justify-content:flex-start;">
+                                <div style="width:150px; display:flex; justify-content:flex-start"><span>Enable Paging</span></div>
+                                <div>
+                                    <input type="checkbox" @change="handleEnablePaging" v-model="chkEnablePaging" id="enablePaging" name="enablePaging" value="true">
+                                </div>
+                            </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
+                                <div style="width:150px; display:flex; justify-content:flex-start"><span></span>Paging Text Color</div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'ptc')}" type='text' style="width:100px" height="30px"></div>
+                            </div>                         
+                            <br>
+                            <hr style="height: 1px; width: 100%;">
+                            <br>
+                            <div style="display:flex; width:100%; justify-content:flex-start;">
+                                <div style="width:150px; display:flex; justify-content:flex-start"><span>Enable Slider</span></div>
+                                <div>
+                                    <input type="checkbox" @change="handleEnableSlider" v-model="chkEnableSlider" id="enableSlider" name="enableSlider" value="true">
+                                </div>
+                            </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start;margin-top:15px;">
+                                <div style="width:150px; display:flex; justify-content:flex-start;"><span>Slider Fill Color</span></div>
+                                <div><input @input="(event)=>{debounceColorChange(event,'sfc')}" type='text' style="width:100px" height="30px"></div>
+                            </div>   
+                        </div>
+                    </div>
+                </div>
+                <div v-show="currentTab==='rows'" style="width:75%; display:flex; padding:35px; flex-direction:column; align-items:center; justify-content:center;">
+                    <div style="width:100%; height:100%;">
+                        <div style="display:flex; flex-direction:column; justify-content:flex-start;">
+                            <div style="display:flex; width:100%; justify-content:flex-start;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Row Odd Background Color</div>
                                 <div><input @input="(event)=>{debounceColorChange(event,'grobc')}" type='text' style="width:100px" height="30px"></div>
                             </div>   
@@ -149,16 +217,11 @@
                     </div>
 
                 </div>
-                <div v-show="currentTab==='header'" style="width:75%; display:flex; flex-direction:column; padding-left:40px; padding-right:40px; padding-top:20px; padding-bottom:20px; align-items:center; justify-content:center;">
+                <div v-show="currentTab==='header'" style="width:75%; display:flex; flex-direction:column; padding:35px; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
-                        <span style="font-size:20px;">Grid Title</span>
-                        <div style="display:flex; margin-top:40px; flex-direction:column; justify-content:flex-start;">
+                        <div style="display:flex; flex-direction:column; justify-content:flex-start;">
                             <div style="display:flex; width:100%; justify-content:flex-start;">
-                                <div style="width:100px; display:flex; justify-content:flex-start"><span>Title Text</span></div>
-                                <div><input @input="debounceHeaderChange" type='text' style="width:200px" height="30px"></div>
-                            </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
-                                <div style="width:100px; display:flex; justify-content:flex-start"><span>Title Color</span></div>
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Title Color</span></div>
                                 <div><input @input="(event)=>{debounceColorChange(event,'title')}" type='text' style="width:100px" height="30px"></div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
@@ -225,6 +288,21 @@ export default {
     },
     data() {
         return {
+            devModeWidthValue:0,
+            devModeHeightValue:0,
+            activeColumnEdit:{
+                ColumnHeader:'',
+                Index:0,
+                Width:'',
+                WidthValue:0,
+                Alignment:'',
+                DataType:'',
+                IsPreSortEnabled:false                 
+            },
+            columnSelected:-1,
+            numColumns:8,
+            chkEnablePaging:true,
+            chkEnableSlider:true,
             shouldAnimate:false,
             shouldReverseAnimate:false,
             developmentMode:false,
@@ -301,8 +379,106 @@ export default {
         }        
     },
     methods: {
+
+
+        download() {
+            var element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(JSON.parse(JSON.stringify(this.gridSettings))));
+            element.setAttribute('download', 'shift-grid-config.js');
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        },
+         
+        handleCustomWidth(event){
+            this.gridSettings.columns[this.activeColumnEdit.Index].Width=event.target.value+'px';
+            this.gridSettings.columns[this.activeColumnEdit.Index].WidthValue=parseInt(event.target.value);
+            this.gridSettings.columns[this.activeColumnEdit.Index].IsUsingACustomWidth=event.target.value>0
+            this.calculateColumnWidths()            
+        },
+        handleEnablePreSort(event){
+            this.gridSettings.columns[this.activeColumnEdit.Index].IsPreSortEnabled=event.target.value;
+        },
+        handleHeaderChange(){
+            this.gridSettings.columns[this.activeColumnEdit.Index].ColumnHeader=event.target.value;
+        },
+        handleColumnEdit(event){
+            if (event.target.value>-1) {
+            this.columnSelected=event.target.value;
+                this.activeColumnEdit = {
+                    ColumnHeader:this.gridSettings.columns[event.target.value].ColumnHeader,
+                    Index:this.gridSettings.columns[event.target.value].Index,
+                    Width:this.gridSettings.columns[event.target.value].Width,
+                    WidthValue:this.gridSettings.columns[event.target.value].WidthValue,
+                    Alignment:this.gridSettings.columns[event.target.value].Alignment,
+                    DataType:this.gridSettings.columns[event.target.value].DataType,
+                    IsPreSortEnabled:this.gridSettings.columns[event.target.value].IsPreSortEnabled 
+                }            
+                
+            } else {
+                this.activeColumnEdit={
+                    ColumnHeader:'',
+                    Index:0,
+                    Width:'',
+                    WidthValue:0,
+                    Alignment:'',
+                    DataType:'',
+                    IsPreSortEnabled:false                 
+                }
+            }
+        },
+        handleColNumChange(event){
+
+            if (this.gridSettings.columns.length<event.target.value) {
+                let numToPush = event.target.value - this.gridSettings.columns.length
+                let index = this.gridSettings.columns.length
+                for (let i = 0; i < numToPush; i++) {
+                    this.gridSettings.columns.push(
+                        {
+                            ColumnHeader:'Column',
+                            Index:index,
+                            Width:'',
+                            WidthValue:0,
+                            Alignment:'',
+                            DataType:'string',
+                            IsPreSortEnabled:false                            
+                        }
+                    )
+                    index++
+                }
+
+                for (let j = 0; j < numToPush; j++) {
+
+                    for (let i = 0; i < this.fullDS.length; i++) {
+                        this.fullDS[i].data.push('Data')
+                    }
+
+                }
+            } else {
+                let currentCount = this.gridSettings.columns.length
+                let numToPop = currentCount - event.target.value
+                let tmp = [...this.gridSettings.columns]
+                this.gridSettings.columns = tmp.splice(0,currentCount-numToPop)
+            }
+            console.log(this.gridSettings)
+            this.calculateColumnWidths()            
+        },
+        handleEnablePaging(event){
+            this.gridSettings.pagination.Enabled = event.target.checked; 
+            if (this.gridSettings.pagination.Enabled===false){
+                this.gridSettings.slider.Enabled=false
+                this.chkEnableSlider = false
+            }
+
+        },
+        handleEnableSlider(event){
+            this.gridSettings.slider.Enabled = event.target.checked;            
+        },
         setCurrentTab(tab){
-            console.log("wtf", tab)
             this.currentTab = tab
         },
         handleInitialValue(event){
@@ -618,16 +794,16 @@ export default {
         },
         calculateColumnWidths(){
             let tmp = 0
-            const numCols = this.fullDS[0].data.length
+            const numCols = this.gridSettings.columns.length
             let custCols = [] 
-            if(!this.gridSettings.developmentMode.Enabled){
-                for (let i = 0; i < numCols; i++) {
-                    if (this.gridSettings.columns[i].WidthValue>0) {
-                        custCols.push(i)
-                        tmp = tmp + this.gridSettings.columns[i].WidthValue
-                    }
+            for (let i = 0; i < numCols; i++) {
+                if (this.gridSettings.columns[i].IsUsingACustomWidth) {
+                    console.log("pushing something?? ", this.gridSettings.columns[i].WidthValue)
+                    custCols.push(i)
+                    tmp = tmp + this.gridSettings.columns[i].WidthValue
                 }
             }
+
 
            const numColumns = numCols-custCols.length
            let widthOfGrid = this.gridSettings.size.GridWidthValue - tmp
@@ -940,8 +1116,11 @@ export default {
             this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
         },
         initializeDevMode(){
-            this.dataSlice = [...this.fullDS].slice(0,2)
-            console.log("this.dta', ", this.dataSlice)
+           this.devModeWidthValue = this.gridSettings.size.GridWidthValue
+           this.devModeHeightValue = this.gridSettings.size.GridHeightValue
+
+           this.dataSlice = [...this.fullDS].slice(0,2)
+           
         },
         timeout(ms){
             return new Promise(resolve => setTimeout(resolve, ms))    

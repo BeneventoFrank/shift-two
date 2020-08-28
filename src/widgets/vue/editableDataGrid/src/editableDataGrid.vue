@@ -58,7 +58,7 @@
             </div>
             <div ref='dataRow' class='dataRow' :style="`width:${gridSettings.size.GridWidth}; overflow-x:hidden;  position:relative; height:${gridSettings.developmentMode.Enabled?100:gridSettings.size.GridHeightValue-headerHeight}px`">
                 <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; padding-top:${gridSettings.developmentMode.Enabled?0:0}px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
-                    <tr :class="`row ${rowIndex%2===0&&shouldAnimate&&!this.gridSettings.developmentMode.Enabled?'animateLeft':''} ${rowIndex%2!==0&&shouldAnimate&&!this.gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
+                    <tr :class="`row ${rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
                     :style="`border-spacing:0px; 
                             background-color:${rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor};
                             cursor:pointer; 

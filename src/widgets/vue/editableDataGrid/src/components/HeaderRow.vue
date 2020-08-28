@@ -25,7 +25,7 @@
                     <div :id="`header-${index}`" :ref="`header-${index}`" 
                         :style="`width:${gridSettings.columns[index].Width}; display:flex; flex-direction:row; 
                                 justify-content:${gridSettings.columns[index].DataAlignment}; 
-                                height:${gridSettings.columns[index].ColumnHeaderHeight}; 
+                                height:30px; 
                                 border-right:${getBorder(header.borderWidth, gridSettings.columns[index].BorderWidth, index)};
                                 background-color:${ ((currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(index.toString())))||((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === gridSettings.columns[index].Index))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor} 
                                 `"

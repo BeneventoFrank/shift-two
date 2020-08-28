@@ -35,7 +35,7 @@
                         <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :color="gridSettings.colorScheme.ActiveIndicatorColor" :height='25'/></div>
                         <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /></div>
                     </div>
-                    <div ref="title" style="width:60%;"><span class='title' :style="`color:${gridSettings.colorScheme.GridTitleColor}`" v-if="gridSettings.title.Text" >{{gridSettings.title.Text}}</span></div>
+                    <div ref="title" style="width:60%;"><span class='title' :style="`color:${gridSettings.colorScheme.GridTitleColor}`" v-if="gridSettings.title.Enabled" >{{gridSettings.title.Text}}</span></div>
                     <div style="width:20%;"></div>
                 </div>
                 
@@ -58,7 +58,7 @@
             </div>
             <div ref='dataRow' class='dataRow' :style="`width:${gridSettings.size.GridWidth}; overflow-x:hidden;  position:relative; height:${gridSettings.developmentMode.Enabled?100:gridSettings.size.GridHeightValue-headerHeight}px`">
                 <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; padding-top:${gridSettings.developmentMode.Enabled?0:0}px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
-                    <tr :class="`${rowIndex%2===0?'evenRow':'oddRow'} ${rowIndex%2!=0&&shouldAnimate?'animate':''} ${rowIndex%2!=0&&shouldReverseAnimate?'reverseAnimation':''}`" 
+                    <tr :class="`row ${rowIndex%2===0&&shouldAnimate&&!this.gridSettings.developmentMode.Enabled?'animateLeft':''} ${rowIndex%2!==0&&shouldAnimate&&!this.gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
                     :style="`border-spacing:0px; 
                             background-color:${rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor};
                             cursor:pointer; 
@@ -69,7 +69,7 @@
                             align-items:center; 
                             display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                         <td :style="`width:${gridSettings.columns[colIndex].Width}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;
-                                    color:${gridSettings.colorScheme.GridRowTextColor}`" v-for="(column,colIndex) in gridSettings.columns"  :key="colIndex">{{dataRow.data[colIndex]}}</td>
+                                    color:${gridSettings.colorScheme.GridRowTextColor}; text-align:${gridSettings.columns[colIndex].Alignment};`" v-for="(column,colIndex) in gridSettings.columns"  :key="colIndex">{{dataRow.data[colIndex]}}</td>
                     </tr>
                 </table>
             </div>
@@ -84,6 +84,7 @@
                 <div style="width:25%; display:flex; flex-direction:column;">
                     <div @click="setCurrentTab('welcome')" class='tab' :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='welcome'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='welcome'?'#f2ecdc':'slateGrey'}; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex;`"><span style="width:100%">Welcome</span></div>
                     <div @click="setCurrentTab('size')" class='tab' :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='size'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='size'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Size</span></div>
+                    <div @click="setCurrentTab('title')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='title'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='title'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Title</span></div>
                     <div @click="setCurrentTab('header')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='header'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='header'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Header</span></div>
                     <div @click="setCurrentTab('rows')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='rows'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='rows'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Rows</span></div>
                     <div @click="setCurrentTab('columns')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='columns'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='columns'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Columns</span></div>
@@ -94,9 +95,28 @@
                 </div>
                 <div v-show="currentTab==='welcome'" style="width:75%; background-color:#f2ecdc; padding:20px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                     <span style="padding-bottom:40px; font-size:20px;">Welcome to the grid configuration tool.</span>
-                    <span style="padding-bottom:20px; font-size:16px;">This tool will allow you to customize the look and feel of your grid. Each tab contains a button that will allow you to download the config needed to generate the grid you see. </span>
-                    <span style="padding-bottom:20px; font-size:16px;">You may re-open this tool at any point by turning on developmentMode in your config</span>
-                    <span style="font-size:16px;">Thanks for picking Shift-Grid, tell us what you think. <a href='www.shift-two.com'>www.shift-two.com</a></span>
+                    <span style="padding-bottom:20px; font-size:14px;">Use the tabs on the left to configure your grid exactly as you want it. When you are done, use the <b>Generate Config</b> tab to download your settings.</span>
+                    <span style="padding-bottom:20px; font-size:14px;">You may re-open this tool at any point by turning on developmentMode in your config</span>
+                    <span style="font-size:14px; ">Thanks for picking Shift-Grid, tell us what you think. </span>
+                    <span style="font-size:14px; "><a href='www.shift-two.com'>www.shift-two.com</a></span>
+                    
+                </div>
+                <div v-show="currentTab==='title'" style="width:75%; padding:35px; background-color:#f2ecdc; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <div style="width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-start;">
+                        <div style="display:flex; width:100%; justify-content:flex-start;">
+                            <div style="width:150px; display:flex; justify-content:flex-start"><span>Enable Title</span></div>
+                            <div>
+                                <input type="checkbox" @change="handleEnableTitle" v-model="chkEnableTitle" id="enableTitle" name="enableTitle" value="true">
+                            </div>
+                        </div>                                                 
+                        <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
+                            <div style="width:150px; display:flex; justify-content:flex-start"><span>Title Color</span></div>
+                            <div style='display:flex; align-items:center;'>
+                                <input @input="(event)=>{debounceColorChange(event,'title')}" v-model="activeColorScheme.gridTitleColor"  type='text' style="width:100px" height="30px">
+                                <input type='color' @input="(event)=>{handleColorPickerChange(event,'title')}" class='colorPicker' :value='activeColorScheme.gridTitleColor'>
+                            </div>
+                        </div>    
+                    </div>
                 </div>
                 <div v-show="currentTab==='size'" style="width:75%; padding:35px; background-color:#f2ecdc; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
@@ -141,9 +161,9 @@
                                 <div style="display:flex; width:100%; margin-top:15px;">
                                     <div style="width:50%; display:flex;justify-content:flex-start;"><span>Data Alignment</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
-                                        <select v-model="activeColumnEdit.Alignment" style="width:100px;" name="alignment" id="alignment">
+                                        <select @input="handleDataAlignment" v-model="activeColumnEdit.Alignment" style="width:100px;" name="alignment" id="alignment">
                                             <option value='left'>left</option>
-                                            <option value='middle'>center</option>
+                                            <option value='center'>center</option>
                                             <option value='right'>right</option>
                                         </select>                                        
                                     </div>
@@ -151,7 +171,7 @@
                                 <div style="display:flex; width:100%; margin-top:15px;">
                                     <div style="width:50%; display:flex;justify-content:flex-start;"><span>Data Type</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
-                                        <select v-model="activeColumnEdit.DataType" style="width:100px;" name="dataType" id="dataType">
+                                        <select @input="handleDataPropertyChange" v-model="activeColumnEdit.DataType" style="width:100px;" name="dataType" id="dataType">
                                             <option value='string'>string</option>
                                             <option value='number'>number</option>
                                         </select>                                        
@@ -256,10 +276,9 @@
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
                             <div style="display:flex; width:100%; justify-content:flex-start;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Title Color</span></div>
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Enable Header Row</span></div>
                                 <div style='display:flex; align-items:center;'>
-                                    <input @input="(event)=>{debounceColorChange(event,'title')}" v-model="activeColorScheme.gridTitleColor"  type='text' style="width:100px" height="30px">
-                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'title')}" class='colorPicker' :value='activeColorScheme.gridTitleColor'>
+                                    <input type="checkbox" @change="handleEnableHeader" v-model="chkEnableHeader" id="enableHeader" name="enableHeader" value="true">                                    
                                 </div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
@@ -378,9 +397,11 @@ export default {
                 IsPreSortEnabled:false                 
             },
             columnSelected:-1,
-            numColumns:8,
+            numColumns:4,
             chkEnablePaging:true,
             chkEnableSlider:true,
+            chkEnableTitle:true,
+            chkEnableHeader:true,
             shouldAnimate:false,
             shouldReverseAnimate:false,
             developmentMode:false,
@@ -457,6 +478,12 @@ export default {
         }        
     },
     methods: {
+        handleEnableTitle(){
+            this.gridSettings.title.Enabled=this.chkEnableTitle
+        },
+        handleEnableHeader(){
+            this.gridSettings.header.Enabled=this.chkEnableHeader
+        },
         handleColorPickerChange(event, code){
             switch (code) {
                 case 'ftc':
@@ -628,6 +655,12 @@ export default shiftSettings
             this.gridSettings.columns[this.activeColumnEdit.Index].WidthValue=parseInt(event.target.value);
             this.gridSettings.columns[this.activeColumnEdit.Index].IsUsingACustomWidth=event.target.value>0
             this.calculateColumnWidths()            
+        },
+        handleDataAlignment(event){
+            this.gridSettings.columns[this.activeColumnEdit.Index].Alignment = event.target.value
+        },
+        handleDataPropertyChange(){
+            this.gridSettings.columns[this.activeColumnEdit.Index].DataType = event.target.value
         },
         handleEnablePreSort(event){
             this.gridSettings.columns[this.activeColumnEdit.Index].IsPreSortEnabled=event.target.value;
@@ -1355,9 +1388,12 @@ export default shiftSettings
             this.activeColorScheme.gridHeaderBorderColor = this.gridSettings.colorScheme.GridHeaderBorderColor,
             this.activeColorScheme.flyoutBackgroundColor = this.gridSettings.colorScheme.FlyoutBackgroundColor,
             this.activeColorScheme.flyoutTextColor = this.gridSettings.colorScheme.FlyoutTextColor
-
-           this.dataSlice = [...this.fullDS].slice(0,2)
-           
+            this.chkEnablePaging = this.gridSettings.pagination.Enabled
+            this.chkEnableSlider = this.gridSettings.slider.Enabled
+            this.chkEnableTitle = this.gridSettings.title.Enabled 
+            this.chkEnableHeader = this.gridSettings.header.Enabled
+            
+            this.dataSlice = [...this.fullDS].slice(0,2)
         },
         timeout(ms){
             return new Promise(resolve => setTimeout(resolve, ms))    
@@ -1405,7 +1441,7 @@ export default shiftSettings
             this.configureWebWorkers()
             this.shouldAnimate = true //make this a config setting.
             setTimeout(() => {
-                this.shouldReverseAnimate = true   
+                this.shouldReverseAnimate=true   
             }, 500);
         }
     }
@@ -1421,18 +1457,19 @@ export default shiftSettings
         .cell{
             width:20%;
         }
-        .oddRow{
-            border-top: 1px solid #DCDCDC;    
-            background-color: #f8f8f8;
+        .row{
             height:auto;
             max-height:30px;
-            transition:transform .3s;
+            transition:transform .5s;
         }
-        .animate{
-            transform: translate(0px,20px)
+        .animateLeft{
+            transform: translate(-30px,0px)
+        }
+        .animateRight{
+            transform: translate(30px,0px)
         }
         .reverseAnimation{
-            transform: translate(0px,-20px)
+            transform: translate(0px,0px) 
         }
         .dataRow{
             width:100%; 

@@ -34,6 +34,7 @@ let shiftSettings = {
         InitialNumberOfRowsPerPage:0,
     },
     title:{
+        Enabled:true,
         Text:'Title'
     },
     columns:[
@@ -43,7 +44,7 @@ let shiftSettings = {
             Width:'',
             WidthValue:0,
             IsUsingACustomWidth:false,
-            Alignment:'',
+            Alignment:'center',
             DataType:'string',
             IsPreSortEnabled:true                            
         },
@@ -53,7 +54,7 @@ let shiftSettings = {
             Width:'',
             WidthValue:0,
             IsUsingACustomWidth:false,
-            Alignment:'',
+            Alignment:'center',
             DataType:'string',
             IsPreSortEnabled:false                            
         },
@@ -63,7 +64,7 @@ let shiftSettings = {
             Width:'',
             WidthValue:0,
             IsUsingACustomWidth:false,
-            Alignment:'',
+            Alignment:'center',
             DataType:'string',
             IsPreSortEnabled:false                            
         },
@@ -73,47 +74,7 @@ let shiftSettings = {
             Width:'',
             WidthValue:0,
             IsUsingACustomWidth:false,
-            Alignment:'',
-            DataType:'string',
-            IsPreSortEnabled:false                            
-        },
-        {
-            ColumnHeader:'Column',
-            Index:4,
-            Width:'',
-            WidthValue:0,
-            IsUsingACustomWidth:false,
-            Alignment:'',
-            DataType:'string',
-            IsPreSortEnabled:false                            
-        },
-        {
-            ColumnHeader:'Column',
-            Index:5,
-            Width:'',
-            WidthValue:0,
-            IsUsingACustomWidth:false,
-            Alignment:'',
-            DataType:'string',
-            IsPreSortEnabled:false                            
-        },
-        {
-            ColumnHeader:'Column',
-            Index:6,
-            Width:'',
-            WidthValue:0,
-            IsUsingACustomWidth:false,
-            Alignment:'',
-            DataType:'string',
-            IsPreSortEnabled:false                            
-        },
-        {
-            ColumnHeader:'Column',
-            Index:7,
-            Width:'',
-            WidthValue:0,
-            IsUsingACustomWidth:false,
-            Alignment:'',
+            Alignment:'center',
             DataType:'string',
             IsPreSortEnabled:false                            
         }

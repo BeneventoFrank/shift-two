@@ -62,13 +62,14 @@
                     :style="`border-spacing:0px; 
                             background-color:${rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor};
                             cursor:pointer; 
+                            padding:0px;
                             overflow:hidden; 
                             width:100%;
                             border-collapse:collapse; 
                             height:35px;
                             align-items:center; 
                             display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                        <td :style="`width:${gridSettings.columns[colIndex].Width}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;
+                        <td :style="`width:${gridSettings.columns[colIndex].Width}; height:100%; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;
                                     color:${gridSettings.colorScheme.GridRowTextColor}; text-align:${gridSettings.columns[colIndex].Alignment};`" v-for="(column,colIndex) in gridSettings.columns"  :key="colIndex">{{dataRow.data[colIndex]}}</td>
                     </tr>
                 </table>
@@ -1477,25 +1478,22 @@ export default shiftSettings
             flex-direction:row;
             scroll-behavior: smooth;
         }
-
-        .dataGrid{
-
-        }
-        .dataGrid tr:hover{
+        tr:hover{
             background-color: #E8E8E8;
         }
-        td, th {
-        padding:0px;
-        position: relative;
-        outline: 0;
-        }
         td:hover {
-            background-color: #DCDCDC;
-
+            background-color: #c4c8cc;
         }
-        tr{
-            padding-top: 5px;
-            padding-bottom: 5px;
+        td:hover::after {
+        content: "";
+        position: absolute;
+        background-color: #dce1e6;
+        left: 0;
+        top: 0;
+        height: 30px;
+        width: 100%;
+        z-index: -1;
+        
         }
         .title{
             font-size:24px;

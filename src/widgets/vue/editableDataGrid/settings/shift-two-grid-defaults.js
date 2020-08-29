@@ -12,74 +12,32 @@ let shiftSettings = {
         Enabled:true
     },
     rows:{
-        Height:'30px',
-        HeightValue:30,
-        HighlightRowEnabled:true
+        Height:'30px', //Change at own risk
+        HeightValue:30, //Change at own risk
+        HighlightRowEnabled:'true',
     },
-    slider:{
+    slider:{ //Change at own risk
         Enabled:true,
         SliderWidth:300,
-        MinValue:0,
-        MaxValue:0,
-        StepValue:0,
-        InitialValue:0,
+        MinValue:100,
+        MaxValue:1000,
+        StepValue:100,
+        InitialValue:100
     },
-    pagination:{
-        Enabled:true,
+    pagination:{ //Change at own risk
+        Enabled:true, 
         MinRecordsViewable:0,
         MaxRecordsViewable:0,
         TotalNumberOfRecords:0,
         PageNumberCurrentlyViewing:0,        
         MaxPageNumberPossible:0,
         NumberOfApplicibleRowsPerPage:0,
-        InitialNumberOfRowsPerPage:0,
+        InitialNumberOfRowsPerPage:0
     },
     title:{
-        Enabled:true,
+        Enabled:'true',
         Text:'Title'
     },
-    columns:[
-        {
-            ColumnHeader:'Column',
-            Index:0,
-            Width:'',
-            WidthValue:0,
-            IsUsingACustomWidth:false,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true                            
-        },
-        {
-            ColumnHeader:'Column',
-            Index:1,
-            Width:'',
-            WidthValue:0,
-            IsUsingACustomWidth:false,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:false                            
-        },
-        {
-            ColumnHeader:'Column',
-            Index:2,
-            Width:'',
-            WidthValue:0,
-            IsUsingACustomWidth:false,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:false                            
-        },
-        {
-            ColumnHeader:'Column',
-            Index:3,
-            Width:'',
-            WidthValue:0,
-            IsUsingACustomWidth:false,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:false                            
-        }
-    ],
     colorScheme:{
         SliderFillColor:'#708090',
         PagingTextColor:'#708090',
@@ -93,11 +51,52 @@ let shiftSettings = {
         GridHeaderBorderColor:'#708090',
         FlyoutBackgroundColor:'#F8F8F8',
         FlyoutTextColor:'#708090',
-        RowHighlightBackground:'#C3D9F9',
-        RowHighlightActiveCell:'#b1c4e0'
+        RowHighlightBackground:'#edeeb4',
+        RowHighlightActiveCell:'#dadc8f',
 
-    }
+    },
+    columns:[
+        {
+            ColumnHeader:'Column',
+            Index:0,
+            Width:'150px',
+            WidthValue:150,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:true                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:1,
+            Width:'150px',
+            WidthValue:150,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:2,
+            Width:'150px',
+            WidthValue:150,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:3,
+            Width:'150px',
+            WidthValue:150,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
 
+    ]
 }
-
 export default shiftSettings

@@ -69,8 +69,16 @@
                             height:35px;
                             align-items:center; 
                             display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                        <td @mouseleave="()=>{cellHoverIndex=null}" @mouseenter="()=>{cellHoverIndex=colIndex}" :style="`width:${gridSettings.columns[colIndex].Width}; height:100%; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block; background-color:${gridSettings.rows.HighlightRowEnabled?rowIndex===hoverIndex&&colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''} 
-                                    color:${gridSettings.colorScheme.GridRowTextColor}; text-align:${gridSettings.columns[colIndex].Alignment};`" v-for="(column,colIndex) in gridSettings.columns"  :key="colIndex">{{dataRow.data[colIndex]}}</td>
+                        <td 
+                            @mouseleave="()=>{cellHoverIndex=null}" 
+                            @mouseenter="()=>{cellHoverIndex=colIndex}" 
+                            :style="`width:${gridSettings.columns[colIndex].Width}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block; 
+                                     color:${gridSettings.colorScheme.GridRowTextColor};`" v-for="(column,colIndex) in gridSettings.columns"  :key="colIndex">
+                            <div 
+                                :style="`background-color: ${gridSettings.rows.HighlightRowEnabled?rowIndex===hoverIndex&&colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
+                                        width:100%; height:30px; display:flex; align-items:center;
+                                        justify-content:${gridSettings.columns[colIndex].Alignment}`">{{dataRow.data[colIndex]}}</div>
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -137,7 +145,7 @@
                         </div>
                     </div>
                 </div>
-                <div v-show="currentTab==='columns'" style="width:75%; padding:35px; display:flex; flex-direction:column; align-items:flex-start; background-color:#f2ecdc; justify-content:flex-start;">
+                <div v-show="currentTab==='columns'" style="width:75%; padding:30px; display:flex; flex-direction:column; align-items:flex-start; background-color:#f2ecdc; justify-content:flex-start;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
                             <div style="display:flex; flex-direction:row; align-items:center; justify-content:flex-start; align-items:center;">
@@ -151,9 +159,12 @@
                                     <option v-for="(column, index) in gridSettings.columns" :key="index" :value="index">{{`header - ${column.ColumnHeader}`}}</option>
                                 </select>                                
                             </div>
-                            <br>
-                            <hr v-show="columnSelected!==-1" style="width:100%; height:1px;">
-                            <br>
+                            <div :style="`display:flex; flex-direction:column; width=100%; height:70px; justify-content:center; align-items:center`">
+                                    <span class="smallerText" style="margin-bottom:10px;">(Total width of grid) - (Total custom widths) - (Min width each other col)</span>
+                                    <span class="smallerText">{{`Available for customizing: ${availableForCustomizing}px`}}</span>
+                            </div>
+
+                            <hr v-show="columnSelected!==-1" style="width:100%; margin-bottom:10px; height:1px;">
                             <div v-show="columnSelected!==-1" style='width:100%; display:flex; flex-direction:column; align-items:center;'>
                                 <div style="display:flex; width:100%;">
                                     <div style="width:50%; display:flex;justify-content:flex-start;"><span>Column Header</span></div>
@@ -161,15 +172,18 @@
                                 </div>
                                 <div style="display:flex; width:100%; margin-top:15px;">
                                     <div style="width:50%; display:flex;justify-content:flex-start;"><span>Custom Width</span></div>
-                                    <div style="width:50%; display:flex;justify-content:flex-start;"><input @input="handleCustomWidth" type='number' v-model="activeColumnEdit.WidthValue" style='width:100px;'><span>px</span></div>
+                                    <div style="width:50%; display:flex;justify-content:flex-start; align-items:center;">
+                                        <input @input="handleCustomWidth" type='number' v-model="activeColumnEdit.WidthValue" style='width:100px;'><span>px</span>
+                                        <span style="margin-left:10px; margin-right:10px;">auto</span><input @change="handleAutoSize" v-model="activeColumnEdit.ChkAuto" style="margin:0;" type="checkbox" id="enablePresort" name="enablePresort" value="true">
+                                    </div>
                                 </div>
                                 <div style="display:flex; width:100%; margin-top:15px;">
                                     <div style="width:50%; display:flex;justify-content:flex-start;"><span>Data Alignment</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
                                         <select @input="handleDataAlignment" v-model="activeColumnEdit.Alignment" style="width:100px;" name="alignment" id="alignment">
-                                            <option value='left'>left</option>
+                                            <option value='flex-start'>left</option>
                                             <option value='center'>center</option>
-                                            <option value='right'>right</option>
+                                            <option value='flex-end'>right</option>
                                         </select>                                        
                                     </div>
                                 </div>
@@ -402,6 +416,7 @@ export default {
     },
     data() {
         return {
+            availableForCustomizing:0,
             hoverIndex:null,
             cellHoverIndex:null,
             copyButtonText:'Copy',
@@ -430,7 +445,9 @@ export default {
                 WidthValue:0,
                 Alignment:'',
                 DataType:'',
-                IsPreSortEnabled:false                 
+                IsUsingACustomWidth:false,
+                IsPreSortEnabled:false,
+                ChkAuto:true            
             },
             columnSelected:-1,
             numColumns:4,
@@ -518,6 +535,17 @@ export default {
         }        
     },
     methods: {
+        handleAutoSize(){
+            this.activeColumnEdit.IsUsingACustomWidth=false;
+            this.activeColumnEdit.Width=null
+            this.activeColumnEdit.WidthValue=null
+            this.activeColumnEdit.ChkAuto = true;
+            this.gridSettings.columns[this.activeColumnEdit.Index].IsUsingACustomWidth = false
+            this.gridSettings.columns[this.activeColumnEdit.Index].Width = null
+            this.gridSettings.columns[this.activeColumnEdit.Index].WidthValue = null
+            this.calculateColumnWidths()
+            this.availableForCustomizing = this.calculateAvailableSpace()
+        },
         handleEnaleRowHighlight(){
             this.gridSettings.rows.HighlightRowEnabled = this.chkEnableHighlight
         },
@@ -608,10 +636,11 @@ let config = `let shiftSettings = {
         Enabled:${this.gridSettings.header.Enabled}
     },
     rows:{
-        Height:'${this.gridSettings.rows.HeightValue}px',
-        HeightValue:${this.gridSettings.rows.HeightValue}
+        Height:'${this.gridSettings.rows.HeightValue}px', //Change at own risk
+        HeightValue:${this.gridSettings.rows.HeightValue}, //Change at own risk
+        HighlightRowEnabled:'${this.gridSettings.rows.HighlightRowEnabled}',
     },
-    slider:{
+    slider:{ //Change at own risk
         Enabled:${this.gridSettings.slider.Enabled},
         SliderWidth:${this.gridSettings.slider.SliderWidth},
         MinValue:${this.gridSettings.slider.MinValue},
@@ -619,8 +648,8 @@ let config = `let shiftSettings = {
         StepValue:${this.gridSettings.slider.StepValue},
         InitialValue:${this.gridSettings.slider.InitialValue}
     },
-    pagination:{
-        Enabled:${this.gridSettings.pagination.Enabled},
+    pagination:{ //Change at own risk
+        Enabled:${this.gridSettings.pagination.Enabled}, 
         MinRecordsViewable:0,
         MaxRecordsViewable:0,
         TotalNumberOfRecords:0,
@@ -630,6 +659,7 @@ let config = `let shiftSettings = {
         InitialNumberOfRowsPerPage:0
     },
     title:{
+        Enabled:'${this.gridSettings.title.Enabled}',
         Text:'${this.gridSettings.title.Text}'
     },
     colorScheme:{
@@ -644,7 +674,10 @@ let config = `let shiftSettings = {
         ActiveIndicatorColor:'${this.gridSettings.colorScheme.ActiveIndicatorColor}',
         GridHeaderBorderColor:'${this.gridSettings.colorScheme.GridHeaderBorderColor}',
         FlyoutBackgroundColor:'${this.gridSettings.colorScheme.FlyoutBackgroundColor}',
-        FlyoutTextColor:'${this.gridSettings.colorScheme.FlyoutTextColor}'
+        FlyoutTextColor:'${this.gridSettings.colorScheme.FlyoutTextColor}',
+        RowHighlightBackground:'${this.gridSettings.colorScheme.RowHighlightBackground}',
+        RowHighlightActiveCell:'${this.gridSettings.colorScheme.RowHighlightActiveCell}',
+
     },
     columns:[
 `           
@@ -721,6 +754,8 @@ export default shiftSettings
             this.gridSettings.columns[this.activeColumnEdit.Index].WidthValue=parseInt(event.target.value);
             this.gridSettings.columns[this.activeColumnEdit.Index].IsUsingACustomWidth=event.target.value>0
             this.calculateColumnWidths()            
+            this.availableForCustomizing=this.calculateAvailableSpace()
+            this.activeColumnEdit.ChkAuto=!event.target.value>0
         },
         handleDataAlignment(event){
             this.gridSettings.columns[this.activeColumnEdit.Index].Alignment = event.target.value
@@ -740,11 +775,13 @@ export default shiftSettings
                 this.activeColumnEdit = {
                     ColumnHeader:this.gridSettings.columns[event.target.value].ColumnHeader,
                     Index:this.gridSettings.columns[event.target.value].Index,
-                    Width:this.gridSettings.columns[event.target.value].Width,
-                    WidthValue:this.gridSettings.columns[event.target.value].WidthValue,
+                    Width: this.gridSettings.columns[event.target.value].IsUsingACustomWidth?this.gridSettings.columns[event.target.value].Width:'',
+                    WidthValue: this.gridSettings.columns[event.target.value].IsUsingACustomWidth?this.gridSettings.columns[event.target.value].WidthValue:null,
                     Alignment:this.gridSettings.columns[event.target.value].Alignment,
                     DataType:this.gridSettings.columns[event.target.value].DataType,
-                    IsPreSortEnabled:this.gridSettings.columns[event.target.value].IsPreSortEnabled 
+                    IsUsingACustomWidth:this.gridSettings.columns[event.target.value].IsUsingACustomWidth,
+                    IsPreSortEnabled:this.gridSettings.columns[event.target.value].IsPreSortEnabled,
+                    ChkAuto:this.gridSettings.columns[event.target.value].IsUsingACustomWidth?false:true
                 }            
                 
             } else {
@@ -755,7 +792,9 @@ export default shiftSettings
                     WidthValue:0,
                     Alignment:'',
                     DataType:'',
-                    IsPreSortEnabled:false                 
+                    IsUsingACustomWidth:false,
+                    IsPreSortEnabled:false,
+                    ChkAuto:true
                 }
             }
         },
@@ -771,7 +810,7 @@ export default shiftSettings
                             Index:index,
                             Width:'',
                             WidthValue:0,
-                            Alignment:'',
+                            Alignment:'center',
                             DataType:'string',
                             IsPreSortEnabled:false                            
                         }
@@ -791,7 +830,8 @@ export default shiftSettings
                 let tmp = [...this.gridSettings.columns]
                 this.gridSettings.columns = tmp.splice(0,currentCount-numToPop)
             }
-            this.calculateColumnWidths()            
+            this.calculateColumnWidths() 
+            this.availableForCustomizing= this.calculateAvailableSpace()           
         },
         handleEnablePaging(event){
             this.gridSettings.pagination.Enabled = event.target.checked; 
@@ -838,6 +878,7 @@ export default shiftSettings
             this.gridSettings.size.GridWidth = `${event.target.value}px`
             this.gridSettings.size.GridWidthValue = parseInt(event.target.value)
             this.calculateColumnWidths()
+            this.availableForCustomizing = this.calculateAvailableSpace()
         },750),     
         debounceHeightInput: debounce(function (event){
             this.gridSettings.size.GridHeight = `${event.target.value}px`
@@ -1445,6 +1486,26 @@ export default shiftSettings
             this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
             this.ww_sortWorker.postMessage({'MessageType':'data','Data':this.fullDS, 'Columns':this.gridSettings.columns})
         },
+        getCustomWidths(){
+            let widthData = {}
+            let custom = 0
+            let rest = 0
+            for (let i = 0; i < this.gridSettings.columns.length; i++) {
+                if(this.gridSettings.columns[i].IsUsingACustomWidth){
+                    custom = custom + this.gridSettings.columns[i].WidthValue
+                } else {
+                    rest = rest + 10
+                }
+            }
+            widthData.custom = custom
+            widthData.rest = rest
+            return widthData 
+        },
+        calculateAvailableSpace(){
+            const widthData = this.getCustomWidths()
+            console.log(widthData)
+            return(this.gridSettings.size.GridWidthValue-widthData.custom - widthData.rest)
+        },
         initializeDevMode(){
             this.devModeWidthValue = this.gridSettings.size.GridWidthValue
             this.devModeHeightValue = this.gridSettings.size.GridHeightValue
@@ -1468,6 +1529,7 @@ export default shiftSettings
             this.chkEnableHeader = this.gridSettings.header.Enabled
             this.chkEnableHighlight = this.gridSettings.rows.HighlightRowEnabled
             this.titleText = this.gridSettings.title.Text
+            this.availableForCustomizing = this.calculateAvailableSpace()
             let tmp =[]
             for (let i = 0; i < 2; i++) {
                 tmp.push(this.fullDS[i])
@@ -1504,8 +1566,6 @@ export default shiftSettings
         if(this.gridSettings.developmentMode.Enabled){
             this.initializeDevMode()
             setTimeout(async() => {
-            this.gridSettings.size.GridHeight = '270px;'
-            this.gridSettings.size.GridHeightValue = 270
             this.shouldAnimateConfigTool = true 
                 setTimeout(async() => {
                     const tmp='Developer Mode'.split('')
@@ -1529,6 +1589,9 @@ export default shiftSettings
 };
 </script>
 <style >
+        td {
+            vertical-align: middle;
+        }
         .pointer {
             cursor: pointer;
         }
@@ -1620,6 +1683,9 @@ export default shiftSettings
             width:30px;
             border-radius:5px;
             outline: none;
+        }
+        .smallerText{
+            font-size: 12px;
         }
 
 </style>

@@ -5,15 +5,16 @@ let shiftSettings = {
     size:{
         GridWidth:'600px', //px value of width
         GridWidthValue:600,
-        GridHeight:'270px', //px value of height
-        GridHeightValue:270, //int value used for calculations
+        GridHeight:'600px', //px value of height
+        GridHeightValue:600, //int value used for calculations
     },
     header:{
         Enabled:true
     },
     rows:{
         Height:'30px',
-        HeightValue:30
+        HeightValue:30,
+        HighlightRowEnabled:true
     },
     slider:{
         Enabled:true,
@@ -91,7 +92,10 @@ let shiftSettings = {
         ActiveIndicatorColor:'#C3D9F9',
         GridHeaderBorderColor:'#708090',
         FlyoutBackgroundColor:'#F8F8F8',
-        FlyoutTextColor:'#708090'
+        FlyoutTextColor:'#708090',
+        RowHighlightBackground:'#C3D9F9',
+        RowHighlightActiveCell:'#b1c4e0'
+
     }
 
 }

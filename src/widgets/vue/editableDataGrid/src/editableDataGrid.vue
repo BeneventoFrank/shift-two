@@ -58,9 +58,9 @@
             </div>
             <div ref='dataRow' class='dataRow' :style="`width:${gridSettings.size.GridWidth}; overflow-x:hidden;  position:relative; height:${gridSettings.developmentMode.Enabled?100:gridSettings.size.GridHeightValue-headerHeight}px`">
                 <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; padding-top:${gridSettings.developmentMode.Enabled?0:0}px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
-                    <tr :class="`row ${rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
+                    <tr @mouseleave="()=>{hoverIndex=null}" @mouseenter="()=>{hoverIndex=rowIndex}" :class="`row ${rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
                     :style="`border-spacing:0px; 
-                            background-color:${rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor};
+                            background-color:${rowIndex===hoverIndex&&gridSettings.rows.HighlightRowEnabled?gridSettings.colorScheme.RowHighlightBackground:rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
                             cursor:pointer; 
                             padding:0px;
                             overflow:hidden; 
@@ -69,7 +69,7 @@
                             height:35px;
                             align-items:center; 
                             display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                        <td :style="`width:${gridSettings.columns[colIndex].Width}; height:100%; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;
+                        <td @mouseleave="()=>{cellHoverIndex=null}" @mouseenter="()=>{cellHoverIndex=colIndex}" :style="`width:${gridSettings.columns[colIndex].Width}; height:100%; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block; background-color:${gridSettings.rows.HighlightRowEnabled?rowIndex===hoverIndex&&colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''} 
                                     color:${gridSettings.colorScheme.GridRowTextColor}; text-align:${gridSettings.columns[colIndex].Alignment};`" v-for="(column,colIndex) in gridSettings.columns"  :key="colIndex">{{dataRow.data[colIndex]}}</td>
                     </tr>
                 </table>
@@ -109,10 +109,14 @@
                             <div>
                                 <input type="checkbox" @change="handleEnableTitle" v-model="chkEnableTitle" id="enableTitle" name="enableTitle" value="true">
                             </div>
-                        </div>                                                 
-                        <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
+                        </div>       
+                        <div style="display:flex; width:100%; margin-top:15px; align-items:flex-end;">
+                            <div style="width:150px; display:flex;justify-content:flex-start;"><span>Column Header</span></div>
+                            <div style="width:150px; display:flex;justify-content:flex-start;"><input @input="handleTitleChange" type='text' v-model="titleText" style='width:100%'></div>
+                        </div>                        
+                        <div style="display:flex; width:100%; justify-content:flex-start; align-items:center; margin-top:15px;">
                             <div style="width:150px; display:flex; justify-content:flex-start"><span>Title Color</span></div>
-                            <div style='display:flex; align-items:center;'>
+                            <div style='display:flex;  align-items:center;'>
                                 <input @input="(event)=>{debounceColorChange(event,'title')}" v-model="activeColorScheme.gridTitleColor"  type='text' style="width:100px" height="30px">
                                 <input type='color' @input="(event)=>{handleColorPickerChange(event,'title')}" class='colorPicker' :value='activeColorScheme.gridTitleColor'>
                             </div>
@@ -122,11 +126,11 @@
                 <div v-show="currentTab==='size'" style="width:75%; padding:35px; background-color:#f2ecdc; display:flex; flex-direction:column; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
-                            <div style="display:flex; width:100%; justify-content:flex-start;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; align-items:flex-end;">
                                 <div style="width:100px; display:flex; justify-content:flex-start"><span>Grid Width</span></div>
                                 <div><input @input="debounceInput" v-model="devModeWidthValue"  type='number' style="width:75px" height="30px"><span> px</span></div>
                             </div>    
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; align-items:flex-end; margin-top:15px;">
                                 <div style="width:100px; display:flex; justify-content:flex-start"><span>Grid Height</span></div>
                                 <div><input type='number' @input="debounceHeightInput" v-model="devModeHeightValue" style="width:75px" height="30px"><span> px</span></div>
                             </div>   
@@ -136,7 +140,7 @@
                 <div v-show="currentTab==='columns'" style="width:75%; padding:35px; display:flex; flex-direction:column; align-items:flex-start; background-color:#f2ecdc; justify-content:flex-start;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
-                            <div style="display:flex; flex-direction:row; align-items:center; justify-content:flex-start;">
+                            <div style="display:flex; flex-direction:row; align-items:center; justify-content:flex-start; align-items:center;">
                                 <span style="margin-right:15px;">Number Of Columns</span>
                                 <input type="number" id="quantity" @change="handleColNumChange" name="quantity" v-model="numColumns" min="1" max='25' style="width:45px" height="30px">
                             </div>
@@ -192,13 +196,13 @@
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
 
-                            <div style="display:flex; width:100%; justify-content:flex-start;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
                                 <div style="width:150px; display:flex; justify-content:flex-start"><span>Enable Paging</span></div>
                                 <div>
                                     <input type="checkbox" @change="handleEnablePaging" v-model="chkEnablePaging" id="enablePaging" name="enablePaging" value="true">
                                 </div>
                             </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:15px; align-items:center;">
                                 <div style="width:150px; display:flex; justify-content:flex-start"><span></span>Paging Text Color</div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'ptc')}" v-model="activeColorScheme.pagingTextColor" type='text' style="width:100px" height="30px">
@@ -208,13 +212,13 @@
                             <br>
                             <hr style="height: 1px; width: 100%;">
                             <br>
-                            <div style="display:flex; width:100%; justify-content:flex-start;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
                                 <div style="width:150px; display:flex; justify-content:flex-start"><span>Enable Slider</span></div>
                                 <div>
                                     <input type="checkbox" @change="handleEnableSlider" v-model="chkEnableSlider" id="enableSlider" name="enableSlider" value="true">
                                 </div>
                             </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start;margin-top:15px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start;margin-top:15px; align-items:center;">
                                 <div style="width:150px; display:flex; justify-content:flex-start;"><span>Slider Fill Color</span></div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'sfc')}" v-model="activeColorScheme.sliderFillColor" type='text' style="width:100px" height="30px">
@@ -227,28 +231,50 @@
                 <div v-show="currentTab==='rows'" style="width:75%; display:flex; padding:35px; background-color:#f2ecdc; flex-direction:column; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
-                            <div style="display:flex; width:100%; justify-content:flex-start;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Row Odd Background Color</div>
-                                <div style='display:flex; align-items:center;'>
-                                    <input @input="(event)=>{debounceColorChange(event,'grobc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.gridRowOddBackgroundColor">
-                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'grobc')}" class='colorPicker' :value='activeColorScheme.gridRowOddBackgroundColor'>
-                                </div>
-                            </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Row Even Background Color</span></div>
+                            <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Even Row Background Color</span></div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'grebc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.gridRowEvenBackgroundColor">
                                     <input type='color' @input="(event)=>{handleColorPickerChange(event,'grebc')}" class='colorPicker' :value='activeColorScheme.gridRowEvenBackgroundColor'>
                                 </div>
                             </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
-                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Row Text Color</span></div>
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px; align-items:center;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Odd Row Background Color</div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'grobc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.gridRowOddBackgroundColor">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'grobc')}" class='colorPicker' :value='activeColorScheme.gridRowOddBackgroundColor'>
+                                </div>
+                            </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px; align-items:center;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Row Text Color</span></div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'grtc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.gridRowTextColor">
                                     <input type='color' @input="(event)=>{handleColorPickerChange(event,'grtc')}" class='colorPicker' :value='activeColorScheme.gridRowTextColor'>
                                 </div>
                             </div>   
-  
+                            <br>
+                            <hr style='width:100%;'>
+                            <br>
+                            <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Enable Row Highlight </span></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input type="checkbox" @change="handleEnaleRowHighlight" v-model="chkEnableHighlight" id="enableHeader" name="enableHeader" value="true">                                    
+                                </div>
+                            </div>
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px; align-items:center;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Row Highlight Background</div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'rhb')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.rowHighlightBackground">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'rhb')}" class='colorPicker' :value='activeColorScheme.rowHighlightBackground'>
+                                </div>
+                            </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px; align-items:center;">
+                                <div style="width:250px; display:flex; justify-content:flex-start"><span>Row Highlight Active Cell</span></div>
+                                <div style='display:flex; align-items:center;'>
+                                    <input @input="(event)=>{debounceColorChange(event,'rhac')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.rowHighlightActiveCell">
+                                    <input type='color' @input="(event)=>{handleColorPickerChange(event,'rhac')}" class='colorPicker' :value='activeColorScheme.rowHighlightActiveCell'>
+                                </div>
+                            </div>   
                         </div>
                     </div>
                 </div>
@@ -270,26 +296,30 @@
                                 <div style="width:300px; display:flex; justify-content:flex-start"><span>Download as a .zip file</span></div>
                                 <div><button @click="(event)=>{download(event,'zip')}">Download</button></div>
                             </div>   
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                                <div style="width:300px; display:flex; justify-content:flex-start"><span>Copy to your clipboard </span></div>
+                                <div><button @click="(event)=>{download(event,'copy')}">{{copyButtonText}}</button></div>
+                            </div>   
                           </div>
                     </div>
                 </div>
                 <div v-show="currentTab==='header'" style="width:75%; background-color:#f2ecdc; display:flex; flex-direction:column; padding:35px; align-items:center; justify-content:center;">
                     <div style="width:100%; height:100%;">
                         <div style="display:flex; flex-direction:column; justify-content:flex-start;">
-                            <div style="display:flex; width:100%; justify-content:flex-start;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Enable Header Row</span></div>
                                 <div style='display:flex; align-items:center;'>
                                     <input type="checkbox" @change="handleEnableHeader" v-model="chkEnableHeader" id="enableHeader" name="enableHeader" value="true">                                    
                                 </div>
                             </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; align-items:center; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Background Color</div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'ghbc')}" v-model="activeColorScheme.gridHeaderBackgroundColor" type='text' style="width:100px" height="30px">
                                     <input type='color' @input="(event)=>{handleColorPickerChange(event,'ghbc')}" class='colorPicker' :value='activeColorScheme.gridHeaderBackgroundColor'>
                                 </div>
                             </div>  
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; align-items:center; margin-top:10px;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span></span>Grid Header Text Color</div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'ghtc')}" v-model="activeColorScheme.gridHeaderTextColor" type='text' style="width:100px" height="30px">
@@ -297,7 +327,7 @@
                                 </div>
 
                             </div>  
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px; align-items:center;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Grid Header Divider Color</span></div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'ghboc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.gridHeaderBorderColor">
@@ -305,7 +335,7 @@
                                 </div>
 
                             </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px; align-items:center;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Background Color</span></div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'fbc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.flyoutBackgroundColor">
@@ -313,14 +343,14 @@
                                 </div>
 
                             </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px; align-items:center;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Flyout Text Color</span></div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'ftc')}" type='text' style="width:100px" height="30px" v-model="activeColorScheme.flyoutTextColor">
                                     <input type='color' @input="(event)=>{handleColorPickerChange(event,'ftc')}" class='colorPicker' :value='activeColorScheme.flyoutTextColor'>
                                 </div>
                             </div>   
-                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;">
+                            <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px;  align-items:center;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span>Active Indicator Color</span></div>
                                 <div style='display:flex; align-items:center;'>
                                     <input @input="(event)=>{debounceColorChange(event,'aic')}" v-model="activeColorScheme.activeIndicatorColor" type='text' style="width:100px" height="30px">
@@ -372,6 +402,9 @@ export default {
     },
     data() {
         return {
+            hoverIndex:null,
+            cellHoverIndex:null,
+            copyButtonText:'Copy',
             activeColorScheme:{
                 sliderFillColor:'',
                 pagingTextColor:'',
@@ -384,7 +417,9 @@ export default {
                 activeIndicatorColor:'',
                 gridHeaderBorderColor:'',
                 flyoutBackgroundColor:'',
-                flyoutTextColor:''
+                flyoutTextColor:'',
+                rowHighlightBackground:'',
+                rowHighlightActiveCell:''
             },
             devModeWidthValue:0,
             devModeHeightValue:0,
@@ -403,6 +438,8 @@ export default {
             chkEnableSlider:true,
             chkEnableTitle:true,
             chkEnableHeader:true,
+            chkEnableHighlight:true,
+            titleText:'',
             shouldAnimate:false,
             shouldReverseAnimate:false,
             developmentMode:false,
@@ -455,6 +492,8 @@ export default {
             gridSettings:{
                 developmentMode:{
                 },
+                rows:{
+                },
                 size:{
                 },
                 colorScheme:{
@@ -479,6 +518,12 @@ export default {
         }        
     },
     methods: {
+        handleEnaleRowHighlight(){
+            this.gridSettings.rows.HighlightRowEnabled = this.chkEnableHighlight
+        },
+        handleTitleChange(event){
+            this.gridSettings.title.Text = event.target.value
+        },
         handleEnableTitle(){
             this.gridSettings.title.Enabled=this.chkEnableTitle
         },
@@ -534,6 +579,14 @@ export default {
                 case 'ptc':
                     this.activeColorScheme.pagingTextColor = event.target.value
                     this.gridSettings.colorScheme.PagingTextColor = event.target.value
+                    break;
+                case 'rhb':
+                    this.activeColorScheme.rowHighlightBackground = event.target.value
+                    this.gridSettings.colorScheme.RowHighlightBackground = event.target.value
+                    break;
+                case 'rhac':
+                    this.activeColorScheme.rowHighlightActiveCell = event.target.value
+                    this.gridSettings.colorScheme.RowHighlightActiveCell = event.target.value
                     break;
 
                 default:
@@ -619,7 +672,7 @@ export default shiftSettings
             return config        
         },
         
-        download(event,downloadAs) {
+        async download(event,downloadAs) {
             let element
             let zip = new JSZip();
             switch (downloadAs) {
@@ -638,6 +691,18 @@ export default shiftSettings
                         document.body.appendChild(element);
                         element.click();
                         document.body.removeChild(element);
+                    break;
+                case 'copy':
+                        try {
+                            await navigator.clipboard.writeText(this.generateConfig())
+                            this.copyButtonText = 'Copied!'
+                            setTimeout(() => {
+                                this.copyButtonText = 'Copy'
+                            }, 3000);
+                        } catch (error) {
+                            console.log('failed to copy')
+                        }
+
                     break;
                 default:
                         element = document.createElement('a');
@@ -820,7 +885,12 @@ export default shiftSettings
                 case 'ptc':
                     tmpField = 'PagingTextColor'
                     break;
-
+                case 'rhb':
+                    tmpField = 'RowHighlightBackground'
+                    break;
+                case 'rhac':
+                    tmpField = 'RowHighlightActiveCell'
+                    break;                    
                 default:
                     break;
             }
@@ -984,6 +1054,7 @@ export default shiftSettings
             }
         },        
         gridWillScroll(numberOfRows){
+            if(this.gridSettings.developmentMode.Enabled){return} 
             let retVal = false
             let height = 0
             if(this.gridSettings.size.GridHeight){
@@ -1377,24 +1448,33 @@ export default shiftSettings
         initializeDevMode(){
             this.devModeWidthValue = this.gridSettings.size.GridWidthValue
             this.devModeHeightValue = this.gridSettings.size.GridHeightValue
-            this.activeColorScheme.sliderFillColor = this.gridSettings.colorScheme.SliderFillColor,
-            this.activeColorScheme.pagingTextColor = this.gridSettings.colorScheme.PagingTextColor,
-            this.activeColorScheme.gridTitleColor = this.gridSettings.colorScheme.GridTitleColor,
-            this.activeColorScheme.gridHeaderTextColor = this.gridSettings.colorScheme.GridHeaderTextColor,
-            this.activeColorScheme.gridRowTextColor = this.gridSettings.colorScheme.GridRowTextColor,
-            this.activeColorScheme.gridHeaderBackgroundColor = this.gridSettings.colorScheme.GridHeaderBackgroundColor,
-            this.activeColorScheme.gridRowOddBackgroundColor = this.gridSettings.colorScheme.GridRowOddBackgroundColor,
-            this.activeColorScheme.gridRowEvenBackgroundColor = this.gridSettings.colorScheme.GridRowEvenBackgroundColor,
-            this.activeColorScheme.activeIndicatorColor = this.gridSettings.colorScheme.ActiveIndicatorColor,
-            this.activeColorScheme.gridHeaderBorderColor = this.gridSettings.colorScheme.GridHeaderBorderColor,
-            this.activeColorScheme.flyoutBackgroundColor = this.gridSettings.colorScheme.FlyoutBackgroundColor,
+            this.activeColorScheme.sliderFillColor = this.gridSettings.colorScheme.SliderFillColor
+            this.activeColorScheme.pagingTextColor = this.gridSettings.colorScheme.PagingTextColor
+            this.activeColorScheme.gridTitleColor = this.gridSettings.colorScheme.GridTitleColor
+            this.activeColorScheme.gridHeaderTextColor = this.gridSettings.colorScheme.GridHeaderTextColor
+            this.activeColorScheme.gridRowTextColor = this.gridSettings.colorScheme.GridRowTextColor
+            this.activeColorScheme.gridHeaderBackgroundColor = this.gridSettings.colorScheme.GridHeaderBackgroundColor
+            this.activeColorScheme.gridRowOddBackgroundColor = this.gridSettings.colorScheme.GridRowOddBackgroundColor
+            this.activeColorScheme.gridRowEvenBackgroundColor = this.gridSettings.colorScheme.GridRowEvenBackgroundColor
+            this.activeColorScheme.activeIndicatorColor = this.gridSettings.colorScheme.ActiveIndicatorColor
+            this.activeColorScheme.gridHeaderBorderColor = this.gridSettings.colorScheme.GridHeaderBorderColor
+            this.activeColorScheme.flyoutBackgroundColor = this.gridSettings.colorScheme.FlyoutBackgroundColor
             this.activeColorScheme.flyoutTextColor = this.gridSettings.colorScheme.FlyoutTextColor
+            this.activeColorScheme.rowHighlightBackground = this.gridSettings.colorScheme.RowHighlightBackground
+            this.activeColorScheme.rowHighlightActiveCell = this.gridSettings.colorScheme.RowHighlightActiveCell
             this.chkEnablePaging = this.gridSettings.pagination.Enabled
             this.chkEnableSlider = this.gridSettings.slider.Enabled
             this.chkEnableTitle = this.gridSettings.title.Enabled 
             this.chkEnableHeader = this.gridSettings.header.Enabled
+            this.chkEnableHighlight = this.gridSettings.rows.HighlightRowEnabled
+            this.titleText = this.gridSettings.title.Text
+            let tmp =[]
+            for (let i = 0; i < 2; i++) {
+                tmp.push(this.fullDS[i])
+            }
+            this.fullDS = tmp;
+            this.dataSlice = tmp
             
-            this.dataSlice = [...this.fullDS].slice(0,2)
         },
         timeout(ms){
             return new Promise(resolve => setTimeout(resolve, ms))    
@@ -1472,28 +1552,14 @@ export default shiftSettings
         .reverseAnimation{
             transform: translate(0px,0px) 
         }
+        .highlightRow{
+            background-color: tomato !important;
+        }
         .dataRow{
             width:100%; 
             display:flex; 
             flex-direction:row;
             scroll-behavior: smooth;
-        }
-        tr:hover{
-            background-color: #E8E8E8;
-        }
-        td:hover {
-            background-color: #c4c8cc;
-        }
-        td:hover::after {
-        content: "";
-        position: absolute;
-        background-color: #dce1e6;
-        left: 0;
-        top: 0;
-        height: 30px;
-        width: 100%;
-        z-index: -1;
-        
         }
         .title{
             font-size:24px;

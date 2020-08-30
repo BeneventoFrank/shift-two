@@ -963,6 +963,7 @@ export default shiftSettings
                 tmp = this.fullDS
             }
             let paging = {
+                Enabled:this.gridSettings.pagination.Enabled,
                 MinRecordsViewable:1,
                 MaxRecordsViewable:tmp.length<count?tmp.length:count,
                 TotalNumberOfRecords:tmp.length,
@@ -973,7 +974,7 @@ export default shiftSettings
                 CurrentSkip:0,
                 CurrentTake:0
             }
-            this.pagination = paging          
+            this.gridSettings.pagination = paging          
         },
         handleChangeNumberPerPage(event){
             if(this.gridSettings.developmentMode.Enabled){return} 
@@ -1000,84 +1001,88 @@ export default shiftSettings
         },            
         async handleNextClick(isASingleMove){
             this.pageDataForward(isASingleMove.isASinglePageMove)
-            const start = (this.pagination.PageNumberCurrentlyViewing*this.pagination.NumberOfApplicibleRowsPerPage)-this.pagination.NumberOfApplicibleRowsPerPage
-            const end = start + this.pagination.NumberOfApplicibleRowsPerPage
+            const start = (this.gridSettings.pagination.PageNumberCurrentlyViewing*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+            const end = start + this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
             this.dataSlice = this.fetchRecordsFromDS(start,end)
         },
         async handlePreviousClick(isASingleMove){
             this.pageDataBackward(isASingleMove.isASinglePageMove)
-            const start = (this.pagination.PageNumberCurrentlyViewing*this.pagination.NumberOfApplicibleRowsPerPage)-this.pagination.NumberOfApplicibleRowsPerPage
-            const end = ((this.pagination.PageNumberCurrentlyViewing+1)*this.pagination.NumberOfApplicibleRowsPerPage)-(this.pagination.NumberOfApplicibleRowsPerPage)
+            const start = (this.gridSettings.pagination.PageNumberCurrentlyViewing*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+            const end = ((this.gridSettings.pagination.PageNumberCurrentlyViewing+1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-(this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)
             this.dataSlice = this.fetchRecordsFromDS(start,end)
         },
         pageDataBackward(isASinglePageMove){
         if(isASinglePageMove){
                 const paging = {
-                MinRecordsViewable:((this.pagination.PageNumberCurrentlyViewing-1)*this.pagination.NumberOfApplicibleRowsPerPage)-this.pagination.NumberOfApplicibleRowsPerPage<=0?1:((this.pagination.PageNumberCurrentlyViewing-1)*this.pagination.NumberOfApplicibleRowsPerPage)-this.pagination.NumberOfApplicibleRowsPerPage,
-                MaxRecordsViewable:this.pagination.MaxRecordsViewable-this.pagination.NumberOfApplicibleRowsPerPage>0?(this.pagination.MaxRecordsViewable-(this.pagination.MaxRecordsViewable-this.pagination.NumberOfApplicibleRowsPerPage)):this.pagination.MaxRecordsViewable,
-                TotalNumberOfRecords:this.pagination.TotalNumberOfRecords,
-                PageNumberCurrentlyViewing:this.pagination.PageNumberCurrentlyViewing-1,        
-                MaxPageNumberPossible:this.pagination.MaxPageNumberPossible,
-                NumberOfApplicibleRowsPerPage:this.pagination.NumberOfApplicibleRowsPerPage,
-                IsPaging:this.pagination.PageNumberCurrentlyViewing-1===1?false:true,
-                CurrentSkip:this.pagination.CurrentSkip-this.pagination.NumberOfApplicibleRowsPerPage,
-                CurrentTake:this.pagination.NumberOfApplicibleRowsPerPage
+                MinRecordsViewable:((this.gridSettings.pagination.PageNumberCurrentlyViewing-1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage<=0?1:((this.gridSettings.pagination.PageNumberCurrentlyViewing-1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                MaxRecordsViewable:this.gridSettings.pagination.MaxRecordsViewable-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage>0?(this.gridSettings.pagination.MaxRecordsViewable-(this.gridSettings.pagination.MaxRecordsViewable-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)):this.gridSettings.pagination.MaxRecordsViewable,
+                TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
+                PageNumberCurrentlyViewing:this.gridSettings.pagination.PageNumberCurrentlyViewing-1,        
+                MaxPageNumberPossible:this.gridSettings.pagination.MaxPageNumberPossible,
+                NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                IsPaging:this.gridSettings.pagination.PageNumberCurrentlyViewing-1===1?false:true,
+                CurrentSkip:this.gridSettings.pagination.CurrentSkip-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                CurrentTake:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
                 }
-                this.pagination = paging
+                this.gridSettings.pagination = paging
         } else {
                 const paging = {
                 MinRecordsViewable:1,
-                MaxRecordsViewable:this.pagination.NumberOfApplicibleRowsPerPage,
-                TotalNumberOfRecords:this.pagination.TotalNumberOfRecords,
+                MaxRecordsViewable:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
                 PageNumberCurrentlyViewing:1,        
-                MaxPageNumberPossible:Math.ceil(this.pagination.TotalNumberOfRecords/this.pagination.NumberOfApplicibleRowsPerPage),
-                NumberOfApplicibleRowsPerPage:this.pagination.NumberOfApplicibleRowsPerPage,
+                MaxPageNumberPossible:Math.ceil(this.gridSettings.pagination.TotalNumberOfRecords/this.gridSettings.pagination.NumberOfApplicibleRowsPerPage),
+                NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
                 IsPaging:false,
                 CurrentSkip:0,
-                CurrentTake:this.pagination.NumberOfApplicibleRowsPerPage         
+                CurrentTake:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage         
                 }
-                this.pagination = paging          
+                this.gridSettings.pagination = paging
         }
         },
         pageDataForward(isASinglePageMove){
             if(isASinglePageMove){
-                let tmp = this.pagination.MinRecordsViewable===1?this.pagination.NumberOfApplicibleRowsPerPage:this.pagination.MinRecordsViewable+this.pagination.NumberOfApplicibleRowsPerPage
-                let paging = {
+                console.log(this.gridSettings.pagination)
+                const tmp = this.gridSettings.pagination.MinRecordsViewable===1?this.gridSettings.pagination.NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.MinRecordsViewable+this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+                const paging = {
+                    Enabled:this.gridSettings.pagination.Enabled,
                     MinRecordsViewable:tmp,
-                    MaxRecordsViewable:tmp+this.pagination.NumberOfApplicibleRowsPerPage>this.pagination.TotalNumberOfRecords?this.pagination.TotalNumberOfRecords:tmp+this.pagination.NumberOfApplicibleRowsPerPage,
-                    TotalNumberOfRecords:this.pagination.TotalNumberOfRecords,
-                    PageNumberCurrentlyViewing:this.pagination.PageNumberCurrentlyViewing+1,        
-                    MaxPageNumberPossible:this.pagination.MaxPageNumberPossible,
-                    NumberOfApplicibleRowsPerPage:this.pagination.NumberOfApplicibleRowsPerPage,
+                    MaxRecordsViewable:tmp+this.gridSettings.pagination.NumberOfApplicibleRowsPerPage>this.gridSettings.pagination.TotalNumberOfRecords?this.gridSettings.pagination.TotalNumberOfRecords:tmp+this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                    TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
+                    PageNumberCurrentlyViewing:this.gridSettings.pagination.PageNumberCurrentlyViewing+1,        
+                    MaxPageNumberPossible:this.gridSettings.pagination.MaxPageNumberPossible,
+                    NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
                     IsPaging:true,
-                    CurrentSkip:this.pagination.CurrentSkip+this.pagination.NumberOfApplicibleRowsPerPage,
-                    CurrentTake:this.pagination.NumberOfApplicibleRowsPerPage
+                    CurrentSkip:this.gridSettings.pagination.CurrentSkip+this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                    CurrentTake:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
                 }
-                this.pagination = paging
+                this.gridSettings.pagination = paging
             } else {
                 const paging = {
-                    MinRecordsViewable:this.pagination.TotalNumberOfRecords - (this.pagination.TotalNumberOfRecords - this.pagination.NumberOfApplicibleRowsPerPage) ,
-                    MaxRecordsViewable:this.pagination.TotalNumberOfRecords,
-                    TotalNumberOfRecords:this.pagination.TotalNumberOfRecords,
-                    PageNumberCurrentlyViewing:this.pagination.MaxPageNumberPossible,        
-                    MaxPageNumberPossible:this.pagination.MaxPageNumberPossible,
-                    NumberOfApplicibleRowsPerPage:this.pagination.NumberOfApplicibleRowsPerPage,
+                    Enabled:this.gridSettings.pagination.Enabled,
+                    MinRecordsViewable:this.gridSettings.pagination.TotalNumberOfRecords - (this.gridSettings.pagination.TotalNumberOfRecords - this.gridSettings.pagination.NumberOfApplicibleRowsPerPage) ,
+                    MaxRecordsViewable:this.gridSettings.pagination.TotalNumberOfRecords,
+                    TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
+                    PageNumberCurrentlyViewing:this.gridSettings.pagination.MaxPageNumberPossible,        
+                    MaxPageNumberPossible:this.gridSettings.pagination.MaxPageNumberPossible,
+                    NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
                     IsPaging:true,
-                    CurrentSkip:(this.pagination.MaxPageNumberPossible*this.pagination.NumberOfApplicibleRowsPerPage)-this.pagination.NumberOfApplicibleRowsPerPage,
-                    CurrentTake:this.pagination.NumberOfApplicibleRowsPerPage         
+                    CurrentSkip:(this.gridSettings.pagination.MaxPageNumberPossible*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                    CurrentTake:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage         
                 }
-                this.pagination = paging
+                this.gridSettings.pagination = paging
             }
+
         },
         initializePaging(numberOfRowsPerPage){
             console.log(numberOfRowsPerPage)
             if (this.gridSettings.slider.Enabled) {
                 let minValue, maxValue, stepValue, initialValue,sliderWidth = 0
-                    if(numberOfRowsPerPage===10){
+                    if(numberOfRowsPerPage===100){
                         minValue=10, maxValue=100, stepValue=10, initialValue=100,sliderWidth = 300    
-                    } else if(numberOfRowsPerPage===100){
-                        minValue=100, maxValue=1000, stepValue=100, initialValue=100,sliderWidth = 300    
-                    } else if(numberOfRowsPerPage===4000){
+                    } else if(numberOfRowsPerPage===500){
+                        minValue=100, maxValue=1000, stepValue=100, initialValue=500,sliderWidth = 300    
+                    } else if(numberOfRowsPerPage===1000){
                         minValue=500, maxValue=4000, stepValue=500, initialValue=1000,sliderWidth = 300    
                     }                    
                     this.gridSettings.slider.MinValue = minValue;
@@ -1106,9 +1111,9 @@ export default shiftSettings
                 if((this.fullDS.length>=0)&&(this.fullDS.length<=100)){
                     return 100
                 } else if((this.fullDS.length>100)&&(this.fullDS.length<=1000)){
-                    return 1000
+                    return 500
                 } else if(this.fullDS.length>1000){
-                    return 4000
+                    return 1000
                 }
             }
         },        

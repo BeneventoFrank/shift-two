@@ -64,12 +64,13 @@ export default {
   },
   methods:{
       init(){
+          console.log('wht is the initial value', this.initialValue)
           const slider = this.$refs.sliderInput;
           slider.oninput = this.debounceSlider;
           this.updateValue(slider);
           this.updateValuePosition(slider);
           this.updateProgress(slider);
-          this.setTicks(slider);
+          //this.setTicks(slider);
           this.$emit('initialValue',slider.value)
       },
       debounceSlider: debounce(function (event){
@@ -79,7 +80,9 @@ export default {
           setTimeout(() => {this.$emit('change',event)}, 500);          
       },0),  
       updateValue(slider) {
+          console.log(slider.dataset.valueId)
           let value = document.getElementById(slider.dataset.valueId);
+          console.log(value)
           value.innerHTML = `<div style="background-color:${this.colorScheme.SliderFillColor}" class='sliderIndicator'>${slider.value}</div> `;
       },
       updateValuePosition(slider) {

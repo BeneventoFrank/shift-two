@@ -1070,13 +1070,14 @@ export default shiftSettings
             }
         },
         initializePaging(numberOfRowsPerPage){
+            console.log(numberOfRowsPerPage)
             if (this.gridSettings.slider.Enabled) {
                 let minValue, maxValue, stepValue, initialValue,sliderWidth = 0
                     if(numberOfRowsPerPage===10){
                         minValue=10, maxValue=100, stepValue=10, initialValue=100,sliderWidth = 300    
                     } else if(numberOfRowsPerPage===100){
                         minValue=100, maxValue=1000, stepValue=100, initialValue=100,sliderWidth = 300    
-                    } else if(numberOfRowsPerPage===1000){
+                    } else if(numberOfRowsPerPage===4000){
                         minValue=500, maxValue=4000, stepValue=500, initialValue=1000,sliderWidth = 300    
                     }                    
                     this.gridSettings.slider.MinValue = minValue;
@@ -1098,6 +1099,7 @@ export default shiftSettings
             } 
         },
         getInitialRowsPerPage(){
+            console.log(this.weAreUsingTheSlider, this.fullDS.length, this.sliderCount)
             if (this.weAreUsingTheSlider) {
                 return this.sliderCount //investigate this see how its used and set
             } else {

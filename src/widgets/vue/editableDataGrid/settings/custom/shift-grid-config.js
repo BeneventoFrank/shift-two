@@ -1,12 +1,12 @@
 let shiftSettings = {
     developmentMode:{
-        Enabled:false
+        Enabled:true
     },
     size:{
-        GridWidth:'800px', //px value of width
-        GridWidthValue:800,
-        GridHeight:'450px', //px value of height
-        GridHeightValue:450, //int value used for calculations
+        GridWidth:'900px', //px value of width
+        GridWidthValue:900,
+        GridHeight:'600px', //px value of height
+        GridHeightValue:600, //int value used for calculations
     },
     header:{
         Enabled:true
@@ -36,39 +36,49 @@ let shiftSettings = {
     },
     title:{
         Enabled:'true',
-        Text:'Title'
+        Text:'My Title'
     },
     colorScheme:{
-        SliderFillColor:'#708090',
+        SliderFillColor:'#206ebc',
         PagingTextColor:'#708090',
-        GridTitleColor:'#708090',
-        GridHeaderTextColor:'#708090',
+        GridTitleColor:'#4d9c30',
+        GridHeaderTextColor:'#dee3e8',
         GridRowTextColor:'#708090',
-        GridHeaderBackgroundColor:'#F8F8F8',
+        GridHeaderBackgroundColor:'#327e16',
         GridRowOddBackgroundColor:'#F8F8F8',
         GridRowEvenBackgroundColor:'#FFFFFF',
-        ActiveIndicatorColor:'#C3D9F9',
-        GridHeaderBorderColor:'#708090',
-        FlyoutBackgroundColor:'#F8F8F8',
-        FlyoutTextColor:'#708090',
-        RowHighlightBackground:'#edeeb4',
-        RowHighlightActiveCell:'#dadc8f',
+        ActiveIndicatorColor:'#0e58c8',
+        GridHeaderBorderColor:'#0863bf',
+        FlyoutBackgroundColor:'#c71a1a',
+        FlyoutTextColor:'#c1ccd7',
+        RowHighlightBackground:'#8fdbd2',
+        RowHighlightActiveCell:'#629dd0',
 
     },
     columns:[
         {
-            ColumnHeader:'name',
+            ColumnHeader:'Daniel',
             Index:0,
-            Width:'222px',
-            WidthValue:222,
+            Width:'350px',
+            WidthValue:350,
             IsUsingACustomWidth:true,
             Alignment:'center',
             DataType:'string',
             IsPreSortEnabled:true                            
         },
         {
-            ColumnHeader:'address',
+            ColumnHeader:'Column',
             Index:1,
+            Width:'100px',
+            WidthValue:100,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Header',
+            Index:2,
             Width:'250px',
             WidthValue:250,
             IsUsingACustomWidth:true,
@@ -78,19 +88,9 @@ let shiftSettings = {
         },
         {
             ColumnHeader:'Column',
-            Index:2,
-            Width:'15px',
-            WidthValue:15,
-            IsUsingACustomWidth:false,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:false                            
-        },
-        {
-            ColumnHeader:'Column',
             Index:3,
-            Width:'15px',
-            WidthValue:15,
+            Width:'100px',
+            WidthValue:100,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -99,9 +99,9 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:4,
-            Width:'298px',
-            WidthValue:298,
-            IsUsingACustomWidth:true,
+            Width:'100px',
+            WidthValue:100,
+            IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
             IsPreSortEnabled:false                            

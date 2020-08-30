@@ -1,7 +1,7 @@
 <template>
   <div id="app" style='width:100%;'>
     <EditableDataGrid :gridConfig="localConfig"/>
-    <!-- <EditableDataGrid /> -->
+    
   </div>
 </template>
 

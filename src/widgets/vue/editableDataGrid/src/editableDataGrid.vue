@@ -1200,7 +1200,7 @@ export default shiftSettings
 
            const numColumns = numCols-custCols.length
            let widthOfGrid = this.gridSettings.size.GridWidthValue - tmp
-           widthOfGrid = this.boolGridWillScroll?(widthOfGrid*.975):widthOfGrid
+           widthOfGrid = this.boolGridWillScroll?(widthOfGrid):widthOfGrid
            const eachColumn = Math.floor(widthOfGrid/numColumns)
             for (let i = 0; i < numCols; i++) {
                 if (!custCols.includes(i)) {

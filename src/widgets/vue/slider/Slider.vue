@@ -77,7 +77,7 @@ export default {
           this.updateValue(event.target);
           this.updateValuePosition(event.target);
           this.updateProgress(event.target);
-          setTimeout(() => {this.$emit('change',event)}, 500);          
+          setTimeout(() => {this.$emit('change',event)}, 1000);          
       },0),  
       updateValue(slider) {
           console.log(slider.dataset.valueId)

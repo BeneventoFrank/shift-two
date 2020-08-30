@@ -5,10 +5,9 @@
             <div ref='gridHeader' id='gridHeader'>
                 <div ref="pagination" :style="`display:flex; flex-direction:row; width:${gridSettings.size.GridWidth}; justify-content:center; align-items:flex-end; flex-wrap:wrap; padding-bottom:12px;`">
                     <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center;`">
-                        <div :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`">
+                        <div v-if="gridSettings.slider.Enabled" :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`">
                             <Slider @change="handleChangeNumberPerPage" 
                                     @initialValue="handleInitialValue" 
-                                    v-show="gridSettings.slider.Enabled" 
                                     :width="gridSettings.slider.SliderWidth"
                                     :minValue="gridSettings.slider.MinValue"
                                     :maxValue="gridSettings.slider.MaxValue"
@@ -18,9 +17,8 @@
                             ></Slider>
                         </div>
                     </div>
-                    <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:flex-end; margin-top:${gridSettings.size.GridWidthValue>=600?0:20}px; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`" class='pagination'>
+                    <div v-if="gridSettings.pagination.Enabled" :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:flex-end; margin-top:${gridSettings.size.GridWidthValue>=600?0:20}px; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`" class='pagination'>
                         <Pagination 
-                            v-show="gridSettings.pagination.Enabled"
                             :cmpCanPagePrevious="cmpCanPagePrevious"
                             :cmpCanPageNext="cmpCanPageNext"
                             :pagination="gridSettings.pagination"
@@ -57,11 +55,12 @@
                 </div>
             </div>
             <div ref='dataRow' class='dataRow' :style="`width:${gridSettings.size.GridWidth}; overflow-x:hidden;  position:relative; height:${gridSettings.developmentMode.Enabled?100:gridSettings.size.GridHeightValue-headerHeight}px`">
-                <table class='dataGrid' :style="`cellpadding:0; cellspacing:0; padding-top:${gridSettings.developmentMode.Enabled?0:0}px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
-                    <tr @mouseleave="()=>{hoverIndex=null}" @mouseenter="()=>{hoverIndex=rowIndex}" :class="`row ${rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
+                <table ref='table' class='dataGrid' :style="`cellpadding:0; cellspacing:0; padding-top:${gridSettings.developmentMode.Enabled?0:0}px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
+                    <tr @mouseenter="()=>{hoverIndex=rowIndex}" :class="`row ${rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
                     :style="`border-spacing:0px; 
-                            background-color:${rowIndex===hoverIndex&&gridSettings.rows.HighlightRowEnabled?gridSettings.colorScheme.RowHighlightBackground:rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
+                            background-color:${gridSettings.rows.HighlightRowEnabled&&rowIndex===hoverIndex?gridSettings.colorScheme.RowHighlightBackground:rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
                             cursor:pointer; 
+                            scroll-behavior:smooth;
                             padding:0px;
                             overflow:hidden; 
                             width:100%;
@@ -70,7 +69,6 @@
                             align-items:center; 
                             display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
                         <td 
-                            @mouseleave="()=>{cellHoverIndex=null}" 
                             @mouseenter="()=>{cellHoverIndex=colIndex}" 
                             :style="`width:${gridSettings.columns[colIndex].Width}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block; 
                                      color:${gridSettings.colorScheme.GridRowTextColor};`" v-for="(column,colIndex) in gridSettings.columns"  :key="colIndex">
@@ -388,7 +386,6 @@
 <script>
 import JSZip from 'jszip'
 import FileSaver from 'file-saver'
-import sampleGridData from '../data/sampleRowData'
 import debounce from 'lodash.debounce'
 import HeaderRow from './components/HeaderRow'
 import ShiftSettings from '../settings/shift-two-grid-defaults'
@@ -406,6 +403,7 @@ import Pagination from '../../pagination/Pagination'
 import Slider from '../../slider/Slider'
 import Eye from '../src/images/Eye'
 import CancelEye from '../src/images/CancelEye'
+import generateData from '../data/dataGenerator'
 
 export default {
     name:"EditableDataGrid",
@@ -1104,18 +1102,21 @@ export default shiftSettings
             } 
         },
         getInitialRowsPerPage(){
-            console.log(this.weAreUsingTheSlider, this.fullDS.length, this.sliderCount)
-            if (this.weAreUsingTheSlider) {
-                return this.sliderCount //investigate this see how its used and set
-            } else {
-                if((this.fullDS.length>=0)&&(this.fullDS.length<=100)){
-                    return 100
-                } else if((this.fullDS.length>100)&&(this.fullDS.length<=1000)){
-                    return 500
-                } else if(this.fullDS.length>1000){
-                    return 1000
-                }
-            }
+            if (this.gridSettings.pagination.Enabled) {
+                if (this.weAreUsingTheSlider) {
+                    return this.sliderCount //investigate this see how its used and set
+                } else {
+                    if((this.fullDS.length>=0)&&(this.fullDS.length<=100)){
+                        return 100
+                    } else if((this.fullDS.length>100)&&(this.fullDS.length<=1000)){
+                        return 500
+                    } else if(this.fullDS.length>1000){
+                        return 1000
+                    }
+                }                
+            } 
+            return this.fullDS.length
+
         },        
         gridWillScroll(numberOfRows){
             if(this.gridSettings.developmentMode.Enabled){return} 
@@ -1438,24 +1439,16 @@ export default shiftSettings
             this.gridSettings = tmp
         },
         processData(){
-            const GetRandomDataSet = ()=>{
-                let num = Math.floor(Math.random() * 3)
-                while (num<=0||num>3) {
-                    num = Math.floor(Math.random() * 3)
-                }
-                return sampleGridData[num]
-            }
-            
             let tmp = []
             if (this.gridData.length>0) {
                 //load the data from the prop
                 tmp = this.gridData
             } else {
                 //load some random data.
-                tmp = GetRandomDataSet()
+                tmp = generateData()
             }
             this.fullDS = tmp            
-            this.dataSlice = tmp.slice(0,this.getInitialRowsPerPage())
+            this.dataSlice = tmp.slice(0,1000)
 
         },
         configureWebWorkers(){
@@ -1583,12 +1576,15 @@ export default shiftSettings
 
     },        
     async mounted(){
+        console.log('mounted', new Date())
         this.processConfig();
         this.processData();
+        console.log('processed data',new Date())
         this.boolGridWillScroll = this.gridWillScroll()
         this.calculateColumnWidths()
         this.gridSettings.pagination.Enabled?this.initializePaging(this.getInitialRowsPerPage()):null
         this.headerHeight = this.calculateHeightOfDataRow()
+        
         if(this.gridSettings.developmentMode.Enabled){
             this.initializeDevMode()
             setTimeout(async() => {
@@ -1605,7 +1601,9 @@ export default shiftSettings
             }, 0);
 
         } else {
+            console.log('configuring WW', new Date())
             this.configureWebWorkers()
+            console.log('done', new Date())
             this.shouldAnimate = true //make this a config setting.
             setTimeout(() => {
                 this.shouldReverseAnimate=true   

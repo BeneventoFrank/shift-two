@@ -54,8 +54,8 @@
                 </HeaderRow>
                 </div>
             </div>
-            <div ref='dataRow' class='dataRow' :style="`width:${gridSettings.size.GridWidth}; overflow-x:hidden;  position:relative; height:${gridSettings.developmentMode.Enabled?100:gridSettings.size.GridHeightValue-headerHeight}px`">
-                <table ref='table' class='dataGrid' :style="`cellpadding:0; cellspacing:0; padding-top:${gridSettings.developmentMode.Enabled?0:0}px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
+            <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:${gridSettings.size.GridWidth}; overflow-y:scroll;  position:relative; max-height:${gridSettings.developmentMode.Enabled?100:gridSettings.size.GridHeightValue-headerHeight}px`">
+                <table ref='table'  class='dataGrid' :style="`top:${tableTop}px cellpadding:0; cellspacing:0; padding-top:${gridSettings.developmentMode.Enabled?0:0}px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
                     <tr @mouseenter="()=>{hoverIndex=rowIndex}" :class="`row ${rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
                     :style="`border-spacing:0px; 
                             background-color:${gridSettings.rows.HighlightRowEnabled&&rowIndex===hoverIndex?gridSettings.colorScheme.RowHighlightBackground:rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
@@ -75,7 +75,7 @@
                             <div 
                                 :style="`background-color: ${gridSettings.rows.HighlightRowEnabled?rowIndex===hoverIndex&&colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
                                         width:100%; height:30px; display:flex; align-items:center; padding:0; margin:0;
-                                        justify-content:${gridSettings.columns[colIndex].Alignment}`">{{dataRow.data[colIndex]}}</div>
+                                        justify-content:${gridSettings.columns[colIndex].Alignment}`">{{rowIndex}}{{dataRow.data[colIndex]}}</div>
                         </td>
                     </tr>
                 </table>
@@ -416,6 +416,7 @@ export default {
     },
     data() {
         return {
+            tableTop:0,
             showWidthError:false,
             availableForCustomizing:0,
             hoverIndex:null,
@@ -536,6 +537,45 @@ export default {
         }        
     },
     methods: {
+        parseData(startingPoint){
+            console.log(startingPoint)
+            let tmp = []
+            for (let i = startingPoint+1; i <= startingPoint+20; i++) {
+                if(this.fullDS[i])
+                {
+                    console.log('pushing')
+                    tmp.push(this.fullDS[i])
+                }
+            }
+            console.log(tmp)
+            this.dataSlice = [...this.dataSlice, ...tmp]
+        },
+        handleScroll: debounce(function (){
+                let scrollHeight
+                window.requestAnimationFrame(()=>{
+                    console.log('scrolling', this.$refs.dataRow.scrollTop)
+                    if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
+                       
+                        scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/32)
+                        
+                        this.parseData(scrollHeight)
+                    } else {
+                        scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/32)-450
+                        if(scrollHeight<950){
+                            scrollHeight = 0
+                        }
+                        
+                        this.tableTop = this.$refs.dataRow.scrollTop
+                        this.parseData(scrollHeight)
+                    }
+                    this.highestScrollPosition = scrollHeight
+                })              
+        },0), 
+
+
+       
+
+
         handleAutoSize(){
             this.activeColumnEdit.IsUsingACustomWidth=false;
             this.activeColumnEdit.Width=null
@@ -1449,6 +1489,9 @@ export default shiftSettings
             }
             this.fullDS = tmp            
             this.dataSlice = tmp.slice(0,1000)
+            console.log(this.fullDS.length, this.fullDS.length*32)
+            this.$refs.table.style.height=this.fullDS.length*32+'px'
+            this.$refs.dataRow.style.height=this.fullDS.length*32+'px'
 
         },
         configureWebWorkers(){

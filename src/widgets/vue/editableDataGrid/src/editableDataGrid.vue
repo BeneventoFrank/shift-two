@@ -54,32 +54,24 @@
                 </HeaderRow>
                 </div>
             </div>
-            <div ref='dataRow' class='dataRow' @scroll="handleScroll" :style="`width:${gridSettings.size.GridWidth}; overflow-y:scroll;  position:relative; max-height:${gridSettings.developmentMode.Enabled?100:gridSettings.size.GridHeightValue-headerHeight}px`">
-                <table ref='table'  class='dataGrid' :style="`top:${tableTop}px cellpadding:0; cellspacing:0; padding-top:${gridSettings.developmentMode.Enabled?0:0}px; position:relative; padding-bottom:5px; overflow-x:scroll; width:100%;`">
-                    <tr @mouseenter="()=>{hoverIndex=rowIndex}" :class="`row ${rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
-                    :style="`border-spacing:0px; 
-                            background-color:${gridSettings.rows.HighlightRowEnabled&&rowIndex===hoverIndex?gridSettings.colorScheme.RowHighlightBackground:rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
-                            cursor:pointer; 
-                            scroll-behavior:smooth;
-                            padding:0px;
-                            overflow:hidden; 
-                            width:100%;
-                            border-collapse:collapse; 
-                            height:35px;
-                            align-items:center; 
-                            display:flex;`" v-for="(dataRow,rowIndex) in dataSlice" :key="rowIndex">
-                        <td 
-                            @mouseenter="()=>{cellHoverIndex=colIndex}" 
-                            :style="`width:${gridSettings.columns[colIndex].Width}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block; 
-                                     color:${gridSettings.colorScheme.GridRowTextColor};`" v-for="(column,colIndex) in gridSettings.columns"  :key="colIndex">
-                            <div 
-                                :style="`background-color: ${gridSettings.rows.HighlightRowEnabled?rowIndex===hoverIndex&&colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:colIndex===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
-                                        width:100%; height:30px; display:flex; align-items:center; padding:0; margin:0;
-                                        justify-content:${gridSettings.columns[colIndex].Alignment}`">{{rowIndex}}{{dataRow.data[colIndex]}}</div>
-                        </td>
-                    </tr>
-                </table>
-            </div>
+
+
+
+                
+                <div id='viewport' @scroll="runScroller" :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:scroll;`">
+                    <div :style="`display:flex; padding-top:5px; padding-bottom:5px; flex-direction:column;`">
+                        <div :style="`height:${topPaddingHeight}px; `"></div>
+                        <div class='item' 
+                            :style="`height:32px; display:flex; align-items:center; 
+                                     background-color:${gridSettings.rows.HighlightRowEnabled&&item.rowIndex===hoverIndex?gridSettings.colorScheme.RowHighlightBackground:item.rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
+                            `"
+                            :class="`row ${item.rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${item.rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
+                            v-for="(item) in data" :key="item.rowIndex">
+                            <span :style="`width:${gridSettings.columns[index].Width}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  `" v-for="(col,index) in item.data" :key="index"> {{col}}{{item.rowIndex}}</span>
+                        </div>
+                        <div :style="`height:${bottomPaddingHeight}px;`"></div>
+                    </div>
+                </div>
         </div>
     </div>
     <div v-if="gridSettings.developmentMode.Enabled" :class="`configTool ${shouldAnimateConfigTool?'animateConfigTool':null}`" style="display:flex; flex-direction:row; box-shadow: 0px 0px 27px -13px black; min-width:600px; position:absolute; z-index:10000; margin-top:270px; justify-content:center; ">
@@ -416,6 +408,28 @@ export default {
     },
     data() {
         return {
+
+        viewportHeight:0,
+        totalHeight:0,
+        toleranceHeight:0,
+        bufferHeight:0,
+        bufferedItems:0,
+        itemsAbove:0,
+        topPaddingHeight:0,
+        bottomPaddingHeight:0,
+        initialPosition:0,
+            data:[],
+            settings:{
+                minIndex: 1,
+                maxIndex: 0,
+                startIndex: 1,
+                itemHeight: 32,
+                amount: 15, //number of items in the viewport
+                tolerance: 2 //outlet size - rendered but not visible
+            },
+            initialState:{
+
+            },
             tableTop:0,
             showWidthError:false,
             availableForCustomizing:0,
@@ -537,6 +551,57 @@ export default {
         }        
     },
     methods: {
+        runScroller({target:{scrollTop}}){
+            const index = this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight)
+            console.log('what is the index', index, this.bufferedItems,scrollTop)
+            const data = this.getData(index, this.bufferedItems)
+            const topPaddingHeight = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
+            const bottomPaddingHeight = Math.max(this.totalHeight - topPaddingHeight - this.data.length * this.settings.itemHeight, 0)
+
+ 
+                this.topPaddingHeight = topPaddingHeight,
+                this.bottomPaddingHeight=bottomPaddingHeight,
+                console.log("running scroller", data)
+                this.data = data
+        },
+        setInitialState(minIndex, maxIndex, startIndex, itemHeight, amount, tolerance){
+            console.log(minIndex, maxIndex, startIndex, itemHeight, amount, tolerance)
+        // 1) height of the visible part of the viewport (px)
+        this.viewportHeight = amount * itemHeight
+        // 2) total height of rendered and virtualized items (px)
+        this.totalHeight = (maxIndex - minIndex + 1) * itemHeight
+        // 3) single viewport outlet height, filled with rendered but invisible rows (px)
+        this.toleranceHeight = tolerance * itemHeight
+        // 4) all rendered rows height, visible part + invisible outlets (px)
+        this.bufferHeight = this.viewportHeight + 2 * this.toleranceHeight
+        // 5) number of items to be rendered, buffered dataset length (pcs)
+        this.bufferedItems = amount + 2 * tolerance
+        // 6) how many items will be virtualized above (pcs)
+        this.itemsAbove = startIndex - tolerance - minIndex
+        // 7) initial height of the top padding element (px)
+        this.topPaddingHeight = this.itemsAbove * itemHeight
+        // 8) initial height of the bottom padding element (px)
+        this.bottomPaddingHeight = this.totalHeight - this.topPaddingHeight
+        // 9) initial scroll position (px)
+        this.initialPosition = this.topPaddingHeight + this.toleranceHeight
+        // initial state object
+        this.data = []
+        },
+
+        getData(offset, limit){
+        const data = []
+        const start = Math.max(this.settings.minIndex, offset)
+        const end = Math.min(offset + limit - 1, this.settings.maxIndex)
+
+        if (start <= end) {
+            for (let i = start; i <= end; i++) {
+                console.log('start and end', start,end)
+            data.push({ rowIndex: i, data: this.fullDS[i].data })
+            }
+        }
+        return data
+        
+        },
         parseData(startingPoint){
             console.log(startingPoint)
             let tmp = []
@@ -1488,10 +1553,7 @@ export default shiftSettings
                 tmp = generateData()
             }
             this.fullDS = tmp            
-            this.dataSlice = tmp.slice(0,1000)
-            console.log(this.fullDS.length, this.fullDS.length*32)
-            this.$refs.table.style.height=this.fullDS.length*32+'px'
-            this.$refs.dataRow.style.height=this.fullDS.length*32+'px'
+            this.settings.maxIndex = this.fullDS.length-1
 
         },
         configureWebWorkers(){
@@ -1622,7 +1684,11 @@ export default shiftSettings
         console.log('mounted', new Date())
         this.processConfig();
         this.processData();
-        console.log('processed data',new Date())
+        this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
+        this.$refs.viewportElement.scrollTop = this.initialPosition
+        if(!this.initialPosition){
+            this.runScroller({target:{scrollTop:0}})
+        }
         this.boolGridWillScroll = this.gridWillScroll()
         this.calculateColumnWidths()
         this.gridSettings.pagination.Enabled?this.initializePaging(this.getInitialRowsPerPage()):null
@@ -1756,6 +1822,9 @@ export default shiftSettings
         }
         .mediumText{
             font-size:14px
+        }
+        .item{
+            
         }
 
 </style>

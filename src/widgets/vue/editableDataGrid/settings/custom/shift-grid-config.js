@@ -96,6 +96,36 @@ let shiftSettings = {
             DataType:'string',
             IsPreSortEnabled:false                            
         },
+        {
+            ColumnHeader:'Column',
+            Index:3,
+            Width:'150px',
+            WidthValue:150,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:3,
+            Width:'150px',
+            WidthValue:150,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:3,
+            Width:'150px',
+            WidthValue:150,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
 
     ]
 }

@@ -24,7 +24,7 @@ const generateData = ()=>{
 
     let rows = Math.floor(Math.random() * 100000) + 1 
     console.log('hey we are generatng -----------------------------------------',rows)  
-    let cols = Math.floor(Math.random() * 10) + 1   
+    let cols = 6
     let data = []
     let dataArray = []
     for (let i = 0; i <=rows; i++) {
@@ -34,6 +34,7 @@ const generateData = ()=>{
         }
         data.push(
             {
+                rowIndex:i,
                 data:dataArray
             }
         )

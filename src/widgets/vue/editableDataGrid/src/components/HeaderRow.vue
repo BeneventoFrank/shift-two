@@ -1,7 +1,7 @@
 <template>
     <div>
         <div style='width:100%; background-color:white;'>
-            <div class="superHeader" :style="`width:${gridWillScroll?'99%':'100%'}`">
+            <div class="superHeader" :style="`width:100%;`">
                 <div :style="`width:${header.Width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header,index) in gridSettings.columns" :key="index">
                     <span style='display:flex;flex-direction:row;' v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(index.toString())">
                         <div>

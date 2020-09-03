@@ -24,12 +24,12 @@ const generateData = ()=>{
 
     let rows = Math.floor(Math.random() * 100000) + 1 
     console.log('hey we are generatng -----------------------------------------',rows)  
-    let cols = 6
+    let cols = 10
     let data = []
     let dataArray = []
     for (let i = 0; i <=rows; i++) {
         dataArray= []
-        for (let j = 0; j <= cols; j++) {
+        for (let j = 0; j < cols; j++) {
             dataArray.push(getRandomData())
         }
         data.push(

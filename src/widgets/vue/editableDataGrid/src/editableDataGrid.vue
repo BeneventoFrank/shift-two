@@ -58,16 +58,27 @@
 
 
                 
-                <div id='viewport' @scroll="runScroller" :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:scroll;`">
-                    <div :style="`display:flex; padding-top:5px; padding-bottom:5px; flex-direction:column;`">
+                <div id='viewport' @scroll="runScroller" :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:auto; overflow-x:hidden;`">
+                    <div :style="`display:flex; flex-direction:column;`">
                         <div :style="`height:${topPaddingHeight}px; `"></div>
-                        <div class='item' 
+                        <div class='item'
+                            @mouseleave="()=>{hoverIndex=null}" 
+                            @mouseenter="()=>{hoverIndex=item.rowIndex}"     
                             :style="`height:32px; display:flex; align-items:center; 
                                      background-color:${gridSettings.rows.HighlightRowEnabled&&item.rowIndex===hoverIndex?gridSettings.colorScheme.RowHighlightBackground:item.rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
+                                    
                             `"
                             :class="`row ${item.rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${item.rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
                             v-for="(item) in data" :key="item.rowIndex">
-                            <span :style="`width:${gridSettings.columns[index].Width}; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  `" v-for="(col,index) in item.data" :key="index"> {{col}}{{item.rowIndex}}</span>
+                            <span 
+                                  @mouseleave="()=>{cellHoverIndex=null}" 
+                                  @mouseenter="()=>{cellHoverIndex=index}"
+                                  :style="`width:${gridSettings.columns[index].Width}; height:100%; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
+                                           color:${gridSettings.colorScheme.GridRowTextColor};
+                                           text-align:${gridSettings.columns[index].Alignment};
+                                           background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
+                                         `" 
+                                  v-for="(col,index) in item.data" :key="index"> {{col}}{{item.rowIndex}}</span>
                         </div>
                         <div :style="`height:${bottomPaddingHeight}px;`"></div>
                     </div>
@@ -280,9 +291,9 @@
                                     <div style="width:50%; display:flex;justify-content:flex-start;"><span class="mediumText">Data Alignment</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
                                         <select @input="handleDataAlignment" v-model="activeColumnEdit.Alignment" style="width:100px;" name="alignment" id="alignment">
-                                            <option value='flex-start'>left</option>
-                                            <option value='center'>center</option>
-                                            <option value='flex-end'>right</option>
+                                            <option value='left'>left</option>
+                                            <option value='middle'>center</option>
+                                            <option value='right'>right</option>
                                         </select>                                        
                                     </div>
                                 </div>
@@ -423,7 +434,7 @@ export default {
                 minIndex: 1,
                 maxIndex: 0,
                 startIndex: 1,
-                itemHeight: 32,
+                itemHeight: 30,
                 amount: 15, //number of items in the viewport
                 tolerance: 2 //outlet size - rendered but not visible
             },
@@ -551,21 +562,20 @@ export default {
         }        
     },
     methods: {
+        calculateNumRows(){
+            console.log('this.gridSettings.size.GridHeightValue - this.headerHeight', this.gridSettings.size.GridHeightValue , this.headerHeight)
+            this.settings.amount = Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/30)
+        },
         runScroller({target:{scrollTop}}){
             const index = this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight)
-            console.log('what is the index', index, this.bufferedItems,scrollTop)
             const data = this.getData(index, this.bufferedItems)
             const topPaddingHeight = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
             const bottomPaddingHeight = Math.max(this.totalHeight - topPaddingHeight - this.data.length * this.settings.itemHeight, 0)
-
- 
-                this.topPaddingHeight = topPaddingHeight,
-                this.bottomPaddingHeight=bottomPaddingHeight,
-                console.log("running scroller", data)
-                this.data = data
+            this.topPaddingHeight = topPaddingHeight,
+            this.bottomPaddingHeight=bottomPaddingHeight,
+            this.data = data
         },
         setInitialState(minIndex, maxIndex, startIndex, itemHeight, amount, tolerance){
-            console.log(minIndex, maxIndex, startIndex, itemHeight, amount, tolerance)
         // 1) height of the visible part of the viewport (px)
         this.viewportHeight = amount * itemHeight
         // 2) total height of rendered and virtualized items (px)
@@ -592,55 +602,15 @@ export default {
         const data = []
         const start = Math.max(this.settings.minIndex, offset)
         const end = Math.min(offset + limit - 1, this.settings.maxIndex)
-
+        console.log('what do you get ', start, end, this.fullDS)
         if (start <= end) {
             for (let i = start; i <= end; i++) {
-                console.log('start and end', start,end)
             data.push({ rowIndex: i, data: this.fullDS[i].data })
             }
         }
         return data
         
         },
-        parseData(startingPoint){
-            console.log(startingPoint)
-            let tmp = []
-            for (let i = startingPoint+1; i <= startingPoint+20; i++) {
-                if(this.fullDS[i])
-                {
-                    console.log('pushing')
-                    tmp.push(this.fullDS[i])
-                }
-            }
-            console.log(tmp)
-            this.dataSlice = [...this.dataSlice, ...tmp]
-        },
-        handleScroll: debounce(function (){
-                let scrollHeight
-                window.requestAnimationFrame(()=>{
-                    console.log('scrolling', this.$refs.dataRow.scrollTop)
-                    if(this.$refs.dataRow.scrollTop>this.highestScrollPosition){
-                       
-                        scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/32)
-                        
-                        this.parseData(scrollHeight)
-                    } else {
-                        scrollHeight = Math.ceil(this.$refs.dataRow.scrollTop/32)-450
-                        if(scrollHeight<950){
-                            scrollHeight = 0
-                        }
-                        
-                        this.tableTop = this.$refs.dataRow.scrollTop
-                        this.parseData(scrollHeight)
-                    }
-                    this.highestScrollPosition = scrollHeight
-                })              
-        },0), 
-
-
-       
-
-
         handleAutoSize(){
             this.activeColumnEdit.IsUsingACustomWidth=false;
             this.activeColumnEdit.Width=null
@@ -947,7 +917,21 @@ export default shiftSettings
                 let currentCount = this.gridSettings.columns.length
                 let numToPop = currentCount - event.target.value
                 let tmp = [...this.gridSettings.columns]
+                
                 this.gridSettings.columns = tmp.splice(0,currentCount-numToPop)
+                let newDataArray = []
+                for (let i = 0; i < this.data.length; i++) {
+                    
+                    newDataArray.push(
+                        {
+                            rowIndex:this.data[i].rowIndex,
+                            data:this.data[i].data.splice(0,currentCount-numToPop)    
+                        }
+                    )
+                }
+                this.data = newDataArray
+                
+                console.log("after", this.data)
             }
             this.calculateColumnWidths() 
             this.availableForCustomizing= this.calculateAvailableSpace()           
@@ -1002,6 +986,10 @@ export default shiftSettings
         debounceHeightInput: debounce(function (event){
             this.gridSettings.size.GridHeight = `${event.target.value}px`
             this.gridSettings.size.GridHeightValue = parseInt(event.target.value)
+            this.viewportHeight = this.gridSettings.size.GridHeightValue - this.headerHeight
+            this.settings.amount = Math.floor(this.viewportHeight/30)
+            this.bufferedItems = this.settings.amount + 2 * this.settings.tolerance
+            this.runScroller({target:{scrollTop:0}})
         },750),               
         debounceHeaderChange: debounce(function (event){
             this.gridSettings.title.Text = event.target.value
@@ -1313,12 +1301,14 @@ export default shiftSettings
 
            const numColumns = numCols-custCols.length
            let widthOfGrid = this.gridSettings.size.GridWidthValue - tmp
-           widthOfGrid = this.boolGridWillScroll?(widthOfGrid):widthOfGrid
+           widthOfGrid = this.boolGridWillScroll?(widthOfGrid*.993):widthOfGrid
            const eachColumn = Math.floor(widthOfGrid/numColumns)
             for (let i = 0; i < numCols; i++) {
                 if (!custCols.includes(i)) {
+                    console.log('here....')
                     this.gridSettings.columns[i].Width = `${eachColumn}px`
                     this.gridSettings.columns[i].WidthValue = eachColumn
+                    console.log('done....')
                 }
             }
         },
@@ -1524,12 +1514,12 @@ export default shiftSettings
                                     columnsBeingFiltered:[]
                                   }
         },
-        calculateHeightOfDataRow(){
+        calculateHeightOfHeaderRow(){
             let tmp=0;
             const height = this.gridSettings.size.GridWidthValue<600?91:51;
-            this.gridSettings.header.Enabled?tmp=tmp+51:null
-            this.gridSettings.pagination.Enabled?tmp=tmp+height:null
-            this.gridSettings.title.Text.length>0?tmp=tmp+28:null
+            tmp=this.gridSettings.header.Enabled?tmp+51:tmp+0
+            tmp=this.gridSettings.pagination.Enabled?tmp+height:tmp+0
+            tmp=this.gridSettings.title.Text.length>0?tmp+28:tmp+0
             return tmp
         },
         processConfig(){
@@ -1654,13 +1644,6 @@ export default shiftSettings
             this.titleText = this.gridSettings.title.Text
             this.availableForCustomizing = this.calculateAvailableSpace()
             this.numColumns = this.gridSettings.columns.length
-            let tmp =[]
-            for (let i = 0; i < 2; i++) {
-                tmp.push(this.fullDS[i])
-            }
-            this.fullDS = tmp;
-            this.dataSlice = tmp
-            
         },
         timeout(ms){
             return new Promise(resolve => setTimeout(resolve, ms))    
@@ -1684,15 +1667,16 @@ export default shiftSettings
         console.log('mounted', new Date())
         this.processConfig();
         this.processData();
+        this.boolGridWillScroll = this.gridWillScroll()
+        this.calculateColumnWidths()
+        this.gridSettings.pagination.Enabled?this.initializePaging(this.getInitialRowsPerPage()):null
+        this.headerHeight = this.calculateHeightOfHeaderRow()
+        this.calculateNumRows()
         this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
         this.$refs.viewportElement.scrollTop = this.initialPosition
         if(!this.initialPosition){
             this.runScroller({target:{scrollTop:0}})
         }
-        this.boolGridWillScroll = this.gridWillScroll()
-        this.calculateColumnWidths()
-        this.gridSettings.pagination.Enabled?this.initializePaging(this.getInitialRowsPerPage()):null
-        this.headerHeight = this.calculateHeightOfDataRow()
         
         if(this.gridSettings.developmentMode.Enabled){
             this.initializeDevMode()
@@ -1710,13 +1694,11 @@ export default shiftSettings
             }, 0);
 
         } else {
-            console.log('configuring WW', new Date())
             this.configureWebWorkers()
-            console.log('done', new Date())
             this.shouldAnimate = true //make this a config setting.
             setTimeout(() => {
                 this.shouldReverseAnimate=true   
-            }, 500);
+            }, 250);
         }
     }
 };

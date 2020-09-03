@@ -3,10 +3,10 @@ let shiftSettings = {
         Enabled:false
     },
     size:{
-        GridWidth:'900px', //px value of width
-        GridWidthValue:900,
-        GridHeight:'600px', //px value of height
-        GridHeightValue:600, //int value used for calculations
+        GridWidth:'2500px', //px value of width
+        GridWidthValue:2500,
+        GridHeight:'1300px', //px value of height
+        GridHeightValue:1300, //int value used for calculations
     },
     header:{
         Enabled:true
@@ -17,7 +17,7 @@ let shiftSettings = {
         HighlightRowEnabled:'true',
     },
     slider:{ //Change at own risk
-        Enabled:false,
+        Enabled:true,
         SliderWidth:300,
         MinValue:100,
         MaxValue:1000,
@@ -25,7 +25,7 @@ let shiftSettings = {
         InitialValue:100
     },
     pagination:{ //Change at own risk
-        Enabled:false, 
+        Enabled:true, 
         MinRecordsViewable:0,
         MaxRecordsViewable:0,
         TotalNumberOfRecords:0,
@@ -59,8 +59,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:0,
-            Width:'150px',
-            WidthValue:150,
+            Width:'250px',
+            WidthValue:250,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -69,8 +69,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:1,
-            Width:'150px',
-            WidthValue:150,
+            Width:'250px',
+            WidthValue:250,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -79,8 +79,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:2,
-            Width:'150px',
-            WidthValue:150,
+            Width:'250px',
+            WidthValue:250,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -89,8 +89,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:3,
-            Width:'150px',
-            WidthValue:150,
+            Width:'250px',
+            WidthValue:250,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -99,8 +99,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:3,
-            Width:'150px',
-            WidthValue:150,
+            Width:'250px',
+            WidthValue:250,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -109,8 +109,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:3,
-            Width:'150px',
-            WidthValue:150,
+            Width:'250px',
+            WidthValue:250,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -119,9 +119,39 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:3,
-            Width:'150px',
-            WidthValue:150,
+            Width:'250px',
+            WidthValue:250,
             IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:7,
+            Width:'250px',
+            WidthValue:250,
+            IsUsingACustomWidth:undefined,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:8,
+            Width:'250px',
+            WidthValue:250,
+            IsUsingACustomWidth:undefined,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:9,
+            Width:'250px',
+            WidthValue:250,
+            IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
             IsPreSortEnabled:false                            

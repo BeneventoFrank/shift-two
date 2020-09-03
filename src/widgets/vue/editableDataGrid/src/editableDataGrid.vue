@@ -58,27 +58,35 @@
 
 
                 
-                <div id='viewport' @scroll="runScroller" :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:auto; overflow-x:hidden;`">
+                <div id='viewport' :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:auto; overflow-x:hidden;`">
                     <div :style="`display:flex; flex-direction:column;`">
                         <div :style="`height:${topPaddingHeight}px; `"></div>
                         <div class='item'
                             @mouseleave="()=>{hoverIndex=null}" 
                             @mouseenter="()=>{hoverIndex=item.rowIndex}"     
-                            :style="`height:32px; display:flex; align-items:center; 
+                            :style="`height:32px; display:flex; justify-content:center; 
                                      background-color:${gridSettings.rows.HighlightRowEnabled&&item.rowIndex===hoverIndex?gridSettings.colorScheme.RowHighlightBackground:item.rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
                                     
                             `"
                             :class="`row ${item.rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${item.rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
                             v-for="(item) in data" :key="item.rowIndex">
-                            <span 
-                                  @mouseleave="()=>{cellHoverIndex=null}" 
-                                  @mouseenter="()=>{cellHoverIndex=index}"
-                                  :style="`width:${gridSettings.columns[index].Width}; height:100%; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
+                            <div
+                                @mouseleave="()=>{cellHoverIndex=null}" 
+                                @mouseenter="()=>{cellHoverIndex=index}"
+                                v-for="(col,index) in item.data" :key="index"
+                                :style="`display:flex; align-items:center; height:100%;
+                                         width:${gridSettings.columns[index].Width};
+                                         justify-content:center;
+                                         background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
+                                    `">
+                                <span 
+                                  :style="` white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
                                            color:${gridSettings.colorScheme.GridRowTextColor};
+                                           vertical-align:center;
                                            text-align:${gridSettings.columns[index].Alignment};
-                                           background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
                                          `" 
-                                  v-for="(col,index) in item.data" :key="index"> {{col}}{{item.rowIndex}}</span>
+                                  > {{col}}{{item.rowIndex}}</span>
+                            </div>
                         </div>
                         <div :style="`height:${bottomPaddingHeight}px;`"></div>
                     </div>
@@ -567,13 +575,15 @@ export default {
             this.settings.amount = Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/30)
         },
         runScroller({target:{scrollTop}}){
-            const index = this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight)
-            const data = this.getData(index, this.bufferedItems)
-            const topPaddingHeight = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
-            const bottomPaddingHeight = Math.max(this.totalHeight - topPaddingHeight - this.data.length * this.settings.itemHeight, 0)
-            this.topPaddingHeight = topPaddingHeight,
-            this.bottomPaddingHeight=bottomPaddingHeight,
-            this.data = data
+            window.requestAnimationFrame(()=>{
+                const index = this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight)
+                const data = this.getData(index, this.bufferedItems)
+                const topPaddingHeight = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
+                const bottomPaddingHeight = Math.max(this.totalHeight - topPaddingHeight - this.data.length * this.settings.itemHeight, 0)
+                this.topPaddingHeight = topPaddingHeight,
+                this.bottomPaddingHeight=bottomPaddingHeight,
+                this.data = data
+            })
         },
         setInitialState(minIndex, maxIndex, startIndex, itemHeight, amount, tolerance){
         // 1) height of the visible part of the viewport (px)
@@ -601,10 +611,9 @@ export default {
         getData(offset, limit){
         const data = []
         const start = Math.max(this.settings.minIndex, offset)
-        const end = Math.min(offset + limit - 1, this.settings.maxIndex)
-        console.log('what do you get ', start, end, this.fullDS)
+        const end = Math.min(offset + limit, this.settings.maxIndex)
         if (start <= end) {
-            for (let i = start; i <= end; i++) {
+            for (let i = start; i < end; i++) {
             data.push({ rowIndex: i, data: this.fullDS[i].data })
             }
         }
@@ -974,9 +983,6 @@ export default shiftSettings
         handleShowCancelEye(){
             this.isHovering = !this.isHovering
         },
-        fetchRecordsFromDS(start,stop){
-            return this.fullDS.slice(start,stop+1)
-        },    
         debounceInput: debounce(function (event){
             this.gridSettings.size.GridWidth = `${event.target.value}px`
             this.gridSettings.size.GridWidthValue = parseInt(event.target.value)
@@ -1092,19 +1098,38 @@ export default shiftSettings
         },            
         async handleNextClick(isASingleMove){
             this.pageDataForward(isASingleMove.isASinglePageMove)
+
+            const numberOfRowsPagingCanHandle = this.gridSettings.pagination.MaxPageNumberPossible * this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+            const startValue = numberOfRowsPagingCanHandle-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+            const numberOfRowsOnLastPage = this.fullDS.length - startValue 
+
             const start = (this.gridSettings.pagination.PageNumberCurrentlyViewing*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
-            const end = start + this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
-            this.dataSlice = this.fetchRecordsFromDS(start,end)
+            const end = start + (this.gridSettings.pagination.PageNumberCurrentlyViewing===this.gridSettings.pagination.MaxPageNumberPossible? numberOfRowsOnLastPage :this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)    
+
+            console.log("iam setting the end to ------------> ", end, ' from ', start ,' and ', this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)
+            this.settings.minIndex=start
+            this.settings.maxIndex=end
+            this.settings.startIndex=start
+ 
+            if(this.gridSettings.pagination.Enabled&&this.gridSettings.pagination.PageNumberCurrentlyViewing===this.gridSettings.pagination.MaxPageNumberPossible){
+                this.totalHeight = (numberOfRowsOnLastPage  ) * this.settings.itemHeight
+            }
+            this.runScroller({target:{scrollTop:0}})
+            
         },
         async handlePreviousClick(isASingleMove){
             this.pageDataBackward(isASingleMove.isASinglePageMove)
             const start = (this.gridSettings.pagination.PageNumberCurrentlyViewing*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
             const end = ((this.gridSettings.pagination.PageNumberCurrentlyViewing+1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-(this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)
-            this.dataSlice = this.fetchRecordsFromDS(start,end)
+            this.settings.minIndex=start
+            this.settings.maxIndex=end
+            this.settings.startIndex=start
+            this.runScroller({target:{scrollTop:0}})            
         },
         pageDataBackward(isASinglePageMove){
         if(isASinglePageMove){
                 const paging = {
+                Enabled:this.gridSettings.pagination.Enabled,
                 MinRecordsViewable:((this.gridSettings.pagination.PageNumberCurrentlyViewing-1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage<=0?1:((this.gridSettings.pagination.PageNumberCurrentlyViewing-1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
                 MaxRecordsViewable:this.gridSettings.pagination.MaxRecordsViewable-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage>0?(this.gridSettings.pagination.MaxRecordsViewable-(this.gridSettings.pagination.MaxRecordsViewable-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)):this.gridSettings.pagination.MaxRecordsViewable,
                 TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
@@ -1118,6 +1143,7 @@ export default shiftSettings
                 this.gridSettings.pagination = paging
         } else {
                 const paging = {
+                Enabled:this.gridSettings.pagination.Enabled,
                 MinRecordsViewable:1,
                 MaxRecordsViewable:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
                 TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
@@ -1149,9 +1175,11 @@ export default shiftSettings
                 }
                 this.gridSettings.pagination = paging
             } else {
+                const numberOfRowsPagingCanHandle = this.gridSettings.pagination.MaxPageNumberPossible * this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+                const startValue = numberOfRowsPagingCanHandle-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
                 const paging = {
                     Enabled:this.gridSettings.pagination.Enabled,
-                    MinRecordsViewable:this.gridSettings.pagination.TotalNumberOfRecords - (this.gridSettings.pagination.TotalNumberOfRecords - this.gridSettings.pagination.NumberOfApplicibleRowsPerPage) ,
+                    MinRecordsViewable:startValue,
                     MaxRecordsViewable:this.gridSettings.pagination.TotalNumberOfRecords,
                     TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
                     PageNumberCurrentlyViewing:this.gridSettings.pagination.MaxPageNumberPossible,        
@@ -1540,10 +1568,14 @@ export default shiftSettings
                 tmp = this.gridData
             } else {
                 //load some random data.
-                tmp = generateData()
+                tmp = generateData(this.gridSettings.columns.length)
             }
             this.fullDS = tmp            
-            this.settings.maxIndex = this.fullDS.length-1
+            if(this.gridSettings.pagination.Enabled){
+                this.settings.maxIndex = this.getInitialRowsPerPage()
+            } else {
+                this.settings.maxIndex = this.fullDS.length-1
+            }
 
         },
         configureWebWorkers(){
@@ -1673,6 +1705,7 @@ export default shiftSettings
         this.headerHeight = this.calculateHeightOfHeaderRow()
         this.calculateNumRows()
         this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
+        this.$refs.viewportElement.addEventListener('scroll',this.runScroller)
         this.$refs.viewportElement.scrollTop = this.initialPosition
         if(!this.initialPosition){
             this.runScroller({target:{scrollTop:0}})

@@ -27,7 +27,7 @@ const generateData = (numCols)=>{
     let cols = numCols
     let data = []
     let dataArray = []
-    for (let i = 0; i <=rows; i++) {
+    for (let i = 1; i <=rows; i++) {
         dataArray= []
         for (let j = 0; j < cols; j++) {
             dataArray.push(getRandomData())
@@ -39,6 +39,7 @@ const generateData = (numCols)=>{
             }
         )
     }
+    console.log('data?', data)
     return data
 }
 

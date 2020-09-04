@@ -85,7 +85,7 @@
                                            vertical-align:center;
                                            text-align:${gridSettings.columns[index].Alignment};
                                          `" 
-                                  > {{col}}{{item.rowIndex}}</span>
+                                  > {{col}}{{item.rowIndex+1}}</span>
                             </div>
                         </div>
                         <div :style="`height:${bottomPaddingHeight}px;`"></div>
@@ -439,11 +439,11 @@ export default {
         initialPosition:0,
             data:[],
             settings:{
-                minIndex: 1,
+                minIndex: 0,
                 maxIndex: 0,
-                startIndex: 1,
+                startIndex: 0,
                 itemHeight: 30,
-                amount: 15, //number of items in the viewport
+                amount: 0, //number of items in the viewport
                 tolerance: 2 //outlet size - rendered but not visible
             },
             initialState:{
@@ -572,16 +572,23 @@ export default {
     methods: {
         calculateNumRows(){
             console.log('this.gridSettings.size.GridHeightValue - this.headerHeight', this.gridSettings.size.GridHeightValue , this.headerHeight)
-            this.settings.amount = Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/30)
+            if (this.boolGridWillScroll) {
+                this.settings.amount = Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/this.settings.itemHeight)    
+            } else {
+                this.settings.amount = Math.floor(this.fullDS.length) 
+            }
+            
         },
         runScroller({target:{scrollTop}}){
             window.requestAnimationFrame(()=>{
-                const index = this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight)
+                const indexMath = this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight)
+                const index = indexMath < 0 ?0:indexMath
                 const data = this.getData(index, this.bufferedItems)
-                const topPaddingHeight = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
-                const bottomPaddingHeight = Math.max(this.totalHeight - topPaddingHeight - this.data.length * this.settings.itemHeight, 0)
-                this.topPaddingHeight = topPaddingHeight,
-                this.bottomPaddingHeight=bottomPaddingHeight,
+                const topPad = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
+                const topPaddingHeight = this.boolGridWillScroll?topPad:0
+                const bottomPad = Math.max(this.totalHeight - topPaddingHeight - data.length * this.settings.itemHeight, 0)
+                this.bottomPaddingHeight= this.boolGridWillScroll?bottomPad:0
+                this.topPaddingHeight = topPaddingHeight
                 this.data = data
             })
         },
@@ -595,15 +602,21 @@ export default {
         // 4) all rendered rows height, visible part + invisible outlets (px)
         this.bufferHeight = this.viewportHeight + 2 * this.toleranceHeight
         // 5) number of items to be rendered, buffered dataset length (pcs)
-        this.bufferedItems = amount + 2 * tolerance
+         
+        this.bufferedItems =this.boolGridWillScroll?amount + 2 * tolerance:amount
+            
+        
         // 6) how many items will be virtualized above (pcs)
         this.itemsAbove = startIndex - tolerance - minIndex
-        // 7) initial height of the top padding element (px)
-        this.topPaddingHeight = this.itemsAbove * itemHeight
-        // 8) initial height of the bottom padding element (px)
-        this.bottomPaddingHeight = this.totalHeight - this.topPaddingHeight
-        // 9) initial scroll position (px)
-        this.initialPosition = this.topPaddingHeight + this.toleranceHeight
+        
+        this.topPaddingHeight = this.boolGridWillScroll?this.itemsAbove * itemHeight:0
+        this.bottomPaddingHeight = this.boolGridWillScroll?this.totalHeight - this.topPaddingHeight:0
+
+        // this.topPaddingHeight = this.itemsAbove * itemHeight
+        // this.bottomPaddingHeight = this.totalHeight - this.topPaddingHeight
+        
+        this.initialPosition = 0
+
         // initial state object
         this.data = []
         },
@@ -613,8 +626,11 @@ export default {
         const start = Math.max(this.settings.minIndex, offset)
         const end = Math.min(offset + limit, this.settings.maxIndex)
         if (start <= end) {
-            for (let i = start; i < end; i++) {
-            data.push({ rowIndex: i, data: this.fullDS[i].data })
+            for (let i = start; i <= end; i++) {
+                if (this.fullDS[i]){
+                    data.push({ rowIndex: i, data: this.fullDS[i].data })
+                }
+            
             }
         }
         return data

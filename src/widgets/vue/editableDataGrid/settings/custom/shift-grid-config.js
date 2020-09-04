@@ -17,7 +17,7 @@ let shiftSettings = {
         HighlightRowEnabled:'true',
     },
     slider:{ //Change at own risk
-        Enabled:true,
+        Enabled:false,
         SliderWidth:300,
         MinValue:500,
         MaxValue:4000,
@@ -25,7 +25,7 @@ let shiftSettings = {
         InitialValue:1000
     },
     pagination:{ //Change at own risk
-        Enabled:true, 
+        Enabled:false, 
         MinRecordsViewable:0,
         MaxRecordsViewable:0,
         TotalNumberOfRecords:0,

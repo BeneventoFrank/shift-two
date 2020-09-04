@@ -1143,6 +1143,7 @@ export default shiftSettings
             this.runScroller({target:{scrollTop:0}})            
         },
         pageDataBackward(isASinglePageMove){
+        this.resetScroll()
         if(isASinglePageMove){
                 const paging = {
                 Enabled:this.gridSettings.pagination.Enabled,
@@ -1173,7 +1174,11 @@ export default shiftSettings
                 this.gridSettings.pagination = paging
         }
         },
+        resetScroll(){
+            this.$refs.viewportElement.scrollTop=0;
+        },
         pageDataForward(isASinglePageMove){
+            this.resetScroll()
             if(isASinglePageMove){
                 console.log(this.gridSettings.pagination)
                 const tmp = this.gridSettings.pagination.MinRecordsViewable===1?this.gridSettings.pagination.NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.MinRecordsViewable+this.gridSettings.pagination.NumberOfApplicibleRowsPerPage

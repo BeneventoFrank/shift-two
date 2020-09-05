@@ -427,17 +427,17 @@ export default {
     },
     data() {
         return {
-
-        viewportHeight:0,
-        totalHeight:0,
-        toleranceHeight:0,
-        bufferHeight:0,
-        bufferedItems:0,
-        itemsAbove:0,
-        topPaddingHeight:0,
-        bottomPaddingHeight:0,
-        initialPosition:0,
+            workingDataSet:[],
             data:[],
+            viewportHeight:0,
+            totalHeight:0,
+            toleranceHeight:0,
+            bufferHeight:0,
+            bufferedItems:0,
+            itemsAbove:0,
+            topPaddingHeight:0,
+            bottomPaddingHeight:0,
+            initialPosition:0,
             settings:{
                 minIndex: 0,
                 maxIndex: 0,
@@ -567,36 +567,125 @@ export default {
         },
         cmpCanPageNext:function(){
             return (this.gridSettings.pagination.MaxPageNumberPossible>1?true:false)&&(this.gridSettings.pagination.PageNumberCurrentlyViewing<this.gridSettings.pagination.MaxPageNumberPossible)
-        }        
+        },
+        cmpDataSet:function(){
+            if(this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlysorting) return this.workingDataSet
+            return this.fullDS
+        }
     },
     methods: {
         calculateNumRows(){
-            console.log('this.gridSettings.size.GridHeightValue - this.headerHeight', this.gridSettings.size.GridHeightValue , this.headerHeight)
+            let amt = 0;
+
             if (this.boolGridWillScroll) {
-                this.settings.amount = Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/this.settings.itemHeight)    
+                amt = Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/this.settings.itemHeight)    
             } else {
-                this.settings.amount = Math.floor(this.fullDS.length) 
+                amt = Math.floor(this.cmpDataSet.length) 
             }
-            
+            return amt
         },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
         runScroller({target:{scrollTop}}){
             window.requestAnimationFrame(()=>{
-                const indexMath = this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight)
-                const index = indexMath < 0 ?0:indexMath
+                                                             console.log("running the scroller")
+                const index = Math.max(this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight),0)
+                                                                console.log('getting data', index, this.bufferedItems)
                 const data = this.getData(index, this.bufferedItems)
+                                                                console.log(data)
                 const topPad = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
                 const topPaddingHeight = this.boolGridWillScroll?topPad:0
-                const bottomPad = Math.max(this.totalHeight - topPaddingHeight - data.length * this.settings.itemHeight, 0)
+                                                         console.log('total height=', this.totalHeight, topPaddingHeight, data.length, this.settings.itemHeight )
+                const bottomPad = Math.max(this.totalHeight - topPaddingHeight - (data.length * this.settings.itemHeight), 0)
+                                                        console.log('total???', bottomPad)
+                
+                
                 this.bottomPaddingHeight= this.boolGridWillScroll?bottomPad:0
                 this.topPaddingHeight = topPaddingHeight
                 this.data = data
             })
         },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         setInitialState(minIndex, maxIndex, startIndex, itemHeight, amount, tolerance){
         // 1) height of the visible part of the viewport (px)
         this.viewportHeight = amount * itemHeight
         // 2) total height of rendered and virtualized items (px)
-        this.totalHeight = (maxIndex - minIndex + 1) * itemHeight
+        this.totalHeight = (maxIndex - minIndex ) * itemHeight
         // 3) single viewport outlet height, filled with rendered but invisible rows (px)
         this.toleranceHeight = tolerance * itemHeight
         // 4) all rendered rows height, visible part + invisible outlets (px)
@@ -621,21 +710,51 @@ export default {
         this.data = []
         },
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         getData(offset, limit){
         const data = []
         const start = Math.max(this.settings.minIndex, offset)
         const end = Math.min(offset + limit, this.settings.maxIndex)
+                    console.log('the start and end are ', start , ' and ', end)
         if (start <= end) {
+
             for (let i = start; i <= end; i++) {
-                if (this.fullDS[i]){
-                    data.push({ rowIndex: i, data: this.fullDS[i].data })
+                if (this.cmpDataSet[i]){
+                    data.push({ rowIndex: i, data: this.cmpDataSet[i].data })
                 }
-            
             }
         }
         return data
         
         },
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         handleAutoSize(){
             this.activeColumnEdit.IsUsingACustomWidth=false;
             this.activeColumnEdit.Width=null
@@ -954,7 +1073,7 @@ export default shiftSettings
                         }
                     )
                 }
-                this.data = newDataArray
+                //this.data = newDataArray
                 
                 console.log("after", this.data)
             }
@@ -990,7 +1109,7 @@ export default shiftSettings
                 columnsBeingFiltered:[]
             }
             this.clearAllFilters = true
-            this.highestCountLoaded = this.getInitialRowsPerPage();
+            this.highestCountLoaded = this.getRowsPerPage();
             this.filteredData = []
             this.filteredData = this.fullDS 
             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)   
@@ -1009,7 +1128,7 @@ export default shiftSettings
             this.gridSettings.size.GridHeight = `${event.target.value}px`
             this.gridSettings.size.GridHeightValue = parseInt(event.target.value)
             this.viewportHeight = this.gridSettings.size.GridHeightValue - this.headerHeight
-            this.settings.amount = Math.floor(this.viewportHeight/30)
+            this.settings.amount = Math.floor(this.viewportHeight/30) 
             this.bufferedItems = this.settings.amount + 2 * this.settings.tolerance
             this.runScroller({target:{scrollTop:0}})
         },750),               
@@ -1069,19 +1188,13 @@ export default shiftSettings
 
 
         reConfigurePagination(count){
-            let tmp = []
-            if (this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting){
-                tmp = this.filteredData
-            } else{
-                tmp = this.fullDS
-            }
             let paging = {
                 Enabled:this.gridSettings.pagination.Enabled,
                 MinRecordsViewable:1,
-                MaxRecordsViewable:tmp.length<count?tmp.length:count,
-                TotalNumberOfRecords:tmp.length,
+                MaxRecordsViewable:this.cmpDataSet.length<count?this.cmpDataSet.length:count,
+                TotalNumberOfRecords:this.cmpDataSet.length,
                 PageNumberCurrentlyViewing:1,        
-                MaxPageNumberPossible:Math.ceil(tmp.length/count),
+                MaxPageNumberPossible:Math.ceil(this.cmpDataSet.length/count),
                 NumberOfApplicibleRowsPerPage:count,
                 IsPaging:false,
                 CurrentSkip:0,
@@ -1091,96 +1204,72 @@ export default shiftSettings
         },
         handleChangeNumberPerPage(event){
             if(this.gridSettings.developmentMode.Enabled){return} 
-
             this.weAreUsingTheSlider=true
             let count = parseInt(event.target.value)
             this.sliderCount = count
             this.reConfigurePagination(count);
-            let tmp = []
-            if (this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting){
-                tmp = this.filteredData
-            } else{
-                tmp = this.fullDS
-            }
-            let processed=[]
-            for (let i = 0; i < count; i++) {
-                if(tmp[i]){
-                    processed.push(tmp[i])
-                }
-            }
-
-            this.boolGridWillScroll = this.gridWillScroll(processed.length)
-            this.dataSlice = processed;
-        },            
-        async handleNextClick(isASingleMove){
-            this.pageDataForward(isASingleMove.isASinglePageMove)
-
-            const numberOfRowsPagingCanHandle = this.gridSettings.pagination.MaxPageNumberPossible * this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
-            const startValue = numberOfRowsPagingCanHandle-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
-            const numberOfRowsOnLastPage = this.fullDS.length - startValue 
-
-            const start = (this.gridSettings.pagination.PageNumberCurrentlyViewing*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
-            const end = start + (this.gridSettings.pagination.PageNumberCurrentlyViewing===this.gridSettings.pagination.MaxPageNumberPossible? numberOfRowsOnLastPage :this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)    
-
-            console.log("iam setting the end to ------------> ", end, ' from ', start ,' and ', this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)
-            this.settings.minIndex=start
-            this.settings.maxIndex=end
-            this.settings.startIndex=start
- 
-            if(this.gridSettings.pagination.Enabled&&this.gridSettings.pagination.PageNumberCurrentlyViewing===this.gridSettings.pagination.MaxPageNumberPossible){
-                this.totalHeight = (numberOfRowsOnLastPage  ) * this.settings.itemHeight
-            }
-            this.runScroller({target:{scrollTop:0}})
             
+
+        },            
+        handleNextClick(isASingleMove){
+            this.pageDataForward(isASingleMove.isASinglePageMove)
+            if (isASingleMove.isASinglePageMove&&this.gridSettings.pagination.MaxPageNumberPossible!==this.gridSettings.pagination.PageNumberCurrentlyViewing) {
+                this.settings.minIndex = this.gridSettings.pagination.MinRecordsViewable
+                this.settings.maxIndex = this.settings.minIndex + this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+                this.totalHeight = (this.settings.maxIndex - this.settings.minIndex ) * this.settings.itemHeight
+            } else {
+                this.settings.minIndex = this.gridSettings.pagination.MinRecordsViewable
+                this.settings.maxIndex = this.gridSettings.pagination.TotalNumberOfRecords
+                this.totalHeight = (this.settings.maxIndex - this.settings.minIndex ) * this.settings.itemHeight
+            }
+            this.runScroller({target:{scrollTop:0}}) 
         },
-        async handlePreviousClick(isASingleMove){
+
+        handlePreviousClick(isASingleMove){
             this.pageDataBackward(isASingleMove.isASinglePageMove)
             const start = (this.gridSettings.pagination.PageNumberCurrentlyViewing*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
             const end = ((this.gridSettings.pagination.PageNumberCurrentlyViewing+1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-(this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)
             this.settings.minIndex=start
             this.settings.maxIndex=end
             this.settings.startIndex=start
-            this.runScroller({target:{scrollTop:0}})            
+            this.runScroller({target:{scrollTop:0}})   
         },
         pageDataBackward(isASinglePageMove){
-        this.resetScroll()
-        if(isASinglePageMove){
-                const paging = {
-                Enabled:this.gridSettings.pagination.Enabled,
-                MinRecordsViewable:((this.gridSettings.pagination.PageNumberCurrentlyViewing-1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage<=0?1:((this.gridSettings.pagination.PageNumberCurrentlyViewing-1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
-                MaxRecordsViewable:this.gridSettings.pagination.MaxRecordsViewable-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage>0?(this.gridSettings.pagination.MaxRecordsViewable-(this.gridSettings.pagination.MaxRecordsViewable-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)):this.gridSettings.pagination.MaxRecordsViewable,
-                TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
-                PageNumberCurrentlyViewing:this.gridSettings.pagination.PageNumberCurrentlyViewing-1,        
-                MaxPageNumberPossible:this.gridSettings.pagination.MaxPageNumberPossible,
-                NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
-                IsPaging:this.gridSettings.pagination.PageNumberCurrentlyViewing-1===1?false:true,
-                CurrentSkip:this.gridSettings.pagination.CurrentSkip-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
-                CurrentTake:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
-                }
-                this.gridSettings.pagination = paging
-        } else {
-                const paging = {
-                Enabled:this.gridSettings.pagination.Enabled,
-                MinRecordsViewable:1,
-                MaxRecordsViewable:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
-                TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
-                PageNumberCurrentlyViewing:1,        
-                MaxPageNumberPossible:Math.ceil(this.gridSettings.pagination.TotalNumberOfRecords/this.gridSettings.pagination.NumberOfApplicibleRowsPerPage),
-                NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
-                IsPaging:false,
-                CurrentSkip:0,
-                CurrentTake:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage         
-                }
-                this.gridSettings.pagination = paging
-        }
+            if(isASinglePageMove){
+                    const paging = {
+                    Enabled:this.gridSettings.pagination.Enabled,
+                    MinRecordsViewable:((this.gridSettings.pagination.PageNumberCurrentlyViewing-1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage<=0?1:((this.gridSettings.pagination.PageNumberCurrentlyViewing-1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                    MaxRecordsViewable:this.gridSettings.pagination.MaxRecordsViewable-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage>0?(this.gridSettings.pagination.MaxRecordsViewable-(this.gridSettings.pagination.MaxRecordsViewable-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)):this.gridSettings.pagination.MaxRecordsViewable,
+                    TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
+                    PageNumberCurrentlyViewing:this.gridSettings.pagination.PageNumberCurrentlyViewing-1,        
+                    MaxPageNumberPossible:this.gridSettings.pagination.MaxPageNumberPossible,
+                    NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                    IsPaging:this.gridSettings.pagination.PageNumberCurrentlyViewing-1===1?false:true,
+                    CurrentSkip:this.gridSettings.pagination.CurrentSkip-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                    CurrentTake:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+                    }
+                    this.gridSettings.pagination = paging
+            } else {
+                    const paging = {
+                    Enabled:this.gridSettings.pagination.Enabled,
+                    MinRecordsViewable:1,
+                    MaxRecordsViewable:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                    TotalNumberOfRecords:this.gridSettings.pagination.TotalNumberOfRecords,
+                    PageNumberCurrentlyViewing:1,        
+                    MaxPageNumberPossible:Math.ceil(this.gridSettings.pagination.TotalNumberOfRecords/this.gridSettings.pagination.NumberOfApplicibleRowsPerPage),
+                    NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
+                    IsPaging:false,
+                    CurrentSkip:0,
+                    CurrentTake:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage         
+                    }
+                    this.gridSettings.pagination = paging
+            }
         },
         resetScroll(){
             this.$refs.viewportElement.scrollTop=0;
         },
         pageDataForward(isASinglePageMove){
-            this.resetScroll()
             if(isASinglePageMove){
-                console.log(this.gridSettings.pagination)
                 const tmp = this.gridSettings.pagination.MinRecordsViewable===1?this.gridSettings.pagination.NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.MinRecordsViewable+this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
                 const paging = {
                     Enabled:this.gridSettings.pagination.Enabled,
@@ -1212,52 +1301,55 @@ export default shiftSettings
                 }
                 this.gridSettings.pagination = paging
             }
-
         },
         initializePaging(numberOfRowsPerPage){
-            console.log(numberOfRowsPerPage)
             if (this.gridSettings.slider.Enabled) {
                 let minValue, maxValue, stepValue, initialValue,sliderWidth = 0
-                    if(numberOfRowsPerPage===100){
-                        minValue=10, maxValue=100, stepValue=10, initialValue=100,sliderWidth = 300    
-                    } else if(numberOfRowsPerPage===500){
-                        minValue=100, maxValue=1000, stepValue=100, initialValue=500,sliderWidth = 300    
-                    } else if(numberOfRowsPerPage===1000){
-                        minValue=500, maxValue=4000, stepValue=500, initialValue=1000,sliderWidth = 300    
-                    }                    
-                    this.gridSettings.slider.MinValue = minValue;
-                    this.gridSettings.slider.MaxValue = maxValue;
-                    this.gridSettings.slider.StepValue = stepValue;
-                    this.gridSettings.slider.InitialValue = initialValue;
-                    this.gridSettings.slider.SliderWidth = sliderWidth;
+                if(numberOfRowsPerPage===100){
+                    minValue=10, maxValue=100, stepValue=10, initialValue=100,sliderWidth = 300    
+                } else if(numberOfRowsPerPage===500){
+                    minValue=100, maxValue=1000, stepValue=100, initialValue=500,sliderWidth = 300    
+                } else if(numberOfRowsPerPage===1000){
+                    minValue=500, maxValue=4000, stepValue=500, initialValue=1000,sliderWidth = 300    
+                }                    
+                this.gridSettings.slider.MinValue = minValue;
+                this.gridSettings.slider.MaxValue = maxValue;
+                this.gridSettings.slider.StepValue = stepValue;
+                this.gridSettings.slider.InitialValue = initialValue;
+                this.gridSettings.slider.SliderWidth = sliderWidth;
             }
             if(this.gridSettings.pagination.Enabled===true){
                 this.gridSettings.pagination = {
                 Enabled:true,
                 MinRecordsViewable:1,
-                MaxRecordsViewable:this.fullDS.length>this.gridSettings.slider.InitialValue?this.gridSettings.slider.InitialValue:this.fullDS.length,
-                TotalNumberOfRecords:this.fullDS.length,
+                MaxRecordsViewable:this.cmpDataSet.length>this.gridSettings.slider.InitialValue?this.gridSettings.slider.InitialValue:this.cmpDataSet.length,
+                TotalNumberOfRecords:this.cmpDataSet.length,
                 PageNumberCurrentlyViewing:1,                   
-                MaxPageNumberPossible:Math.ceil(this.fullDS.length/this.gridSettings.slider.InitialValue),
+                MaxPageNumberPossible:Math.ceil(this.cmpDataSet.length/this.gridSettings.slider.InitialValue),
                 NumberOfApplicibleRowsPerPage:numberOfRowsPerPage,
                 }
+
             } 
+            console.log('this.gridse', this.gridSettings)
         },
-        getInitialRowsPerPage(){
+        getRowsPerPage(){
+            console.log('this.cmpDataSet.length',this.cmpDataSet.length)
             if (this.gridSettings.pagination.Enabled) {
                 if (this.weAreUsingTheSlider) {
                     return this.sliderCount //investigate this see how its used and set
                 } else {
-                    if((this.fullDS.length>=0)&&(this.fullDS.length<=100)){
+                    console.log('this.cmpDataSet.length',this.cmpDataSet.length)
+                    if((this.cmpDataSet.length>=0)&&(this.cmpDataSet.length<=100)){
                         return 100
-                    } else if((this.fullDS.length>100)&&(this.fullDS.length<=1000)){
+                    } else if((this.cmpDataSet.length>100)&&(this.cmpDataSet.length<=1000)){
                         return 500
-                    } else if(this.fullDS.length>1000){
+                    } else if(this.cmpDataSet.length>1000){
+                        console.log('this.cmpDataSet.length',this.cmpDataSet.length)
                         return 1000
                     }
                 }                
             } 
-            return this.fullDS.length
+            return this.cmpDataSet.length
 
         },        
         gridWillScroll(numberOfRows){
@@ -1270,16 +1362,13 @@ export default shiftSettings
                 }
             }
             let tmp = 0
-            if (this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting){
-                tmp = this.filteredData.length
-            } else{
-                if(numberOfRows){
-                    tmp = numberOfRows
-                } else {
-                    tmp = this.fullDS.length
-                }
+            if(numberOfRows){
+                tmp = numberOfRows
+            } else {
+                tmp = this.cmpDataSet.length
             }
-            if (tmp*31>height)
+
+            if (tmp*30>height)
             {
                 retVal=true
             }
@@ -1305,7 +1394,7 @@ export default shiftSettings
                             this.sortStrategy.direction = split[1]
                             this.filteredData = []
                             this.filteredData = this.sortedData[tmp][split[1]]
-                            this.dataSlice = this.filteredData.slice(0,this.getInitialRowsPerPage())
+                            this.dataSlice = this.filteredData.slice(0,this.getRowsPerPage())
                             this.isDoneSorting = true;
                         } else {
                             this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
@@ -1324,7 +1413,7 @@ export default shiftSettings
                     this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                     this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                 } else {
-                    this.highestCountLoaded = this.getInitialRowsPerPage();
+                    this.highestCountLoaded = this.getRowsPerPage();
                     this.filteredData = []
                     this.filteredData = this.fullDS 
                     this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
@@ -1376,8 +1465,7 @@ export default shiftSettings
             switch (message.data.MessageType) {
                 case 'filterResults':
                     if (message.data.Data.length>0) {
-                        tmp = [...this.tmpResults, ...message.data.Data]
-                        this.tmpResults = tmp
+                        this.tmpResults = [...this.tmpResults, ...message.data.Data]
                     }
                     this.clearAllFilters = false
                     this.filterStrategy.isCurrentlyFiltering=true
@@ -1404,7 +1492,7 @@ export default shiftSettings
                         this.sortStrategy.isCurrentlySorting = true
                         this.sortStrategy.columnBeingSorted = message.data.Column
 
-                        this.highestCountLoaded = this.getInitialRowsPerPage();
+                        this.highestCountLoaded = this.getRowsPerPage();
                         this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                         this.filterCount = 0
                         this.tmpResults = []
@@ -1424,6 +1512,57 @@ export default shiftSettings
                         this.ww_evenSortWorker.terminate()
                     }
                     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
                     break;
                 case 'filterTerminated':
                     this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
@@ -1434,18 +1573,24 @@ export default shiftSettings
                             this.numberOfTerminatedFilters = 0
                             this.isDoneFiltering=true
                         } else {
-                            this.filteredData = this.tmpResults
-                            this.highestCountLoaded = this.getInitialRowsPerPage();
-                            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                            this.filterCount = 0
+                            this.workingDataSet = this.tmpResults
                             this.numberOfTerminatedFilters = 0
                             this.tmpResults = []
                             this.isDoneFiltering=true
-                            if (this.filteredData.length>this.sliderCount) {
+                            if (this.cmpDataSet>this.sliderCount) {
                                 this.reConfigurePagination(this.sliderCount)
                             } else {
-                                this.reConfigurePagination(this.filteredData.length)
+                                this.reConfigurePagination(this.cmpDataSet.length)
                             }
+                            if (this.gridSettings.pagination.MaxPageNumberPossible===this.gridSettings.pagination.MaxRecordsViewable) {
+                                this.settings.maxIndex = this.cmpDataSet.length-1    
+                            } else {
+                                this.settings.maxIndex = this.getRowsPerPage()
+                            }
+                            
+                            this.totalHeight = (this.settings.maxIndex - this.settings.minIndex ) * this.settings.itemHeight
+
+                            this.runScroller({target:{scrollTop:0}})
                         }
                     }
                     break;
@@ -1453,6 +1598,27 @@ export default shiftSettings
                     break;
             }
         },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         handleClearFilter(columnIndex){
             if(this.gridSettings.developmentMode.Enabled){return} 
             if(this.filterStrategy.isCurrentlyFiltering){
@@ -1461,10 +1627,10 @@ export default shiftSettings
                     if (this.sortStrategy.isCurrentlySorting) {
                             const split = this.sortStrategy.strategy.split('^^')
                             this.filteredData = this.sortedData[split[0]][split[1]]
-                            this.highestCountLoaded = this.getInitialRowsPerPage();
+                            this.highestCountLoaded = this.getRowsPerPage();
                             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
                     } else {
-                            this.highestCountLoaded = this.getInitialRowsPerPage();
+                            this.highestCountLoaded = this.getRowsPerPage();
                             this.filteredData = []
                             this.filteredData = this.fullDS 
                             this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)                        
@@ -1593,9 +1759,9 @@ export default shiftSettings
             }
             this.fullDS = tmp            
             if(this.gridSettings.pagination.Enabled){
-                this.settings.maxIndex = this.getInitialRowsPerPage()
+                this.settings.maxIndex = this.getRowsPerPage()
             } else {
-                this.settings.maxIndex = this.fullDS.length-1
+                this.settings.maxIndex = this.cmpDataSet-1 
             }
 
         },
@@ -1717,19 +1883,20 @@ export default shiftSettings
 
     },        
     async mounted(){
-        console.log('mounted', new Date())
         this.processConfig();
         this.processData();
         this.boolGridWillScroll = this.gridWillScroll()
         this.calculateColumnWidths()
-        this.gridSettings.pagination.Enabled?this.initializePaging(this.getInitialRowsPerPage()):null
+        this.gridSettings.pagination.Enabled?this.initializePaging(this.getRowsPerPage()):null
         this.headerHeight = this.calculateHeightOfHeaderRow()
-        this.calculateNumRows()
+        this.settings.amount = this.calculateNumRows()
         this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
         this.$refs.viewportElement.addEventListener('scroll',this.runScroller)
-        this.$refs.viewportElement.scrollTop = this.initialPosition
+        
         if(!this.initialPosition){
-            this.runScroller({target:{scrollTop:0}})
+            this.runScroller({target:{scrollTop:0}}) //this will also run the scroller
+        } else {
+            this.$refs.viewportElement.scrollTop = this.initialPosition //this will execute the scroller
         }
         
         if(this.gridSettings.developmentMode.Enabled){

@@ -3,10 +3,10 @@ let shiftSettings = {
         Enabled:false
     },
     size:{
-        GridWidth:'2500px', //px value of width
-        GridWidthValue:2500,
-        GridHeight:'1200px', //px value of height
-        GridHeightValue:1200, //int value used for calculations
+        GridWidth:'1800px', //px value of width
+        GridWidthValue:1800,
+        GridHeight:'1000px', //px value of height
+        GridHeightValue:1000, //int value used for calculations
     },
     header:{
         Enabled:true
@@ -59,8 +59,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:0,
-            Width:'333px',
-            WidthValue:333,
+            Width:'216px',
+            WidthValue:216,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -69,8 +69,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:1,
-            Width:'333px',
-            WidthValue:333,
+            Width:'216px',
+            WidthValue:216,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -79,8 +79,8 @@ let shiftSettings = {
         {
             ColumnHeader:'my field',
             Index:2,
-            Width:'333px',
-            WidthValue:333,
+            Width:'216px',
+            WidthValue:216,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -99,8 +99,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:4,
-            Width:'333px',
-            WidthValue:333,
+            Width:'216px',
+            WidthValue:216,
             IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
@@ -109,8 +109,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:5,
-            Width:'333px',
-            WidthValue:333,
+            Width:'216px',
+            WidthValue:216,
             IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
@@ -119,8 +119,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:6,
-            Width:'333px',
-            WidthValue:333,
+            Width:'216px',
+            WidthValue:216,
             IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',

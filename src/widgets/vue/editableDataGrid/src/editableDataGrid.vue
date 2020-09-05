@@ -1204,11 +1204,19 @@ export default shiftSettings
         },
         handleChangeNumberPerPage(event){
             if(this.gridSettings.developmentMode.Enabled){return} 
+            let scrlTop = this.$refs.viewportElement.scrollTop
+            if (event.target.value<this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)
+            {
+                scrlTop = 0
+            }
             this.weAreUsingTheSlider=true
             let count = parseInt(event.target.value)
             this.sliderCount = count
             this.reConfigurePagination(count);
-            
+            this.settings.minIndex = this.gridSettings.pagination.MinRecordsViewable
+            this.settings.maxIndex = this.settings.minIndex + this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+            this.totalHeight = (this.settings.maxIndex - this.settings.minIndex ) * this.settings.itemHeight            
+            this.runScroller({target:{scrollTop:scrlTop}})
 
         },            
         handleNextClick(isASingleMove){

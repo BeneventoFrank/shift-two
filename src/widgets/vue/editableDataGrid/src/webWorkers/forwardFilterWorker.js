@@ -50,7 +50,6 @@ export default () => {
                 break;
             case 'returnInitialData':
                 postMessage({'MessageType':'originalData', 'Data':originalData})
-                postMessage({'MessageType':'filterTerminated'})
                 break;
             default:
                 break;

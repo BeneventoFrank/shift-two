@@ -897,18 +897,139 @@ export default {
         resetScroll(){
             this.$refs.viewportElement.scrollTop=0;
         },
-
 ///////End Helper Functions////////    
 
+///////Filter Code/////////
 
+        handleApplyFilter(strategy){
+            if(this.gridSettings.developmentMode.Enabled){return} 
 
+            const addFilter = (col,filter) =>{ 
+                this.filterStrategy.isCurrentlyFiltering = true
+                this.filterStrategy.filters.push(`${col}^^${filter}`)
+                this.filterStrategy.columnsBeingFiltered.push(col)
+            }
+            const updateFilter = (col,filter) =>{
+                this.filterStrategy.isCurrentlyFiltering = true
+                for (let i = 0; i < this.filterStrategy.filters.length; i++) {
+                    let split = this.filterStrategy.filters[i].split('^^')
+                    if(split[0]===col){
+                        this.filterStrategy.filters[i] = `${col}^^${filter}`
+                        break;
+                    }
+                }
+            }
+            let split = strategy.split('^^')
+            let col = split[0]
+            let filter = split[1]
+            if(this.filterStrategy.isCurrentlyFiltering){
+                if(this.filterStrategy.columnsBeingFiltered.includes(col)){
+                    updateFilter(col,filter)
+                    this.isDoneFiltering=false
+                    if(this.filterStrategy.columnsBeingFiltered.length>1){ /////////////////////todo refactor these ?
+                        this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    } 
+                    if(this.filterStrategy.columnsBeingFiltered.length===1){ 
+                        this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                        this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                        this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
+                        this.ww_reverseWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
+                    } 
+                } else {
+                    addFilter(col,filter)
+                    this.isDoneFiltering=false
+                    this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
+                    this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
+                    this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true}) 
+                    this.ww_reverseWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true}) 
+                }
+            } else {
+                //then we are adding the only filter
+                addFilter(col,filter)
+                this.isDoneFiltering=false
+                this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
+                this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
+                this.ww_reverseWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
+            }
+        },
+        clearFilters(){
+            this.filterStrategy = {isCurrentlyFiltering:false, filters:[], columnsBeingFiltered:[]}
+        },
+        handleMessage(message){
+            const setMinAndScroll = (count) => {
+                this.reConfigurePagination(count)
+                const min = this.gridSettings.pagination.MinRecordsViewable
+                const max = this.settings.minIndex + this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+                this.setGridState(min,max)
+                this.runScroller({target:{scrollTop:0}})
+            }
 
+            switch (message.data.MessageType) {
+                case 'filterResults':
+                case 'allFiltersApplied':   
+                console.log("filter results")
+                    if (message.data.Data.length>0) {this.tmpResults = [...this.tmpResults, ...message.data.Data]}
+                    break;
+                case 'originalData': 
+                    this.clearFilters()
+                    setMinAndScroll(this.cmpDataSet.length>this.sliderCount?this.sliderCount:this.cmpDataSet.length)
+                    break;
+                case 'filterTerminated':
+                    this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
+                    if(this.numberOfTerminatedFilters===4)    
+                    {
+                        this.filterStrategy.isCurrentlyFiltering=true
+                        if(this.sortStrategy.isCurrentlySorting===true){
+                            this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData', 'SortStrategy':this.sortStrategy.strategy, 'Data': this.tmpResults})
+                            this.numberOfTerminatedFilters = 0
+                            this.isDoneFiltering=true
+                        } else {
+                            console.log('what is the shit', this.tmpResults)
+                            this.workingDataSet = this.tmpResults
+                            this.numberOfTerminatedFilters = 0
+                            this.tmpResults = []
+                            this.isDoneFiltering=true
+                            setMinAndScroll(this.cmpDataSet.length>this.sliderCount?this.sliderCount:this.cmpDataSet.length)
+                            
+                        }
+                    }
+                    break;
 
+                                                                                                                    // case 'sortComplete':
+                                                                                                                    //         this.filteredData = [...message.data.Data]
+                                                                                                                    //         this.sortStrategy = {}
+                                                                                                                    //         this.sortStrategy.strategy = message.data.Strategy
+                                                                                                                    //         this.sortStrategy.isCurrentlySorting = true
+                                                                                                                    //         this.sortStrategy.columnBeingSorted = message.data.Column
 
-
-
-
-
+                                                                                                                    //         this.highestCountLoaded = this.getRowsPerPage();
+                                                                                                                    //         this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                                                                                                                    //         this.filterCount = 0
+                                                                                                                    //         this.tmpResults = []
+                                                                                                                    //         this.isDoneSorting = true
+                                                                                                                    //         this.reConfigurePagination(this.sliderCount)
+                                                                                                                    //     break;
+                                                                                                                    // case 'dataSorted':
+                                                                                                                    //     this.tmpResultsSort= {...this.tmpResultsSort, ...message.data.Data}
+                                                                                                                    //     break;
+                                                                                                                    // case 'sortTerminated':
+                                                                                                                    //     this.numberOfTerminatedSorts = this.numberOfTerminatedSorts +1                      
+                                                                                                                    //     if(this.numberOfTerminatedSorts===2)    
+                                                                                                                    //     {
+                                                                                                                    //         this.sortedData = this.tmpResultsSort
+                                                                                                                    //         this.isDonePreSorting = true
+                                                                                                                    //         this.ww_oddSortWorker.terminate()
+                                                                                                                    //         this.ww_evenSortWorker.terminate()
+                                                                                                                    //     }
+                                                                                                                    // break;
+                default:
+                    break;
+            }
+        },
 
 
 
@@ -1589,148 +1710,7 @@ export default shiftSettings
                 return 'center'
            }
         },
-        handleMessage(message){
-            let tmp = []
-            switch (message.data.MessageType) {
-                case 'filterResults':
-                    if (message.data.Data.length>0) {
-                        this.tmpResults = [...this.tmpResults, ...message.data.Data]
-                    }
-                    this.clearAllFilters = false
-                    this.filterStrategy.isCurrentlyFiltering=true
-                    break;
-                case 'allFiltersApplied':
-                    if (message.data.Data.length>0) {
-                        tmp = [...this.tmpResults, ...message.data.Data]
-                        this.tmpResults = tmp
-                    }
-                    this.clearAllFilters = false
-                    this.filterStrategy.isCurrentlyFiltering=true
-                    break;                                
-                
-                
-                case 'originalData': 
-                    if (message.data.Data.length>0) {
-                        this.tmpResults = [...this.tmpResults, ...message.data.Data]
-                    }
-                    this.clearFilters()
-                    break;
-                case 'sortComplete':
-                        this.filteredData = [...message.data.Data]
-                        this.sortStrategy = {}
-                        this.sortStrategy.strategy = message.data.Strategy
-                        this.sortStrategy.isCurrentlySorting = true
-                        this.sortStrategy.columnBeingSorted = message.data.Column
-
-                        this.highestCountLoaded = this.getRowsPerPage();
-                        this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                        this.filterCount = 0
-                        this.tmpResults = []
-                        this.isDoneSorting = true
-                        this.reConfigurePagination(this.sliderCount)
-                    break;
-                case 'dataSorted':
-                    this.tmpResultsSort= {...this.tmpResultsSort, ...message.data.Data}
-                    break;
-                case 'sortTerminated':
-                    this.numberOfTerminatedSorts = this.numberOfTerminatedSorts +1                      
-                    if(this.numberOfTerminatedSorts===2)    
-                    {
-                        this.sortedData = this.tmpResultsSort
-                        this.isDonePreSorting = true
-                        this.ww_oddSortWorker.terminate()
-                        this.ww_evenSortWorker.terminate()
-                    }
-                    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    break;
-                case 'filterTerminated':
-                    this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
-                    if(this.numberOfTerminatedFilters===4)    
-                    {
-                        if(this.sortStrategy.isCurrentlySorting===true){
-                            this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData', 'SortStrategy':this.sortStrategy.strategy, 'Data': this.tmpResults})
-                            this.numberOfTerminatedFilters = 0
-                            this.isDoneFiltering=true
-                        } else {
-                            this.workingDataSet = this.tmpResults
-                            this.numberOfTerminatedFilters = 0
-                            this.tmpResults = []
-                            this.isDoneFiltering=true
-
-
-                            if (this.cmpDataSet.length>this.sliderCount) {
-                                this.reConfigurePagination(this.sliderCount)
-                            } else {
-                                this.reConfigurePagination(this.cmpDataSet.length)
-                            }
-
-                            console.log("what can i even say ", this.gridSettings.pagination.MinRecordsViewable)
-                            this.settings.minIndex = this.gridSettings.pagination.MinRecordsViewable
-                            this.settings.maxIndex = this.settings.minIndex + this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
-                            console.log('what are the values', this.settings.maxIndex, this.settings.minIndex , this.settings.itemHeight)
-                            this.totalHeight = (this.settings.maxIndex - this.settings.minIndex ) * this.settings.itemHeight
-                            
-                            console.log('FILTER TERMINATED I AM ABOUT TO RUN???? ')
-                            this.runScroller({target:{scrollTop:0}})
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-        },
-
+      
 
 
 
@@ -1800,69 +1780,7 @@ export default shiftSettings
             
         },
         
-        handleApplyFilter(strategy){
-            if(this.gridSettings.developmentMode.Enabled){return} 
-            const addFilter = (col,filter) =>{ 
-                this.filterStrategy.isCurrentlyFiltering = true
-                this.filterStrategy.filters.push(`${col}^^${filter}`)
-                this.filterStrategy.columnsBeingFiltered.push(col)
-            }
-            const updateFilter = (col,filter) =>{
-                this.filterStrategy.isCurrentlyFiltering = true
-                for (let i = 0; i < this.filterStrategy.filters.length; i++) {
-                    let split = this.filterStrategy.filters[i].split('^^')
-                    if(split[0]===col){
-                        this.filterStrategy.filters[i] = `${col}^^${filter}`
-                        break;
-                    }
-                }
-            }
-            let split = strategy.split('^^')
-            let col = split[0]
-            let filter = split[1]
-            if(this.filterStrategy.isCurrentlyFiltering){ //if we are filtering
-                if(this.filterStrategy.columnsBeingFiltered.includes(col)){
-                    updateFilter(col,filter)
-                    this.isDoneFiltering=false
-
-                    if(this.filterStrategy.columnsBeingFiltered.length>1){ 
-                        this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                        this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                        this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                        this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                    } 
-                    if(this.filterStrategy.columnsBeingFiltered.length===1){ 
-                        this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
-                        this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
-                        this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
-                        this.ww_reverseWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
-                    } 
-   
-                } else {
-                    addFilter(col,filter)
-                    this.isDoneFiltering=false
-                    this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
-                    this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true})  
-                    this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true}) 
-                    this.ww_reverseWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':true}) 
-                }
-            } else {
-                //then we are adding the only filter
-                    addFilter(col,filter)
-                    this.isDoneFiltering=false
-                    this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
-                    this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
-                    this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
-                    this.ww_reverseWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 
-            }
-        },
-        clearFilters(){
-            this.filterStrategy = {
-                                    isCurrentlyFiltering:false,
-                                    filters:[],
-                                    columnsBeingFiltered:[]
-                                  }
-        },
+       
 
         
         getCustomWidths(){

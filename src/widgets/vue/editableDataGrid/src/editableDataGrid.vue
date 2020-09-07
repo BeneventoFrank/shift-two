@@ -1080,6 +1080,7 @@ export default {
                     this.numberOfTerminatedSorts = this.numberOfTerminatedSorts +1                      
                     if(this.numberOfTerminatedSorts===2)    
                     {
+                        console.log('sorting finished')
                         this.sortedData = this.tmpResultsSort
                         this.isDonePreSorting = true
                         this.ww_oddSortWorker.terminate()
@@ -1110,9 +1111,13 @@ export default {
                             this.sortStrategy.isCurrentlySorting = true
                             this.sortStrategy.columnBeingSorted = tmp
                             this.sortStrategy.direction = split[1]
-                            this.filteredData = []
-                            this.filteredData = this.sortedData[tmp][split[1]]
-                            this.dataSlice = this.filteredData.slice(0,this.getRowsPerPage())
+                                console.log(this.sortedData, tmp, split)
+                            this.workingDataSet = this.sortedData[tmp][split[1]]
+                            const min = this.gridSettings.pagination.MinRecordsViewable;
+                            const max = this.gridSettings.pagination.MaxRecordsViewable;
+                            this.setGridState(min,max)
+                            this.resetScroll()
+                            this.runScroller({target:{scrollTop:0}})
                             this.isDoneSorting = true;
                         } else {
                             this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})

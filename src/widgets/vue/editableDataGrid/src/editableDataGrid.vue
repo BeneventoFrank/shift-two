@@ -1062,34 +1062,30 @@ export default {
                         }
                     }
                     break;
-
-                                                                                                                    // case 'sortComplete':
-                                                                                                                    //         this.filteredData = [...message.data.Data]
-                                                                                                                    //         this.sortStrategy = {}
-                                                                                                                    //         this.sortStrategy.strategy = message.data.Strategy
-                                                                                                                    //         this.sortStrategy.isCurrentlySorting = true
-                                                                                                                    //         this.sortStrategy.columnBeingSorted = message.data.Column
-
-                                                                                                                    //         this.highestCountLoaded = this.getRowsPerPage();
-                                                                                                                    //         this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                                                                                                                    //         this.filterCount = 0
-                                                                                                                    //         this.tmpResults = []
-                                                                                                                    //         this.isDoneSorting = true
-                                                                                                                    //         this.reConfigurePagination(this.sliderCount)
-                                                                                                                    //     break;
-                                                                                                                    // case 'dataSorted':
-                                                                                                                    //     this.tmpResultsSort= {...this.tmpResultsSort, ...message.data.Data}
-                                                                                                                    //     break;
-                                                                                                                    // case 'sortTerminated':
-                                                                                                                    //     this.numberOfTerminatedSorts = this.numberOfTerminatedSorts +1                      
-                                                                                                                    //     if(this.numberOfTerminatedSorts===2)    
-                                                                                                                    //     {
-                                                                                                                    //         this.sortedData = this.tmpResultsSort
-                                                                                                                    //         this.isDonePreSorting = true
-                                                                                                                    //         this.ww_oddSortWorker.terminate()
-                                                                                                                    //         this.ww_evenSortWorker.terminate()
-                                                                                                                    //     }
-                                                                                                                    // break;
+                case 'sortComplete':
+                        this.workingDataSet = [...message.data.Data]
+                        this.sortStrategy.strategy = message.data.Strategy
+                        this.sortStrategy.isCurrentlySorting = true
+                        this.reConfigurePagination(this.sliderCount) //I AM NOT SURE THIS SHOULD BE SLIDER COUNT?? WHY?
+                        this.sortStrategy.columnBeingSorted = message.data.Column
+                        this.setGridState(this.gridSettings.pagination.MinRecordsViewable,this.gridSettings.pagination.MaxRecordsViewable)
+                        this.runScroller({target:{scrollTop:0}})
+                        this.resetScroll()
+                        this.isDoneSorting = true
+                    break;
+                case 'dataSorted':
+                    this.tmpResultsSort= {...this.tmpResultsSort, ...message.data.Data}
+                    break;
+                case 'sortTerminated':
+                    this.numberOfTerminatedSorts = this.numberOfTerminatedSorts +1                      
+                    if(this.numberOfTerminatedSorts===2)    
+                    {
+                        this.sortedData = this.tmpResultsSort
+                        this.isDonePreSorting = true
+                        this.ww_oddSortWorker.terminate()
+                        this.ww_evenSortWorker.terminate()
+                    }
+                    break;
                 default:
                     break;
             }

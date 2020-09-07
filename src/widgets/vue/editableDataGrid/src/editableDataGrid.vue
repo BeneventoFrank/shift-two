@@ -569,7 +569,8 @@ export default {
             return (this.gridSettings.pagination.MaxPageNumberPossible>1?true:false)&&(this.gridSettings.pagination.PageNumberCurrentlyViewing<this.gridSettings.pagination.MaxPageNumberPossible)
         },
         cmpDataSet:function(){
-            if(this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlysorting) return this.workingDataSet
+            console.log('compDataset which one? ', this.filterStrategy.isCurrentlyFiltering, this.sortStrategy.isCurrentlySorting)
+            if(this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting) return this.workingDataSet
             return this.fullDS
         }
     },
@@ -598,6 +599,7 @@ export default {
             return tmp
         },
 ///////End Processors////////    
+
 ///////Helper Functions////////
         getRowsPerPage(){
             if (this.gridSettings.pagination.Enabled) {
@@ -720,17 +722,14 @@ export default {
             this.data = []
         },
         runScroller({target:{scrollTop}}){
-            window.requestAnimationFrame(()=>{
-                const index = Math.max(this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight),0)
-                console.log("sending in ", index, this.bufferedItems    )
-                const data = this.getData(index, this.bufferedItems)
-                const topPad = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
-                const topPaddingHeight = this.boolGridWillScroll?topPad:0
-                const bottomPad = Math.max(this.totalHeight - topPaddingHeight - (data.length * this.settings.itemHeight), 0)
-                this.bottomPaddingHeight= this.boolGridWillScroll?bottomPad:0
-                this.topPaddingHeight = topPaddingHeight
-                this.data = data
-            })
+            const index = Math.max(this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight),0)
+            const data = this.getData(index, this.bufferedItems)
+            const topPad = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
+            const topPaddingHeight = this.boolGridWillScroll?topPad:0
+            const bottomPad = Math.max(this.totalHeight - topPaddingHeight - (data.length * this.settings.itemHeight), 0)
+            this.bottomPaddingHeight= this.boolGridWillScroll?bottomPad:0
+            this.topPaddingHeight = topPaddingHeight
+            this.data = data
         },
         configureWebWorkers(){
             let tmpFor1 = []
@@ -787,7 +786,6 @@ export default {
             const data = []
             const start = offset
             const end = Math.min(offset + limit, this.settings.maxIndex)
-            console.log('bottom line this is the start and end ', start ,' and ', end)
             if (start <= end) {
                 for (let i = start; i < end; i++) {
                     if (this.cmpDataSet[i]){
@@ -880,6 +878,7 @@ export default {
             const max = isTheLastPage()?this.gridSettings.pagination.TotalNumberOfRecords:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
             this.setGridState(min,max)            
             this.runScroller({target:{scrollTop:0}})
+            this.$refs.viewportElement.scrollTop = this.$refs.viewportElement.scrollTop-1
 
         },            
         reConfigurePagination(count){
@@ -897,10 +896,12 @@ export default {
         resetScroll(){
             this.$refs.viewportElement.scrollTop=0;
         },
+        handleShowCancelEye(){
+            this.isHovering = !this.isHovering
+        },        
 ///////End Helper Functions////////    
 
 ///////Filter Code/////////
-
         handleApplyFilter(strategy){
             if(this.gridSettings.developmentMode.Enabled){return} 
 
@@ -959,24 +960,87 @@ export default {
         clearFilters(){
             this.filterStrategy = {isCurrentlyFiltering:false, filters:[], columnsBeingFiltered:[]}
         },
+        handleClearFilter(columnIndex){
+            if(this.gridSettings.developmentMode.Enabled||!this.filterStrategy.isCurrentlyFiltering){return} 
+            const clearAFilter= (col)=>{
+                let tmp = []
+                let tmpCol = []
+                for (let i = 0; i < this.filterStrategy.filters.length; i++) {
+                    let split = this.filterStrategy.filters[i].split('^^')
+                    if(split[0]!==col.toString()){
+                        tmpCol.push(split[0])
+                        tmp.push(this.filterStrategy.filters[i])
+                    }
+                }
+                this.filterStrategy = {
+                                        isCurrentlyFiltering:true,
+                                        filters:tmp,
+                                        columnsBeingFiltered:tmpCol
+                                    }
+            }
+            if(this.filterStrategy.columnsBeingFiltered.length===1&&this.filterStrategy.columnsBeingFiltered[0] === columnIndex.toString()){
+                this.clearFilters() //will reset the filter object completely
+                if (this.sortStrategy.isCurrentlySorting) {
+                        const split = this.sortStrategy.strategy.split('^^')
+                        this.filteredData = this.sortedData[split[0]][split[1]]
+                        this.highestCountLoaded = this.getRowsPerPage();
+                        this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                } else {
+                        const min = this.gridSettings.pagination.MinRecordsViewable
+                        const max = this.cmpDataSet.length>this.sliderCount?this.sliderCount:this.cmpDataSet.length
+                        this.setGridState(min,max)
+                        this.runScroller({target:{scrollTop:0}})
+                        this.resetScroll();
+
+                }
+            } else {
+                //then clear a filter was called on a column but other filters are applied. 
+                clearAFilter(columnIndex)
+                this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+            }
+
+            if(this.sortStrategy.isCurrentlySorting===true){
+                this.ww_sortWorker.postMessage({'MessageType':'applySort', 'SortStrategy':this.sortStrategy.strategy})
+            } 
+            this.reConfigurePagination(this.sliderCount)               
+        },
+        handleClearAllFilters(){
+            this.sortStrategy = { //todo. refactor this into a function 
+                isCurrentlySorting:false,
+                strategy:'',
+                columnBeingSorted:''
+            }
+            this.clearFilters();
+            this.clearAllFilters = true //TODO. follow this down and see if its needed
+            const min = this.gridSettings.pagination.MinRecordsViewable
+            const max = this.cmpDataSet.length>this.sliderCount?this.sliderCount:this.cmpDataSet.length
+            this.reConfigurePagination(max)                    
+            this.setGridState(min,max)
+            this.runScroller({target:{scrollTop:0}})
+            this.resetScroll();            
+            
+        },
+///////End Filter Code/////////
+
+///////Worker Messaging Code/////////
         handleMessage(message){
             const setMinAndScroll = (count) => {
+                console.log("count received  ", count)
                 this.reConfigurePagination(count)
                 const min = this.gridSettings.pagination.MinRecordsViewable
-                const max = this.settings.minIndex + this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
+                const max = this.gridSettings.pagination.MaxRecordsViewable
                 this.setGridState(min,max)
                 this.runScroller({target:{scrollTop:0}})
+                this.resetScroll()
             }
 
             switch (message.data.MessageType) {
                 case 'filterResults':
                 case 'allFiltersApplied':   
-                console.log("filter results")
                     if (message.data.Data.length>0) {this.tmpResults = [...this.tmpResults, ...message.data.Data]}
-                    break;
-                case 'originalData': 
-                    this.clearFilters()
-                    setMinAndScroll(this.cmpDataSet.length>this.sliderCount?this.sliderCount:this.cmpDataSet.length)
                     break;
                 case 'filterTerminated':
                     this.numberOfTerminatedFilters = this.numberOfTerminatedFilters +1                      
@@ -1030,9 +1094,56 @@ export default {
                     break;
             }
         },
+///////End Worker Messaging Code/////////
 
+///////Sorting Code/////////
+        handleColumnSort(strategy){
+            if(this.gridSettings.developmentMode.Enabled){return} 
+            this.isDoneSorting = false
+           
+            if(strategy !== ''){
+                    if(this.filterStrategy.isCurrentlyFiltering){
+                        this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})
+                    } else {
+                        const split = strategy.split('^^')
+                        const tmp = parseInt(split[0])
+                        if(this.isDonePreSorting&&this.gridSettings.columns[tmp].IsPreSortEnabled)
+                        {
+                            this.sortStrategy = {}
+                            this.sortStrategy.strategy = strategy
+                            this.sortStrategy.isCurrentlySorting = true
+                            this.sortStrategy.columnBeingSorted = tmp
+                            this.sortStrategy.direction = split[1]
+                            this.filteredData = []
+                            this.filteredData = this.sortedData[tmp][split[1]]
+                            this.dataSlice = this.filteredData.slice(0,this.getRowsPerPage())
+                            this.isDoneSorting = true;
+                        } else {
+                            this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
+                        }
+                    }
+            } else {
+                this.sortStrategy={
+                    isCurrentlySorting:false,
+                    strategy:'',
+                    columnBeingSorted:null
+                }
+                this.isDoneSorting = true;
+                if(this.filterStrategy.isCurrentlyFiltering){
+                    this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                    this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                } else {
+                    this.highestCountLoaded = this.getRowsPerPage();
+                    this.filteredData = []
+                    this.filteredData = this.fullDS 
+                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                }
+            }
 
-
+        },
+///////End Sorting Code/////////
 
 
 
@@ -1560,27 +1671,7 @@ export default shiftSettings
         handleInitialValue(event){
             this.sliderCount = event
         },
-        handleClearAllFilters(){
-            this.sortStrategy = {
-                isCurrentlySorting:false,
-                strategy:'',
-                columnBeingSorted:''
-            }
-            this.filterStrategy = {
-                isCurrentlyFiltering:false,
-                filters:[],
-                columnsBeingFiltered:[]
-            }
-            this.clearAllFilters = true
-            this.highestCountLoaded = this.getRowsPerPage();
-            this.filteredData = []
-            this.filteredData = this.fullDS 
-            this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)   
-            this.reConfigurePagination(this.sliderCount)                    
-        },
-        handleShowCancelEye(){
-            this.isHovering = !this.isHovering
-        },
+
         debounceInput: debounce(function (event){
             this.gridSettings.size.GridWidth = `${event.target.value}px`
             this.gridSettings.size.GridWidthValue = parseInt(event.target.value)
@@ -1650,52 +1741,6 @@ export default shiftSettings
         },750),      
 
 
-        handleColumnSort(strategy){
-            if(this.gridSettings.developmentMode.Enabled){return} 
-            this.isDoneSorting = false
-           
-            if(strategy !== ''){
-                    if(this.filterStrategy.isCurrentlyFiltering){
-                        this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})
-                    } else {
-                        const split = strategy.split('^^')
-                        const tmp = parseInt(split[0])
-                        if(this.isDonePreSorting&&this.gridSettings.columns[tmp].IsPreSortEnabled)
-                        {
-                            this.sortStrategy = {}
-                            this.sortStrategy.strategy = strategy
-                            this.sortStrategy.isCurrentlySorting = true
-                            this.sortStrategy.columnBeingSorted = tmp
-                            this.sortStrategy.direction = split[1]
-                            this.filteredData = []
-                            this.filteredData = this.sortedData[tmp][split[1]]
-                            this.dataSlice = this.filteredData.slice(0,this.getRowsPerPage())
-                            this.isDoneSorting = true;
-                        } else {
-                            this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
-                        }
-                    }
-            } else {
-                this.sortStrategy={
-                    isCurrentlySorting:false,
-                    strategy:'',
-                    columnBeingSorted:null
-                }
-                this.isDoneSorting = true;
-                if(this.filterStrategy.isCurrentlyFiltering){
-                    this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                    this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                    this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                    this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                } else {
-                    this.highestCountLoaded = this.getRowsPerPage();
-                    this.filteredData = []
-                    this.filteredData = this.fullDS 
-                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                }
-            }
-
-        },
         handleFilterClosed(){
             if(this.gridSettings.developmentMode.Enabled){return} 
             this.filterCount = 0
@@ -1730,56 +1775,6 @@ export default shiftSettings
 
 
 
-
-        handleClearFilter(columnIndex){
-            if(this.gridSettings.developmentMode.Enabled||!this.filterStrategy.isCurrentlyFiltering){return} 
-            const clearAFilter= (col)=>{
-                let tmp = []
-                let tmpCol = []
-                for (let i = 0; i < this.filterStrategy.filters.length; i++) {
-                    let split = this.filterStrategy.filters[i].split('^^')
-                    if(split[0]!==col.toString()){
-                        tmpCol.push(split[0])
-                        tmp.push(this.filterStrategy.filters[i])
-                    }
-                }
-                this.filterStrategy = {
-                                        isCurrentlyFiltering:true,
-                                        filters:tmp,
-                                        columnsBeingFiltered:tmpCol
-                                    }
-            }
-            if(this.filterStrategy.columnsBeingFiltered.length===1&&this.filterStrategy.columnsBeingFiltered[0] === columnIndex.toString()){
-                this.clearFilters() //will reset the filter object completely
-                if (this.sortStrategy.isCurrentlySorting) {
-                        const split = this.sortStrategy.strategy.split('^^')
-                        this.filteredData = this.sortedData[split[0]][split[1]]
-                        this.highestCountLoaded = this.getRowsPerPage();
-                        this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
-                } else {
-                        this.settings.minIndex = this.gridSettings.pagination.MinRecordsViewable
-                        this.settings.maxIndex = this.settings.minIndex + this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
-                        this.totalHeight = (this.settings.maxIndex - this.settings.minIndex ) * this.settings.itemHeight
-                        
-                        console.log('I AM ABOUT TO RUN after clearing???? ')
-                        this.runScroller({target:{scrollTop:0}})
-                }
-            } else {
-                //then clear a filter was called on a column but other filters are applied. 
-                clearAFilter(columnIndex)
-                this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-            }
-
-            if(this.sortStrategy.isCurrentlySorting===true){
-                this.ww_sortWorker.postMessage({'MessageType':'applySort', 'SortStrategy':this.sortStrategy.strategy})
-            } 
-            this.reConfigurePagination(this.sliderCount)               
-            
-        },
-        
        
 
         

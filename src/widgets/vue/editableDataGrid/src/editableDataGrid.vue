@@ -36,8 +36,6 @@
                     <div ref="title" style="width:60%;"><span class='title' :style="`color:${gridSettings.colorScheme.GridTitleColor}`" v-if="gridSettings.title.Enabled" >{{gridSettings.title.Text}}</span></div>
                     <div style="width:20%;"></div>
                 </div>
-                
-
                 <div ref="headerRow" v-if="gridSettings.header.Enabled" :style="`width:100%;`">
                 <HeaderRow 
                                 @columnSort="handleColumnSort" 
@@ -54,44 +52,47 @@
                 </HeaderRow>
                 </div>
             </div>
-
-
-
-                
-                <div id='viewport' @scroll='runScroller' :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:auto; overflow-x:hidden;`">
-                    <div :style="`display:flex; flex-direction:column;`">
-                        <div :style="`height:${topPaddingHeight}px; `"></div>
-                        <div class='item'
-                            @mouseleave="()=>{hoverIndex=null}" 
-                            @mouseenter="()=>{hoverIndex=item.rowIndex}"     
-                            :style="`height:32px; display:flex; justify-content:center; 
-                                     background-color:${gridSettings.rows.HighlightRowEnabled&&item.rowIndex===hoverIndex?gridSettings.colorScheme.RowHighlightBackground:item.rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
-                                    
-                            `"
-                            :class="`row ${item.rowIndex%2===0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateLeft':''} ${item.rowIndex%2!==0&&shouldAnimate&&!gridSettings.developmentMode.Enabled?'animateRight':''} ${shouldReverseAnimate?'reverseAnimation':''}`" 
-                            v-for="(item) in data" :key="item.rowIndex">
-                            <div
-                                @mouseleave="()=>{cellHoverIndex=null}" 
-                                @mouseenter="()=>{cellHoverIndex=index}"
-                                v-for="(col,index) in item.data" :key="index"
-                                :style="`display:flex; align-items:center; height:100%;
-                                         width:${gridSettings.columns[index].Width};
-                                         justify-content:center;
-                                         background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
-                                    `">
-                                <span 
-                                  :style="` white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
-                                           color:${gridSettings.colorScheme.GridRowTextColor};
-                                           vertical-align:center;
-                                           text-align:${gridSettings.columns[index].Alignment};
-                                         `" 
-                                  > {{col}}{{item.rowIndex+1}}</span>
-                            </div>
+            
+            <div class='fade-in' v-show="gridLoaded" id='viewport' @scroll='runScroller' :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:auto; overflow-x:hidden;`">
+                <div :style="`display:flex; flex-direction:column;`">
+                    <div :style="`height:${topPaddingHeight}px; `"></div>
+                    <div class='item'
+                        @mouseleave="()=>{hoverIndex=null}" 
+                        @mouseenter="()=>{hoverIndex=item.rowIndex}"     
+                        :style="`height:32px; display:flex; justify-content:center; 
+                                    background-color:${gridSettings.rows.HighlightRowEnabled&&item.rowIndex===hoverIndex?gridSettings.colorScheme.RowHighlightBackground:item.rowIndex%2===0?gridSettings.colorScheme.GridRowEvenBackgroundColor:gridSettings.colorScheme.GridRowOddBackgroundColor} ;
+                                
+                        `"
+                        :class="`row`" 
+                        v-for="(item) in data" :key="item.rowIndex">
+                        <div
+                            @mouseleave="()=>{cellHoverIndex=null}" 
+                            @mouseenter="()=>{cellHoverIndex=index}"
+                            v-for="(col,index) in item.data" :key="index"
+                            :style="`display:flex; align-items:center; height:100%;
+                                        width:${gridSettings.columns[index].Width};
+                                        justify-content:center;
+                                        background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
+                                `">
+                            <span 
+                                :style="` white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
+                                        color:${gridSettings.colorScheme.GridRowTextColor};
+                                        vertical-align:center;
+                                        text-align:${gridSettings.columns[index].Alignment};
+                                        `" 
+                                > {{col}}{{item.rowIndex+1}}</span>
                         </div>
-                        <div :style="`height:${bottomPaddingHeight}px;`"></div>
                     </div>
+                    <div :style="`height:${bottomPaddingHeight}px;`"></div>
                 </div>
+            </div>
+            <div v-show="gridLoaded===false" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                <span style="margin-top:100px;">{{loadingMsg}}</span>
+                <br>
+                <img  src='./images/loader.gif' style='height:auto; width:100px;'>
+            </div>
         </div>
+
     </div>
 </div>
 </template>
@@ -125,6 +126,8 @@ export default {
     },
     data() {
         return {
+            loadingMsg:'Populating Grid Data..',
+            gridLoaded:false,
             workingDataSet:[],
             data:[],
             viewportHeight:0,
@@ -181,8 +184,6 @@ export default {
                 IsPreSortEnabled:false,
                 ChkAuto:true            
             },
-            shouldAnimate:false,
-            shouldReverseAnimate:false,
             headerHeight:0, //calculated total of the header use to dictate the height of datarow.
             fullDS:[],
             weAreUsingTheSlider:false,
@@ -256,6 +257,11 @@ export default {
             console.log('compDataset which one? ', this.filterStrategy.isCurrentlyFiltering, this.sortStrategy.isCurrentlySorting)
             if(this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting) return this.workingDataSet
             return this.fullDS
+        }
+    },
+    watch:{
+        isDonePreSorting: function(val){
+            this.gridLoaded = val
         }
     },
     methods: {
@@ -846,22 +852,24 @@ export default {
     async mounted(){
         this.gridSettings = this.processConfig()
         this.fullDS = this.processData()
+
         this.configureWebWorkers(this.cmpDataSet)
+        setTimeout(() => {
+            this.loadingMsg = 'Processing Filters And Sort..'
+        }, 1000);
         this.boolGridWillScroll = this.gridWillScroll()
         this.calculateColumnWidths()
         const rows = this.getRowsPerPage()
         this.initializePaging(rows)
         this.initializeSlider(rows)
+        setTimeout(() => {
+            this.loadingMsg = 'Finishing Up, Just A Sec..'
+        }, 2500);        
         this.settings.maxIndex = this.gridSettings.pagination.Enabled?rows:this.cmpDataSet.length
         this.headerHeight = this.calculateHeightOfHeaderRow()
         this.settings.amount = this.calculateNumRows()
         this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
         this.runScroller({target:{scrollTop:0}})   
-        this.shouldAnimate = true //make this a config setting.
-        setTimeout(() => {
-            this.shouldReverseAnimate=true   
-        }, 250);
-
     }
 };
 </script>
@@ -881,19 +889,6 @@ export default {
         .row{
             height:auto;
             max-height:30px;
-            transition:transform .5s;
-        }
-        .animateLeft{
-            transform: translate(-30px,0px)
-        }
-        .animateRight{
-            transform: translate(30px,0px)
-        }
-        .reverseAnimation{
-            transform: translate(0px,0px) 
-        }
-        .highlightRow{
-            background-color: tomato !important;
         }
         .dataRow{
             width:100%; 
@@ -970,5 +965,35 @@ export default {
         .item{
             
         }
+        .fade-in {
+        animation: fadeIn ease .4s;
+        -webkit-animation: fadeIn ease .4s;
+        -moz-animation: fadeIn ease .4s;
+        -o-animation: fadeIn ease .4s;
+        -ms-animation: fadeIn ease .4s;
+        }
+        @keyframes fadeIn {
+        0% {opacity:0;}
+        100% {opacity:1;}
+        }
 
+        @-moz-keyframes fadeIn {
+        0% {opacity:0;}
+        100% {opacity:1;}
+        }
+
+        @-webkit-keyframes fadeIn {
+        0% {opacity:0;}
+        100% {opacity:1;}
+        }
+
+        @-o-keyframes fadeIn {
+        0% {opacity:0;}
+        100% {opacity:1;}
+        }
+
+        @-ms-keyframes fadeIn {
+        0% {opacity:0;}
+        100% {opacity:1;}
+        }
 </style>

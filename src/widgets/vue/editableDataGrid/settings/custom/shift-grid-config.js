@@ -3,8 +3,8 @@ let shiftSettings = {
         Enabled:false
     },
     size:{
-        GridWidth:'2500px', //px value of width
-        GridWidthValue:2500,
+        GridWidth:'1200px', //px value of width
+        GridWidthValue:1200,
         GridHeight:'1000px', //px value of height
         GridHeightValue:1000, //int value used for calculations
     },
@@ -156,126 +156,7 @@ let shiftSettings = {
             DataType:'string',
             IsPreSortEnabled:true
         },
-        {
-            ColumnHeader:'Column',
-            Index:10,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:11,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:12,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:13,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:14,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:15,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:16,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:17,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:18,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:19,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:20,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
-        {
-            ColumnHeader:'Column',
-            Index:21,
-            Width:'113px',
-            WidthValue:113,
-            IsUsingACustomWidth:undefined,
-            Alignment:'center',
-            DataType:'string',
-            IsPreSortEnabled:true
-        },
+
 
     ]
 }

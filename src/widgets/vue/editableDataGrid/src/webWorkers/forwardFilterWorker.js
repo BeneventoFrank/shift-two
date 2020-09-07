@@ -7,7 +7,7 @@ export default () => {
         const strat = strategy.split('^^')
         const col = strat[0]
         const keyword = strat[1]
-         let tmp = []
+        let tmp = []
         for (let i = 0; i <= ds.length-1; i++) {
             if(ds[i].data[col].toString().toLowerCase().includes(keyword.toLowerCase())){
                 tmp.push(ds[i])
@@ -17,7 +17,9 @@ export default () => {
             filteredData = []
             filteredData = tmp
             postMessage({'MessageType':'filterResults', 'Column':col, 'Filter':strategy, 'Data':filteredData})
+            postMessage({'MessageType':'filterTerminated'})
         } else {
+            console.log("waht the fuck are you doing here!?")
             return tmp
         }
     }
@@ -35,8 +37,8 @@ export default () => {
                 } else {
                     tmp = originalData
                 }
+                console.log("calling filter DS with ", tmp, message.Strategy)
                 filterDS(tmp, message.Strategy)
-                postMessage({'MessageType':'filterTerminated'})
                 break;
             case 'applyAllFilters':
                 filterStrategy = message.Strategy

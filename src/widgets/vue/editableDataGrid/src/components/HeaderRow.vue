@@ -3,23 +3,24 @@
         <div style='width:100%; background-color:white;'>
             <div class="superHeader" :style="`width:100%;`">
                 <div :style="`width:${header.Width}; height:20px; display:flex; flex-direction:row; justify-content:space-between `" v-for="(header,index) in gridSettings.columns" :key="index">
-                    <span style='display:flex;flex-direction:row;' v-if="currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(index.toString())">
+                    <span style='display:flex;flex-direction:row;' v-if="currentFilters.columnsBeingFiltered.includes(index.toString())">
                         <div>
-                            <FilterSVG style="padding-left:10px" :height="11"></FilterSVG>
+                            <FilterSVG style="padding-left:10px" :color="gridSettings.colorScheme.ActiveIndicatorColor" :height="11"></FilterSVG>
                         </div>
                         <div style='padding-top:2px;'>
-                            <span class="filterText" :style="`text-align:left; margin-left:5px; color:${gridSettings.colorScheme.ActiveIndicatorColor}`">{{getFilterText(currentFilters.filters, index)}}</span>
+                            <span class="filterText" :style="`text-align:left; margin-left:5px; color:${gridSettings.colorScheme.ActiveIndicatorColor};`">{{getFilterText(currentFilters.filters, index)}}</span>
                         </div>
                     </span>
                     <span v-else>&nbsp;</span>
-                    <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === gridSettings.columns[index].Index">
+                    <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted.toString() === index.toString()">
                         <SortSVG style="padding-right:20px" :color="gridSettings.colorScheme.ActiveIndicatorColor" :height="11"></SortSVG>
                     </span>
                     <span v-else>&nbsp;</span>
                 </div>
             </div>
         </div>
-        <div :style="`width: 100%; position: relative; background-color:${applyBGColor&&!clearAllFilters?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 6px -5px black;`">
+        
+        <div :style="`width: 100%; position: relative; background-color:${gridSettings.colorScheme.GridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 6px -5px black;`">
             <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
                     <div :id="`header-${index}`" :ref="`header-${index}`" 
@@ -27,15 +28,13 @@
                                 justify-content:${gridSettings.columns[index].DataAlignment}; 
                                 height:30px; 
 
-                                border-right:${ index!==gridSettings.columns.length-1? '1px solid ' + gridSettings.colorScheme.GridHeaderBorderColor:''}
-                                background-color:${ ((currentFilters.columnsBeingFiltered&&currentFilters.columnsBeingFiltered.length>0&&currentFilters.columnsBeingFiltered.includes(index.toString())))||((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted === gridSettings.columns[index].Index))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor} 
-                                `"
-                        :class="`headerCell 
-                                `" 
+                                border-right:${ index!==gridSettings.columns.length-1? '1px solid ' + gridSettings.colorScheme.GridHeaderBorderColor:''};
+                                background-color:${((currentFilters.columnsBeingFiltered.includes(index.toString()))) || ((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted.toString() === index.toString()))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor};`"
+                        :class="`headerCell`" 
                         @mouseenter="()=>{handleFlyout(index,true)}"  
                         @mouseleave="()=>{handleFlyout(index,false)}"  
                         
-                        v-for="(header,index) in gridSettings.columns" :key="index">
+                        v-for="(header,index) in gridSettings.columns" :key="header.Index">
                         <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].Width}; overflow:hidden; white-space:nowrap; text-overflow:ellipsis`"> 
                             {{gridSettings.columns[index].ColumnHeader}}
                         </span>
@@ -310,7 +309,6 @@ export default {
         width: 50px;
         text-overflow: ellipsis;
         display: inline-block;
-        font-size:11px; 
-        opacity:.5;
+        font-size:13px; 
     }
 </style>

@@ -6,7 +6,6 @@ export default () => {
 
   
     const sortDataset = (strategy, dataset, dataType) => {
-        const setValue = (value)=>{return value?value:''}
         if(!dataset){
             dataset = originalData
         }
@@ -18,7 +17,7 @@ export default () => {
         {
             switch (dataType) {
                 case 'string':
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(a.data[column].toString()).toLowerCase()).localeCompare(setValue(b.data[column].toString()).toLowerCase());})
+                    tmp = dataset.sort(function (a, b) {return ('' + a.data[column].toString().toLowerCase().localeCompare(b.data[column].toLowerCase()));})
                     break;
                 case 'number':
                     tmp = dataset.sort(function (a, b) {return (a.data[column] - b.data[column])})
@@ -29,7 +28,7 @@ export default () => {
         } else {
             switch (dataType) {
                 case 'string':
-                    tmp = dataset.sort(function (a, b) {return ('' + setValue(b.data[column].toString()).toLowerCase()).localeCompare(setValue(a.data[column].toString()).toLowerCase());})
+                    tmp = dataset.sort(function (a, b) {return ('' + b.data[column].toString().toLowerCase().localeCompare(a.data[column].toString().toLowerCase()));})
                     break;
                 case 'number':
                     tmp = dataset.sort(function (a, b) {return (b.data[column] - a.data[column])})
@@ -60,7 +59,7 @@ export default () => {
                 columns = message.Columns
                 break;
             case 'applySort':
-                sortStrategy = message.SortStrategy //should come in as dataProperty^^direction
+                sortStrategy = message.SortStrategy 
                 split = sortStrategy.split('^^')
                 index = split[0]
                 postMessage({'MessageType':'sortComplete', 'Data':sortDataset(sortStrategy, null, getDataType(index)), 'Column':index, 'Strategy':sortStrategy})

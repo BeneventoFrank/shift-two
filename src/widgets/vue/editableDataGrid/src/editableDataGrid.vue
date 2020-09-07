@@ -152,7 +152,6 @@ export default {
             availableForCustomizing:0,
             hoverIndex:null,
             cellHoverIndex:null,
-            copyButtonText:'Copy',
             activeColorScheme:{
                 sliderFillColor:'',
                 pagingTextColor:'',
@@ -624,9 +623,6 @@ export default {
                         this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                     } 
                     if(this.filterStrategy.columnsBeingFiltered.length===1){ 
-                        if(this.sortStrategy.isCurrentlySorting){
-                            this.configureFilterWorkers(this.cmpDataSet)
-                        }
                         this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
                         this.ww_forwardWorker2.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  
                         this.ww_reverseWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false}) 

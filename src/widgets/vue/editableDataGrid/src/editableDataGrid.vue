@@ -1052,7 +1052,6 @@ export default {
                             this.numberOfTerminatedFilters = 0
                             this.isDoneFiltering=true
                         } else {
-                            console.log('what is the shit', this.tmpResults)
                             this.workingDataSet = this.tmpResults
                             this.numberOfTerminatedFilters = 0
                             this.tmpResults = []
@@ -1062,7 +1061,7 @@ export default {
                         }
                     }
                     break;
-                case 'sortComplete':
+                case 'sortComplete': //normal sort route
                         this.workingDataSet = [...message.data.Data]
                         this.sortStrategy.strategy = message.data.Strategy
                         this.sortStrategy.isCurrentlySorting = true
@@ -1073,10 +1072,10 @@ export default {
                         this.resetScroll()
                         this.isDoneSorting = true
                     break;
-                case 'dataSorted':
+                case 'dataSorted'://this is only used by the pre-sorting code
                     this.tmpResultsSort= {...this.tmpResultsSort, ...message.data.Data}
                     break;
-                case 'sortTerminated':
+                case 'sortTerminated': //this is only used by the pre-sorting code
                     this.numberOfTerminatedSorts = this.numberOfTerminatedSorts +1                      
                     if(this.numberOfTerminatedSorts===2)    
                     {
@@ -1100,7 +1099,7 @@ export default {
            
             if(strategy !== ''){
                     if(this.filterStrategy.isCurrentlyFiltering){
-                        this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.filteredData})
+                        this.ww_sortWorker.postMessage({'MessageType':'sortFilteredData','SortStrategy':strategy, 'Data':this.cmpDataSet})
                     } else {
                         const split = strategy.split('^^')
                         const tmp = parseInt(split[0])
@@ -1111,7 +1110,6 @@ export default {
                             this.sortStrategy.isCurrentlySorting = true
                             this.sortStrategy.columnBeingSorted = tmp
                             this.sortStrategy.direction = split[1]
-                                console.log(this.sortedData, tmp, split)
                             this.workingDataSet = this.sortedData[tmp][split[1]]
                             const min = this.gridSettings.pagination.MinRecordsViewable;
                             const max = this.gridSettings.pagination.MaxRecordsViewable;
@@ -1124,11 +1122,7 @@ export default {
                         }
                     }
             } else {
-                this.sortStrategy={
-                    isCurrentlySorting:false,
-                    strategy:'',
-                    columnBeingSorted:null
-                }
+                this.clearSortStrategy()
                 this.isDoneSorting = true;
                 if(this.filterStrategy.isCurrentlyFiltering){
                     this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
@@ -1136,13 +1130,21 @@ export default {
                     this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                     this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                 } else {
-                    this.highestCountLoaded = this.getRowsPerPage();
-                    this.filteredData = []
-                    this.filteredData = this.fullDS 
-                    this.dataSlice = this.filteredData.slice(0,this.highestCountLoaded)
+                    const min = this.gridSettings.pagination.MinRecordsViewable;
+                    const max = this.gridSettings.pagination.MaxRecordsViewable;
+                    this.setGridState(min,max)
+                    this.resetScroll()
+                    this.runScroller({target:{scrollTop:0}})                    
                 }
             }
-
+        },
+        clearSortStrategy(){
+            this.sortStrategy={
+                isCurrentlySorting:false,
+                strategy:'',
+                direction:'',
+                columnBeingSorted:null
+            }
         },
 ///////End Sorting Code/////////
 

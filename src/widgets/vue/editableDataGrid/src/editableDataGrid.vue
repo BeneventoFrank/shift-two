@@ -5,7 +5,7 @@
             <div ref='gridHeader' id='gridHeader'>
                 <div ref="pagination" :style="`display:flex; flex-direction:row; width:${gridSettings.size.GridWidth}; justify-content:center; align-items:flex-end; flex-wrap:wrap; padding-bottom:12px;`">
                     <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center;`">
-                        <div v-if="gridSettings.slider.Enabled" :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`">
+                        <div v-show="gridSettings.slider.Enabled" :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`">
                             <Slider @change="handleChangeNumberPerPage" 
                                     @initialValue="handleInitialValue" 
                                     :width="gridSettings.slider.SliderWidth"
@@ -17,7 +17,7 @@
                             ></Slider>
                         </div>
                     </div>
-                    <div v-if="gridSettings.pagination.Enabled" :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:flex-end; margin-top:${gridSettings.size.GridWidthValue>=600?0:20}px; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`" class='pagination'>
+                    <div v-show="gridSettings.pagination.Enabled" :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:flex-end; margin-top:${gridSettings.size.GridWidthValue>=600?0:20}px; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`" class='pagination'>
                         <Pagination 
                             :cmpCanPagePrevious="cmpCanPagePrevious"
                             :cmpCanPageNext="cmpCanPageNext"
@@ -53,7 +53,7 @@
                 </div>
             </div>
             
-            <div class='fade-in' v-show="gridLoaded" id='viewport' @scroll='runScroller' :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:auto; overflow-x:hidden;`">
+            <div class='fade-in' v-show="gridLoaded" id='viewport' @scroll='runScroller' :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:auto; overflow-x:hidden; scroll-behavior:smooth;`">
                 <div :style="`display:flex; flex-direction:column;`">
                     <div :style="`height:${topPaddingHeight}px; `"></div>
                     <div class='item'
@@ -362,6 +362,16 @@ export default {
                 MaxPageNumberPossible:Math.ceil(this.cmpDataSet.length/this.gridSettings.slider.InitialValue),
                 NumberOfApplicibleRowsPerPage:numberOfRowsPerPage,
                 }
+            } else {
+                this.gridSettings.pagination = {
+                Enabled:false,
+                MinRecordsViewable:1,
+                MaxRecordsViewable:this.cmpDataSet.length,
+                TotalNumberOfRecords:this.cmpDataSet.length,
+                PageNumberCurrentlyViewing:1,                   
+                MaxPageNumberPossible:1,
+                NumberOfApplicibleRowsPerPage:this.cmpDataSet.length
+                }                
             } 
         },
         initializeSlider(numberOfRowsPerPage){

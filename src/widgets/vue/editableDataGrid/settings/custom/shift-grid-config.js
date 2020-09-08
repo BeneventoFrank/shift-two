@@ -64,7 +64,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:true
         },
         {
             ColumnHeader:'Column',
@@ -74,7 +74,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:true
         },
         {
             ColumnHeader:'my field',
@@ -94,7 +94,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:false                            
         },
         {
             ColumnHeader:'Column',
@@ -104,7 +104,7 @@ let shiftSettings = {
             IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:false                            
         },
         {
             ColumnHeader:'Column',
@@ -114,7 +114,7 @@ let shiftSettings = {
             IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:false                            
         },
         {
             ColumnHeader:'Column',
@@ -124,7 +124,7 @@ let shiftSettings = {
             IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:false                            
         },
         {
             ColumnHeader:'Column',
@@ -134,7 +134,7 @@ let shiftSettings = {
             IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true
+            IsPreSortEnabled:false
         },
         {
             ColumnHeader:'Column',
@@ -144,7 +144,7 @@ let shiftSettings = {
             IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true
+            IsPreSortEnabled:false
         },
         {
             ColumnHeader:'Column',
@@ -154,7 +154,7 @@ let shiftSettings = {
             IsUsingACustomWidth:undefined,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true
+            IsPreSortEnabled:false
         },
         // {
         //     ColumnHeader:'Column',
@@ -164,7 +164,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -174,7 +174,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -184,7 +184,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -194,7 +194,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -204,7 +204,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -214,7 +214,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -224,7 +224,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -234,7 +234,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -244,7 +244,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -254,7 +254,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -264,7 +264,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
         // {
         //     ColumnHeader:'Column',
@@ -274,7 +274,7 @@ let shiftSettings = {
         //     IsUsingACustomWidth:undefined,
         //     Alignment:'center',
         //     DataType:'string',
-        //     IsPreSortEnabled:true
+        //     IsPreSortEnabled:false
         // },
 
     ]

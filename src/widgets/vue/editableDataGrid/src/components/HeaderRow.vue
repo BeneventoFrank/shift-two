@@ -40,8 +40,8 @@
                             <div class='innerDiv' :style="`background-color:${gridSettings.colorScheme.FlyoutBackgroundColor}`">
                                 <div class='flyoutHeader'>
                                     <div class='headerItem sort'> 
-                                        <span @click="()=>{handleSortClick(index,'asc')}"><UpArrow :isActiveColumn="header.Index===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
-                                        <span @click="()=>{handleSortClick(index,'desc')}"><DownArrow :isActiveColumn="gridSettings.columns[index].Index===currentSort.columnBeingSorted" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
+                                        <span @click="()=>{handleSortClick(index,'asc')}"><UpArrow :color="gridSettings.colorScheme.ActiveIndicatorColor" :isActiveColumn="currentSort.columnBeingSorted!==null&&header.Index.toString()===currentSort.columnBeingSorted.toString()" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
+                                        <span @click="()=>{handleSortClick(index,'desc')}"><DownArrow :color="gridSettings.colorScheme.ActiveIndicatorColor" :isActiveColumn="currentSort.columnBeingSorted!==null&&header.Index.toString()===currentSort.columnBeingSorted.toString()" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
                                     </div>
                                     <div class='headerItem'>
                                         <label class='filterHeader' :style="`color:${gridSettings.colorScheme.FlyoutTextColor};`">{{gridSettings.columns[index].ColumnHeader}}</label>

@@ -27,12 +27,15 @@ export default {
     },
     isActiveSort:{
       type:String
+    },
+    color:{
+      type:String
     }
   }, 
   methods:{
     getFillColor(){
       if(this.isActiveSort==='desc'&&this.isActiveColumn){
-        return 'black'
+        return this.color
       }
       return '#c3c3c3'      
     }

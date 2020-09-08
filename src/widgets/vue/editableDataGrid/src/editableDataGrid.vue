@@ -342,7 +342,7 @@ export default {
             }
            const numColumns = numCols-custCols.length
            let widthOfGrid = this.gridSettings.size.GridWidthValue - tmp
-           widthOfGrid = this.boolGridWillScroll?(widthOfGrid*.993):widthOfGrid
+           widthOfGrid = this.boolGridWillScroll?(widthOfGrid-17):widthOfGrid //17 is the px width of the scrollbar
            const eachColumn = Math.floor(widthOfGrid/numColumns)
             for (let i = 0; i < numCols; i++) {
                 if (!custCols.includes(i)) {

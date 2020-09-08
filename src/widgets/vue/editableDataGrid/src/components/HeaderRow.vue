@@ -27,8 +27,6 @@
                         :style="`width:${gridSettings.columns[index].Width}; display:flex; flex-direction:row; 
                                 justify-content:${gridSettings.columns[index].DataAlignment}; 
                                 height:30px; 
-
-                                border-right:${ index!==gridSettings.columns.length-1? '1px solid ' + gridSettings.colorScheme.GridHeaderBorderColor:''};
                                 background-color:${((currentFilters.columnsBeingFiltered.includes(index.toString()))) || ((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted.toString() === index.toString()))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor};`"
                         :class="`headerCell`" 
                         @mouseenter="()=>{handleFlyout(index,true)}"  

@@ -86,17 +86,25 @@
                     <div :style="`height:${bottomPaddingHeight}px;`"></div>
                 </div>
             </div>
-            <div v-show="gridLoaded===false" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
+            <div v-show="!gridSettings.developmentMode.Enabled&&gridLoaded===false" style="display:flex; flex-direction:column; justify-content:center; align-items:center;">
                 <span style="margin-top:100px;">{{loadingMsg}}</span>
                 <br>
                 <img  src='./images/loader.gif' style='height:auto; width:100px;'>
             </div>
         </div>
-
+    </div>
+    <div v-if="gridSettings.developmentMode.Enabled" style="display:flex; flex-direction:row; box-shadow: 0px 0px 27px -13px black; min-width:600px; position:absolute; z-index:10000; margin-top:270px; justify-content:center; ">
+        <DeveloperMode 
+                @gridUpdate="processGridUpdate"
+                :gridSettings="gridSettings"
+                :activeColorScheme="activeColorScheme"
+                :activeColumnEdit="activeColumnEdit"
+            />
     </div>
 </div>
 </template>
 <script>
+import DeveloperMode from './components/DeveloperMode'
 import HeaderRow from './components/HeaderRow'
 import ShiftSettings from '../settings/shift-two-grid-defaults'
 import forwardWorker from './webWorkers/forwardFilterWorker'
@@ -122,7 +130,8 @@ export default {
         Slider,
         Pagination,
         Eye,
-        CancelEye
+        CancelEye,
+        DeveloperMode
     },
     data() {
         return {
@@ -277,7 +286,7 @@ export default {
             }
             return tmp
         },
-        processData(){
+        processData(isDevMode){
             let tmp = []
             if (this.gridData.length>0) {
                 //load the data from the prop
@@ -285,8 +294,17 @@ export default {
             } else {
                 //load some random data.
                 tmp = generateData(this.gridSettings.columns.length)
+            }   
+            if(isDevMode){
+                return tmp.splice(1,2)
             }
             return tmp
+        },
+        processGridUpdate(eventData){
+            console.log(eventData)
+            this.gridSettings = eventData.gridSettings;
+            this.activeColorScheme = eventData.activeColorScheme;
+            this.activeColumnEdit = eventData.activeColumnEdit;
         },
 ///////End Processors////////    
 
@@ -294,7 +312,7 @@ export default {
         getRowsPerPage(){
             if (this.gridSettings.pagination.Enabled) {
                 if (this.weAreUsingTheSlider) {
-                    return this.sliderCount //investigate this see how its used and set
+                    return this.sliderCount
                 } else {
                     if((this.cmpDataSet.length>=0)&&(this.cmpDataSet.length<=100)){
                         return 100
@@ -861,25 +879,26 @@ export default {
     },        
     async mounted(){
         this.gridSettings = this.processConfig()
-        this.fullDS = this.processData()
+        this.fullDS = this.processData(this.gridSettings.developmentMode.Enabled)
 
-        this.configureWebWorkers(this.cmpDataSet)
-        setTimeout(() => {
-            this.loadingMsg = 'Processing Filters And Sort..'
-        }, 1000);
-        this.boolGridWillScroll = this.gridWillScroll()
-        this.calculateColumnWidths()
-        const rows = this.getRowsPerPage()
-        this.initializePaging(rows)
-        this.initializeSlider(rows)
-        setTimeout(() => {
-            this.loadingMsg = 'Finishing Up, Just A Sec..'
-        }, 2500);        
-        this.settings.maxIndex = this.gridSettings.pagination.Enabled?rows:this.cmpDataSet.length
-        this.headerHeight = this.calculateHeightOfHeaderRow()
-        this.settings.amount = this.calculateNumRows()
-        this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
-        this.runScroller({target:{scrollTop:0}})   
+            this.configureWebWorkers(this.cmpDataSet)
+            setTimeout(() => {
+                this.loadingMsg = 'Processing Filters And Sort..'
+            }, 1000);
+            this.boolGridWillScroll = this.gridWillScroll()
+            this.calculateColumnWidths()
+            const rows = this.getRowsPerPage()
+            this.initializePaging(rows)
+            this.initializeSlider(rows)
+            setTimeout(() => {
+                this.loadingMsg = 'Finishing Up, Just A Sec..'
+            }, 2500);        
+            this.settings.maxIndex = this.gridSettings.pagination.Enabled?rows:this.cmpDataSet.length
+            this.headerHeight = this.calculateHeightOfHeaderRow()
+            this.settings.amount = this.calculateNumRows()
+            this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
+            this.runScroller({target:{scrollTop:0}})   
+
     }
 };
 </script>

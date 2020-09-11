@@ -7,7 +7,6 @@
                     <div :style="`width:50%; min-width:300px; display:flex; flex-direction:row; align-items:center;`">
                         <div v-show="gridSettings.slider.Enabled" :style="`width:300px; display:flex; flex-direction:row; justify-content:${gridSettings.size.GridWidthValue>=600?'flex-end':'center'};`">
                             <Slider @change="handleChangeNumberPerPage" 
-                                    @initialValue="handleInitialValue" 
                                     :width="gridSettings.slider.SliderWidth"
                                     :minValue="gridSettings.slider.MinValue"
                                     :maxValue="gridSettings.slider.MaxValue"
@@ -71,14 +70,13 @@
                             v-for="(col,index) in item.data" :key="index"
                             :style="`display:flex; align-items:center; height:100%;
                                         width:${gridSettings.columns[index].Width};
-                                        justify-content:center;
+                                        justify-content:${gridSettings.columns[index].Alignment};
                                         background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
                                 `">
                             <span 
                                 :style="` white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
                                         color:${gridSettings.colorScheme.GridRowTextColor};
                                         vertical-align:center;
-                                        text-align:${gridSettings.columns[index].Alignment};
                                         `" 
                                 > {{col}}{{item.rowIndex+1}}</span>
                         </div>
@@ -99,6 +97,7 @@
                 :gridSettings="gridSettings"
                 :activeColorScheme="activeColorScheme"
                 :activeColumnEdit="activeColumnEdit"
+                :fullDS="fullDS"
             />
     </div>
 </div>
@@ -305,6 +304,8 @@ export default {
             this.gridSettings = eventData.gridSettings;
             this.activeColorScheme = eventData.activeColorScheme;
             this.activeColumnEdit = eventData.activeColumnEdit;
+            this.fullDS = eventData.fullDS
+            this.data = eventData.fullDS
         },
 ///////End Processors////////    
 
@@ -440,7 +441,13 @@ export default {
             this.data = []
         },
         runScroller({target:{scrollTop}}){
-            const index = Math.max(this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight),0)
+            let index
+            if(this.gridSettings.pagination.Enabled){
+                index = Math.max(this.settings.minIndex + Math.floor((scrollTop -1) / this.settings.itemHeight),0)
+            } else {
+                index = Math.max(this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight),0)
+            }
+            
             const data = this.getData(index, this.bufferedItems)
             const topPad = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
             const topPaddingHeight = this.boolGridWillScroll?topPad:0
@@ -502,6 +509,7 @@ export default {
             this.ww_sortWorker.postMessage({'MessageType':'data','Data':dataSet, 'Columns':this.gridSettings.columns})
         },
         getData(offset, limit){
+            console.log("ofset and limit", offset, limit)
             const data = []
             const start = offset
             const end = Math.min(offset + limit, this.settings.maxIndex)
@@ -540,6 +548,7 @@ export default {
                 NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage,
             }
             if(isASinglePageMove){
+
                 const tmpMinViewable = this.gridSettings.pagination.MinRecordsViewable===1?this.gridSettings.pagination.NumberOfApplicibleRowsPerPage:this.gridSettings.pagination.MinRecordsViewable+this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
                 paging.MinRecordsViewable=tmpMinViewable
                 paging.MaxRecordsViewable=tmpMinViewable+this.gridSettings.pagination.NumberOfApplicibleRowsPerPage>this.gridSettings.pagination.TotalNumberOfRecords?this.gridSettings.pagination.TotalNumberOfRecords:tmpMinViewable+this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
@@ -554,6 +563,7 @@ export default {
                 paging.PageNumberCurrentlyViewing=this.gridSettings.pagination.MaxPageNumberPossible        
                 paging.MaxPageNumberPossible=this.gridSettings.pagination.MaxPageNumberPossible
             }
+            console.log("setting it to ", paging)
             this.gridSettings.pagination = paging
         },
         handlePreviousClick(isASingleMove){
@@ -618,10 +628,6 @@ export default {
         handleShowCancelEye(){
             this.isHovering = !this.isHovering
         },    
-        handleInitialValue(event){
-            this.sliderCount = event
-        },
-
 ///////End Helper Functions////////    
 
 ///////Filter Code/////////
@@ -880,24 +886,24 @@ export default {
     async mounted(){
         this.gridSettings = this.processConfig()
         this.fullDS = this.processData(this.gridSettings.developmentMode.Enabled)
-
-            this.configureWebWorkers(this.cmpDataSet)
-            setTimeout(() => {
-                this.loadingMsg = 'Processing Filters And Sort..'
-            }, 1000);
-            this.boolGridWillScroll = this.gridWillScroll()
-            this.calculateColumnWidths()
-            const rows = this.getRowsPerPage()
-            this.initializePaging(rows)
-            this.initializeSlider(rows)
-            setTimeout(() => {
-                this.loadingMsg = 'Finishing Up, Just A Sec..'
-            }, 2500);        
-            this.settings.maxIndex = this.gridSettings.pagination.Enabled?rows:this.cmpDataSet.length
-            this.headerHeight = this.calculateHeightOfHeaderRow()
-            this.settings.amount = this.calculateNumRows()
-            this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
-            this.runScroller({target:{scrollTop:0}})   
+        this.configureWebWorkers(this.cmpDataSet)
+        setTimeout(() => {
+            this.loadingMsg = 'Processing Filters And Sort..'
+        }, 1000);
+        this.boolGridWillScroll = this.gridWillScroll()
+        this.calculateColumnWidths()
+        const rows = this.getRowsPerPage()
+        this.sliderCount = rows
+        this.initializeSlider(rows) //init before paging b/c paging uses the slider values
+        this.initializePaging(rows)
+        setTimeout(() => {
+            this.loadingMsg = 'Finishing Up, Just A Sec..'
+        }, 2500);        
+        this.settings.maxIndex = this.gridSettings.pagination.Enabled?rows:this.cmpDataSet.length
+        this.headerHeight = this.calculateHeightOfHeaderRow()
+        this.settings.amount = this.calculateNumRows()
+        this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
+        this.runScroller({target:{scrollTop:0}})   
 
     }
 };

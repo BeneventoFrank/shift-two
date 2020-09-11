@@ -64,14 +64,11 @@ export default {
   },
   methods:{
       init(){
-          console.log('wht is the initial value', this.initialValue)
           const slider = this.$refs.sliderInput;
           slider.oninput = this.debounceSlider;
           this.updateValue(slider);
           this.updateValuePosition(slider);
           this.updateProgress(slider);
-          //this.setTicks(slider);
-          this.$emit('initialValue',slider.value)
       },
       debounceSlider: debounce(function (event){
           this.updateValue(event.target);

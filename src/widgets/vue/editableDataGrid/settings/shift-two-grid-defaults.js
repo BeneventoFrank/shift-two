@@ -1,12 +1,12 @@
 let shiftSettings = {
     developmentMode:{
-        Enabled:true
+        Enabled:false
     },
     size:{
-        GridWidth:'600px', //px value of width
-        GridWidthValue:600,
-        GridHeight:'600px', //px value of height
-        GridHeightValue:600, //int value used for calculations
+        GridWidth:'2500px', //px value of width
+        GridWidthValue:2500,
+        GridHeight:'1000px', //px value of height
+        GridHeightValue:1000, //int value used for calculations
     },
     header:{
         Enabled:true
@@ -17,15 +17,15 @@ let shiftSettings = {
         HighlightRowEnabled:'true',
     },
     slider:{ //Change at own risk
-        Enabled:true,
+        Enabled:false,
         SliderWidth:300,
-        MinValue:100,
-        MaxValue:1000,
-        StepValue:100,
+        MinValue:10,
+        MaxValue:100,
+        StepValue:10,
         InitialValue:100
     },
     pagination:{ //Change at own risk
-        Enabled:true, 
+        Enabled:false, 
         MinRecordsViewable:0,
         MaxRecordsViewable:0,
         TotalNumberOfRecords:0,
@@ -36,41 +36,41 @@ let shiftSettings = {
     },
     title:{
         Enabled:'true',
-        Text:'Title'
+        Text:'US Cities 2020'
     },
     colorScheme:{
-        SliderFillColor:'#708090',
-        PagingTextColor:'#708090',
-        GridTitleColor:'#708090',
-        GridHeaderTextColor:'#708090',
-        GridRowTextColor:'#708090',
-        GridHeaderBackgroundColor:'#F8F8F8',
-        GridRowOddBackgroundColor:'#F8F8F8',
-        GridRowEvenBackgroundColor:'#FFFFFF',
-        ActiveIndicatorColor:'#C3D9F9',
+        SliderFillColor:'#5f646d',
+        PagingTextColor:'#5f646d',
+        GridTitleColor:'#394151',
+        GridHeaderTextColor:'#eef1f6',
+        GridRowTextColor:'#324253',
+        GridHeaderBackgroundColor:'#394151',
+        GridRowOddBackgroundColor:'#d4d6d9',
+        GridRowEvenBackgroundColor:'#d9dde3',
+        ActiveIndicatorColor:'#6a7995',
         GridHeaderBorderColor:'#708090',
-        FlyoutBackgroundColor:'#F8F8F8',
-        FlyoutTextColor:'#708090',
-        RowHighlightBackground:'#edeeb4',
-        RowHighlightActiveCell:'#dadc8f',
+        FlyoutBackgroundColor:'#6a7995',
+        FlyoutTextColor:'#6a7995',
+        RowHighlightBackground:'#d3dff3',
+        RowHighlightActiveCell:'#c0cde3',
 
     },
     columns:[
         {
-            ColumnHeader:'Column',
+            ColumnHeader:'Not sure which one this is',
             Index:0,
-            Width:'150px',
-            WidthValue:150,
-            IsUsingACustomWidth:false,
-            Alignment:'center',
+            Width:'250px',
+            WidthValue:250,
+            IsUsingACustomWidth:true,
+            Alignment:'flex-start',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:false                            
         },
         {
-            ColumnHeader:'Column',
+            ColumnHeader:'Josh',
             Index:1,
-            Width:'150px',
-            WidthValue:150,
+            Width:'111px',
+            WidthValue:111,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -79,8 +79,8 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:2,
-            Width:'150px',
-            WidthValue:150,
+            Width:'111px',
+            WidthValue:111,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
@@ -89,8 +89,88 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:3,
-            Width:'150px',
-            WidthValue:150,
+            Width:'111px',
+            WidthValue:111,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:4,
+            Width:'111px',
+            WidthValue:111,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:5,
+            Width:'900px',
+            WidthValue:900,
+            IsUsingACustomWidth:true,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:6,
+            Width:'111px',
+            WidthValue:111,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:7,
+            Width:'111px',
+            WidthValue:111,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Franks Cities',
+            Index:8,
+            Width:'350px',
+            WidthValue:350,
+            IsUsingACustomWidth:true,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:9,
+            Width:'111px',
+            WidthValue:111,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:10,
+            Width:'111px',
+            WidthValue:111,
+            IsUsingACustomWidth:false,
+            Alignment:'center',
+            DataType:'string',
+            IsPreSortEnabled:false                            
+        },
+        {
+            ColumnHeader:'Column',
+            Index:11,
+            Width:'111px',
+            WidthValue:111,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',

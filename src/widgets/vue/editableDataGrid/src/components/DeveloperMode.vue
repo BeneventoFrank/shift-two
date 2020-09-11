@@ -66,7 +66,7 @@
                             <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span class='mediumText'>Enable Header Row</span></div>
                                 <div style='display:flex; align-items:center;'>
-                                    <input type="checkbox" @change="(event)=>handleUpdateGridSettings(event.target.value,'header','Enabled')" v-model="chkEnableHeader" id="enableHeader" name="enableHeader" value="true">                                    
+                                    <input type="checkbox" @change="(event)=>handleUpdateGridSettings(chkEnableHeader,'header','Enabled')" v-model="chkEnableHeader" id="enableHeader" name="enableHeader" value="true">                                    
                                 </div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start; align-items:center; margin-top:10px;">
@@ -139,7 +139,7 @@
                             <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
                                 <div style="width:250px; display:flex; justify-content:flex-start"><span class='mediumText'>Enable Row Highlight </span></div>
                                 <div style='display:flex; align-items:center;'>
-                                    <input type="checkbox" @change="()=>handleUpdateGridSettings(chkEnableHighlight,'row','HighlightRowEnabled')" v-model="chkEnableHighlight" id="enableHeader" name="enableHeader" value="true">                                    
+                                    <input type="checkbox" @change="()=>handleUpdateGridSettings(chkEnableHighlight,'rows','HighlightRowEnabled')" v-model="chkEnableHighlight" id="enableHeader" name="enableHeader" value="true">                                    
                                 </div>
                             </div>
                             <div style="display:flex; width:100%; justify-content:flex-start; margin-top:10px; align-items:center;">
@@ -197,9 +197,9 @@
                                     <div style="width:50%; display:flex;justify-content:flex-start;"><span class="mediumText">Data Alignment</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
                                         <select @input="(event)=>handleUpdateGridColumns(event,'Alignment')" v-model="localActiveColumnEdit.Alignment" style="width:100px;" name="alignment" id="alignment">
-                                            <option value='left'>left</option>
-                                            <option value='middle'>center</option>
-                                            <option value='right'>right</option>
+                                            <option value='flex-start'>left</option>
+                                            <option value='center'>center</option>
+                                            <option value='flex-end'>right</option>
                                         </select>                                        
                                     </div>
                                 </div>
@@ -245,7 +245,7 @@
                             <div style="display:flex; width:100%; justify-content:flex-start; align-items:center;">
                                 <div style="width:150px; display:flex; justify-content:flex-start"><span class="mediumText">Enable Slider</span></div>
                                 <div>
-                                    <input type="checkbox" @change="(event)=>handleUpdateGridSettings(event.target.value,'slider','Enabled')" v-model="chkEnableSlider" id="enableSlider" name="enableSlider" value="true">
+                                    <input type="checkbox" @change="handleEnableSlider" v-model="chkEnableSlider" id="enableSlider" name="enableSlider" value="true">
                                 </div>
                             </div>   
                             <div style="display:flex; width:100%; justify-content:flex-start;margin-top:15px; align-items:center;">
@@ -364,7 +364,8 @@ export default {
                 IsUsingACustomWidth:false,
                 IsPreSortEnabled:false,
                 ChkAuto:true            
-            },              
+            },   
+            localFullDS:[]
         };
     },
     computed: {
@@ -373,12 +374,11 @@ export default {
 
 ///////Emitters///////
         pushGridChange(){
-            console.log("pushing??")
             this.$emit('gridUpdate',{
-
                 gridSettings: this.localGridSettings,
                 activeColorScheme: this.localActiveColorScheme,
-                activeColumnEdit: this.localActiveColumnEdit
+                activeColumnEdit: this.localActiveColumnEdit,
+                fullDS: this.localFullDS
             })
         },
 
@@ -450,29 +450,26 @@ export default {
                     index++
                 }
                 this.$emit('addGridColumn')         
-                // for (let j = 0; j < numToPush; j++) {
+                for (let j = 0; j < numToPush; j++) {
 
-                //     for (let i = 0; i < this.fullDS.length; i++) {
-                //         this.fullDS[i].data.push('Data')
-                //     }
-                // }
+                    for (let i = 0; i < this.localFullDS.length; i++) {
+                        this.localFullDS[i].data.push('Data')
+                    }
+                }
             } else {
                 let currentCount = this.localGridSettings.columns.length
                 let numToPop = currentCount - event.target.value
                 let tmp = [...this.localGridSettings.columns]
                 
                 this.localGridSettings.columns = tmp.splice(0,currentCount-numToPop)
-                let newDataArray = []
-                for (let i = 0; i < this.data.length; i++) {
-                    
-                    newDataArray.push(
-                        {
-                            rowIndex:this.data[i].rowIndex,
-                            data:this.data[i].data.splice(0,currentCount-numToPop)    
-                        }
-                    )
+                let tmpDS = [...this.localFullDS]
+                console.log(tmpDS)
+                for (let i = 0; i < tmpDS.length; i++) {
+                    //for each row, we need to take one data item off the data array
+                    tmpDS[i].data = [...tmpDS[i].data.splice(0,tmpDS[i].data.length-1)]                    
                 }
-
+                console.log(tmpDS)
+                this.localFullDS = tmpDS
             }
             this.calculateColumnWidths() 
             this.availableForCustomizing= this.calculateAvailableSpace()  
@@ -518,6 +515,16 @@ export default {
                 this.localGridSettings.slider.Enabled=false
                 this.chkEnableSlider = false
             }
+            this.pushGridChange()
+        },
+        handleEnableSlider(event){
+            this.localGridSettings.slider.Enabled = event.target.checked
+            if(this.localGridSettings.slider.Enabled){
+                this.localGridSettings.pagination.Enabled = true; 
+                this.chkEnablePaging=true
+                this.chkEnableSlider=true
+            }
+            this.pushGridChange()
         },
 //////End Slider/Paging Tab/////////
 
@@ -590,7 +597,7 @@ let config = `let shiftSettings = {
             Index:${this.localGridSettings.columns[i].Index},
             Width:'${this.localGridSettings.columns[i].Width}',
             WidthValue:${this.localGridSettings.columns[i].WidthValue},
-            IsUsingACustomWidth:${this.localGridSettings.columns[i].IsUsingACustomWidth},
+            IsUsingACustomWidth:${this.localGridSettings.columns[i].IsUsingACustomWidth?this.localGridSettings.columns[i].IsUsingACustomWidth:false},
             Alignment:'${this.localGridSettings.columns[i].Alignment}',
             DataType:'${this.localGridSettings.columns[i].DataType}',
             IsPreSortEnabled:${this.localGridSettings.columns[i].IsPreSortEnabled}                            
@@ -756,12 +763,18 @@ export default shiftSettings
         },
         activeColumnEdit:{
             type:Object
+        }, 
+        fullDS:{
+            type:Array
         }
+
     },        
     mounted(){
             this.localGridSettings = {...this.gridSettings}
             this.localActiveColorScheme = {...this.activeColorScheme}
             this.localActiveColumnEdit = {...this.activeColumnEdit}
+            this.localFullDS = [...this.fullDS]
+        
             this.initializeDevMode()
     }
 }

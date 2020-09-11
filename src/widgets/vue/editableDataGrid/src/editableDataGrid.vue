@@ -78,7 +78,7 @@
                                         color:${gridSettings.colorScheme.GridRowTextColor};
                                         vertical-align:center;
                                         `" 
-                                > {{col}}{{item.rowIndex+1}}</span>
+                                > {{col}}</span>
                         </div>
                     </div>
                     <div :style="`height:${bottomPaddingHeight}px;`"></div>

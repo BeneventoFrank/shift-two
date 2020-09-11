@@ -30,7 +30,7 @@
                                 background-color:${((currentFilters.columnsBeingFiltered.includes(index.toString()))) || ((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted.toString() === index.toString()))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor};`"
                         :class="`headerCell`" 
                         @mouseenter="()=>{handleFlyout(index,true)}"  
-                        @mouseleave="()=>{handleFlyout(index,false)}"  
+                        @mouseleave="()=>{handleFlyout(index,false)}"
                         
                         v-for="(header,index) in gridSettings.columns" :key="header.Index">
                         <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].Width}; overflow:hidden; white-space:nowrap; text-overflow:ellipsis`"> 
@@ -167,7 +167,7 @@ export default {
            }
        },
        wouldCauseAScroll(index){
-            let retVal = '150px'
+            let retVal = '50%'
             let y = this.$refs[`header-${index}`]
             if(((y[0].offsetLeft+y[0].offsetWidth/2)+300)>this.gridSettings.size.GridWidthValue){
                 retVal = '300px'

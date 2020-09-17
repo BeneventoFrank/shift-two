@@ -1,14 +1,14 @@
 <template>
   <div id="app" style='width:100%;'>
-    <EditableDataGrid  />
-    
+    <EditableDataGrid  :componentList="components" :gridConfig="localConfig"/>
   </div>
 </template>
 
 <script> 
 //import Slider from './widgets/vue/slider/Slider'
 import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
-// import gridConfig from './widgets/vue/editableDataGrid/settings/custom/shift-grid-config'
+import gridConfig from './widgets/vue/editableDataGrid/settings/custom/shift-grid-config'
+import HelloWorld from './widgets/vue/editableDataGrid/src/components/HelloWorld'
 
 export default {
   name: 'App',
@@ -18,8 +18,12 @@ export default {
   },
   data(){
     return {
-       //localConfig:gridConfig
+       localConfig:gridConfig,
+       components:[]
     }
+  },
+  created(){
+    this.components = [HelloWorld]
   }
 }
 </script>

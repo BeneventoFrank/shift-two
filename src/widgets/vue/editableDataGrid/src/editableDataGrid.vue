@@ -73,12 +73,17 @@
                                         justify-content:${gridSettings.columns[index].Alignment};
                                         background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
                                 `">
-                            <span 
-                                :style="` white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
-                                        color:${gridSettings.colorScheme.GridRowTextColor};
-                                        vertical-align:center;
-                                        `" 
-                                > {{col}}</span>
+                            <template v-if="gridSettings.columns[index].IsCustomComponent">
+                                <component :is="components[gridSettings.columns[index].CustomComponent]" :params="{...item, ...gridApi}" ></component>
+                            </template>
+                            <template v-else>
+                                <span 
+                                    :style="` white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
+                                            color:${gridSettings.colorScheme.GridRowTextColor};
+                                            vertical-align:center;
+                                            `" 
+                                    > {{col}}</span>
+                            </template>    
                         </div>
                     </div>
                     <div :style="`height:${bottomPaddingHeight}px;`"></div>
@@ -252,6 +257,9 @@ export default {
                 pagination:{
                 }
             },
+            components:{},
+            gridApi:{}
+            
         };
     },
     computed: {
@@ -307,9 +315,33 @@ export default {
             this.fullDS = eventData.fullDS
             this.data = eventData.fullDS
         },
+        processComponents(){
+            if (this.componentList.length<1) {return}
+            for (let i = 0; i < this.componentList.length; i++) {
+                this.components[this.componentList[i].name] = this.componentList[i]
+            }
+        },
 ///////End Processors////////    
 
 ///////Helper Functions////////
+        refreshRow(rowId,data){
+            this.fullDS[rowId].data=data
+            this.runScroller({target:{scrollTop:0}})
+        },
+        refreshGrid(){
+            //not sure... somehow update the grid as a whole
+        },
+        deleteRow(rowId){
+            let tmp = []
+            for (let i = 0; i < this.fullDS.length; i++) {
+                if(i!==rowId)
+                {
+                    tmp.push(this.fullDS[i])
+                }
+            }
+            this.fullDS = tmp
+            this.runScroller({target:{scrollTop:0}})
+        },
         getRowsPerPage(){
             if (this.gridSettings.pagination.Enabled) {
                 if (this.weAreUsingTheSlider) {
@@ -874,12 +906,17 @@ export default {
         gridConfig:{
             type: Object,
             required: false,
-            default: ()=>{return{}}
+            default: ()=>[]
         }, 
         gridData:{
             type:Array,
             required: false,
-            default: ()=>{return[]}
+            default: ()=>[]
+        },
+        componentList:{
+            type:Array,
+            required: false,
+            default: ()=>[]
         }
 
     },        
@@ -904,7 +941,12 @@ export default {
         this.settings.amount = this.calculateNumRows()
         this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
         this.runScroller({target:{scrollTop:0}})   
-
+    },
+    created(){
+        //we need to map the components to an object for easy use
+        this.processComponents();
+        this.gridApi.refreshRow = this.refreshRow
+        this.gridApi.deleteRow = this.deleteRow
     }
 };
 </script>
@@ -1001,11 +1043,11 @@ export default {
             
         }
         .fade-in {
-        animation: fadeIn ease .4s;
-        -webkit-animation: fadeIn ease .4s;
-        -moz-animation: fadeIn ease .4s;
-        -o-animation: fadeIn ease .4s;
-        -ms-animation: fadeIn ease .4s;
+        animation: fadeIn ease .5s;
+        -webkit-animation: fadeIn ease .5s;
+        -moz-animation: fadeIn ease .5s;
+        -o-animation: fadeIn ease .5s;
+        -ms-animation: fadeIn ease .5s;
         }
         @keyframes fadeIn {
         0% {opacity:0;}

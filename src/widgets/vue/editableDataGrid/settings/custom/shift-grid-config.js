@@ -1,6 +1,6 @@
 let shiftSettings = {
     developmentMode:{
-        Enabled:true
+        Enabled:false
     },
     size:{
         GridWidth:'1000px', //px value of width
@@ -101,10 +101,13 @@ let shiftSettings = {
             Index:4,
             Width:'200px',
             WidthValue:200,
-            IsUsingACustomWidth:false,
-            Alignment:'center',
+            IsUsingACustomWidth:true,
+            Alignment:'right',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:false,
+            IsCustomComponent:true,
+            CustomComponent:'HelloWorld'
+
         },
 
     ]

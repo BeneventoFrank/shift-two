@@ -28,12 +28,15 @@
                     </div>
                 </div>
                 <div style='display:flex; flex-direction:row;'>
-                    <div style="width:20%;">
-                        <div @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :color="gridSettings.colorScheme.ActiveIndicatorColor" :height='25'/></div>
-                        <div @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /></div>
+                    <div style="width:30%; display:flex;">
+                        <template v-if="gridSettings.general.addNewRecord.showAddNewRecord">
+                            <component :is="components[gridSettings.general.addNewRecord.componentToRender]" :params="{...gridApi}" ></component>
+                        </template>
+                        <div style="margin-left:30px;" @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :color="gridSettings.colorScheme.ActiveIndicatorColor" :height='25'/></div>
+                        <div style="margin-left:30px;" @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /></div>
                     </div>
-                    <div ref="title" style="width:60%;"><span class='title' :style="`color:${gridSettings.colorScheme.GridTitleColor}`" v-if="gridSettings.title.Enabled" >{{gridSettings.title.Text}}</span></div>
-                    <div style="width:20%;"></div>
+                    <div ref="title" style="width:40%;"><span class='title' :style="`color:${gridSettings.colorScheme.GridTitleColor}`" v-if="gridSettings.title.Enabled" >{{gridSettings.title.Text}}</span></div>
+                    <div style="width:30%;"></div>
                 </div>
                 <div ref="headerRow" v-if="gridSettings.header.Enabled" :style="`width:100%;`">
                 <HeaderRow 
@@ -151,7 +154,6 @@ export default {
             itemsAbove:0,
             topPaddingHeight:0,
             bottomPaddingHeight:0,
-            initialPosition:0,
             settings:{
                 minIndex: 0,
                 maxIndex: 0,
@@ -242,6 +244,10 @@ export default {
             gridSettings:{
                 developmentMode:{
                 },
+                general:{
+                    addNewRecord:{
+                    }
+                },
                 rows:{
                 },
                 size:{
@@ -324,6 +330,27 @@ export default {
 ///////End Processors////////    
 
 ///////Helper Functions////////
+        addNewRow(data){
+            this.fullDS = [...this.fullDS, {
+                data:data,
+                rowIndex:this.fullDS.length
+            }]
+            this.gridSettings.pagination.TotalNumberOfRecords = this.gridSettings.pagination.TotalNumberOfRecords+1
+            this.configureWebWorkers(this.cmpDataSet)
+            this.headerHeight = this.calculateHeightOfHeaderRow()
+            this.boolGridWillScroll = this.gridWillScroll(this.headerHeight)
+            const rows = this.getRowsPerPage()
+            this.initializeSlider(rows) //init before paging b/c paging uses the slider values
+            this.initializePaging(rows)            
+            this.settings.maxIndex = this.gridSettings.pagination.Enabled?rows:this.cmpDataSet.length
+            this.settings.amount = this.calculateNumRows()
+            const max = this.gridSettings.pagination.MaxRecordsViewable
+            const min = this.gridSettings.pagination.MinRecordsViewable
+            this.setGridState(min, max)
+            this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
+            this.runScroller({target:{scrollTop:0}},true)   
+            this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollHeight;
+        },
         refreshRow(rowId,data){
             this.fullDS[rowId].data=data
             this.runScroller({target:{scrollTop:0}})
@@ -358,26 +385,14 @@ export default {
             } 
             return this.cmpDataSet.length
         },        
-        gridWillScroll(numberOfRows){
+        gridWillScroll(headerHeight){
             if(this.gridSettings.developmentMode.Enabled){return} 
             let retVal = false
-            let height = 0
-            if(this.gridSettings.size.GridHeight){
-                if(this.gridSettings.size.GridHeight.includes('p')){
-                    height = this.gridSettings.size.GridHeight.split('p')[0]
-                }
-            }
-            let tmp = 0
-            if(numberOfRows){
-                tmp = numberOfRows
-            } else {
-                tmp = this.cmpDataSet.length
-            }
-
-            if (tmp*this.settings.itemHeight>height)
+            if ((this.cmpDataSet.length*this.settings.itemHeight)+(headerHeight)>this.gridSettings.size.GridHeightValue)
             {
                 retVal=true
             }
+            console.log('returning retval', retVal)
             return retVal
         
         },
@@ -451,7 +466,7 @@ export default {
             return tmp
         },        
         calculateNumRows(){
-            return this.boolGridWillScroll?Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/this.settings.itemHeight):Math.floor(this.cmpDataSet.length) 
+            return this.boolGridWillScroll?Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/this.settings.itemHeight):this.cmpDataSet.length 
         },
         setInitialState(minIndex, maxIndex, startIndex, itemHeight, amount, tolerance){
             // 1) height of the visible part of the viewport (px)
@@ -466,13 +481,12 @@ export default {
             this.bufferedItems =Math.floor(this.boolGridWillScroll?amount + 2 * tolerance:amount)
             // 6) how many items will be virtualized above (pcs)
             this.itemsAbove = startIndex - tolerance - minIndex
-            this.topPaddingHeight = this.boolGridWillScroll?this.itemsAbove * itemHeight:0
-            this.bottomPaddingHeight = this.boolGridWillScroll?this.totalHeight - this.topPaddingHeight:0
-            this.initialPosition = 0
+            // this.topPaddingHeight = this.boolGridWillScroll?this.itemsAbove * itemHeight:0
+            // this.bottomPaddingHeight = this.boolGridWillScroll?this.totalHeight - this.topPaddingHeight:0
             // initial state object
             this.data = []
         },
-        runScroller({target:{scrollTop}}){
+        runScroller({target:{scrollTop}},scrollToBottom){
             let index
             if(this.gridSettings.pagination.Enabled){
                 index = Math.max(this.settings.minIndex + Math.floor((scrollTop -1) / this.settings.itemHeight),0)
@@ -486,6 +500,11 @@ export default {
             const bottomPad = Math.max(this.totalHeight - topPaddingHeight - (data.length * this.settings.itemHeight), 0)
             this.bottomPaddingHeight= this.boolGridWillScroll?bottomPad:0
             this.topPaddingHeight = topPaddingHeight
+            if(!scrollToBottom){
+                this.$refs.viewportElement.scrollTop = this.$refs.viewportElement.scrollHeight
+                this.topPaddingHeight = this.bottomPaddingHeight
+                this.bottomPaddingHeight = 0
+            }
             this.data = data
         },
         configureFilterWorkers(dataSet){
@@ -545,8 +564,10 @@ export default {
             const data = []
             const start = offset
             const end = Math.min(offset + limit, this.settings.maxIndex)
+            console.log('the end is ', offset,limit, this.settings.maxIndex)
             if (start <= end) {
                 for (let i = start; i < end; i++) {
+                    console.log(start,end,i)
                     if (this.cmpDataSet[i]){
                         data.push({ rowIndex: i, data: this.cmpDataSet[i].data })
                     }
@@ -927,7 +948,8 @@ export default {
         setTimeout(() => {
             this.loadingMsg = 'Processing Filters And Sort..'
         }, 1000);
-        this.boolGridWillScroll = this.gridWillScroll()
+        this.headerHeight = this.calculateHeightOfHeaderRow()        
+        this.boolGridWillScroll = this.gridWillScroll(this.headerHeight)
         this.calculateColumnWidths()
         const rows = this.getRowsPerPage()
         this.sliderCount = rows
@@ -937,7 +959,7 @@ export default {
             this.loadingMsg = 'Finishing Up, Just A Sec..'
         }, 2500);        
         this.settings.maxIndex = this.gridSettings.pagination.Enabled?rows:this.cmpDataSet.length
-        this.headerHeight = this.calculateHeightOfHeaderRow()
+        
         this.settings.amount = this.calculateNumRows()
         this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
         this.runScroller({target:{scrollTop:0}})   
@@ -947,6 +969,7 @@ export default {
         this.processComponents();
         this.gridApi.refreshRow = this.refreshRow
         this.gridApi.deleteRow = this.deleteRow
+        this.gridApi.addNewRow = this.addNewRow
     }
 };
 </script>

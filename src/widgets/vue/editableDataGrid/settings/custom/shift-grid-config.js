@@ -2,6 +2,12 @@ let shiftSettings = {
     developmentMode:{
         Enabled:false
     },
+    general:{
+        addNewRecord:{
+            showAddNewRecord:true,
+            componentToRender:'AddRecord'
+        }
+    },
     size:{
         GridWidth:'1000px', //px value of width
         GridWidthValue:1000,

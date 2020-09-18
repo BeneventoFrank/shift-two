@@ -9,6 +9,7 @@
 import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
 import gridConfig from './widgets/vue/editableDataGrid/settings/custom/shift-grid-config'
 import HelloWorld from './widgets/vue/editableDataGrid/src/components/HelloWorld'
+import AddRecord from './widgets/vue/editableDataGrid/src/components/AddRecord'
 
 export default {
   name: 'App',
@@ -23,7 +24,7 @@ export default {
     }
   },
   created(){
-    this.components = [HelloWorld]
+    this.components = [HelloWorld,AddRecord]
   }
 }
 </script>

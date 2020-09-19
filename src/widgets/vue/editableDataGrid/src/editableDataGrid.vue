@@ -28,7 +28,7 @@
                     </div>
                 </div>
                 <div style='display:flex; flex-direction:row;'>
-                    <div style="width:30%; display:flex;">
+                    <div style="width:30%; display:flex; justify-content:flex-start;">
                         <template v-if="gridSettings.slots.LeftSideOfTitle">
                             <component :is="components[gridSettings.slots.LeftSideOfTitle]" :params="{...gridApi}" ></component>
                         </template>
@@ -36,7 +36,7 @@
                         <div style="margin-left:30px;" @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /></div>
                     </div>
                     <div ref="title" style="width:40%;"><span class='title' :style="`color:${gridSettings.colorScheme.GridTitleColor}`" v-if="gridSettings.title.Enabled" >{{gridSettings.title.Text}}</span></div>
-                    <div style="width:30%;">
+                    <div style="width:30%;display:flex; justify-content:flex-end;">
                         <template v-if="gridSettings.slots.RightSideOfTitle">
                             <component :is="components[gridSettings.slots.RightSideOfTitle]" :params="{...gridApi}" ></component>
                         </template>

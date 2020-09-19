@@ -13,7 +13,7 @@
                     <div @click="setCurrentTab('rows')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='rows'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='rows'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Rows</span></div>
                     <div @click="setCurrentTab('columns')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='columns'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='columns'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Columns</span></div>
                     <div @click="setCurrentTab('paging')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='paging'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='paging'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Slider/Paging</span></div>
-                    <div @click="setCurrentTab('slots')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='slots'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='slots'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Slots/Events</span></div>
+                    <div @click="setCurrentTab('slots')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='slots'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='slots'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Slots</span></div>
                     <div @click="setCurrentTab('generate')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='generate'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='generate'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Generate Config</span></div>
                     <div :style="`background-color:#dbd9d3; border-right:1px solid slateGrey;flex-grow:1;`">
                     </div>
@@ -196,7 +196,7 @@
                                 <div v-show="localActiveColumnEdit.IsUsingCustomComponent" style="display:flex; width:100%; margin-top:10px;">
                                     <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Select The Component</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
-                                        <select @change="(event)=>handleUpdateGridColumns(event,'CustomComponentName')" style="width:200px;" name="columns" id="columns">
+                                        <select v-model="localActiveColumnEdit.CustomComponentName" @change="(event)=>handleUpdateGridColumns(event,'CustomComponentName')" style="width:200px;">
                                             <option :value="``">Select Component</option>
                                             <option v-for="(comp, index) in componentList" :key="index" :value="comp.name">{{comp.name}}</option>
                                         </select>                                                                      
@@ -237,7 +237,7 @@
                                 <div v-show="!localActiveColumnEdit.IsUsingCustomComponent" style="display:flex; width:100%; margin-top:10px;">
                                     <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Component To Show On Click</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
-                                        <select @change="(event)=>handleUpdateGridColumns(event,'OnCellClick')" style="width:200px;">
+                                        <select v-model="localActiveColumnEdit.OnCellClick" @change="(event)=>handleUpdateGridColumns(event,'OnCellClick')" style="width:200px;">
                                             <option :value="``">Select Component</option>
                                             <option v-for="(comp, index) in componentList" :key="index" :value="comp.name">{{comp.name}}</option>
                                         </select>                                                                      
@@ -458,11 +458,12 @@ export default {
             this.pushGridChange()
         },
         handleIsCustomComponent(event){
-            console.log("event", event)
             if (event.target.checked === true) {
-                console.log("markin them")
+                this.localActiveColumnEdit.OnCellClick=''
+                this.handleUpdateGridColumns({target:{value:''}},'OnCellClick')
                 this.handleUpdateGridColumns({target:{value:true}},'IsUsingCustomComponent')
             } else {
+                this.localActiveColumnEdit.CustomComponentName = ''
                 this.handleUpdateGridColumns({target:{value:''}},'CustomComponentName')
                 this.handleUpdateGridColumns({target:{value:false}},'IsUsingCustomComponent')
             }
@@ -481,8 +482,9 @@ export default {
                     IsPreSortEnabled:this.localGridSettings.columns[event.target.value].IsPreSortEnabled,
                     ChkAuto:this.localGridSettings.columns[event.target.value].IsUsingACustomWidth?false:true,
                     IsUsingCustomComponent:this.localGridSettings.columns[event.target.value].IsUsingCustomComponent,
-                    CustomComponentName:this.localGridSettings.columns[event.target.value].CustomComponentName?this.localGridSettings.columns[event.target.value].CustomComponentName:''
-
+                    CustomComponentName:this.localGridSettings.columns[event.target.value].CustomComponentName?this.localGridSettings.columns[event.target.value].CustomComponentName:'',
+                    OnCellClick:this.localGridSettings.columns[event.target.value].OnCellClick?this.localGridSettings.columns[event.target.value].OnCellClick:'',
+                    CellClicked:false
                 }            
                 
             } else {
@@ -495,7 +497,11 @@ export default {
                     DataType:'',
                     IsUsingACustomWidth:false,
                     IsPreSortEnabled:false,
-                    ChkAuto:true
+                    ChkAuto:true,
+                    IsUsingCustomComponent:false,
+                    CustomComponentName:'',
+                    OnCellClick:'',
+                    CellClicked:false
                 }
             }
         },
@@ -869,6 +875,7 @@ export default shiftSettings
             justify-content: flex-end;
         }
         .tab{
+            font-size:15px; 
             justify-content: flex-start;
             align-items:center;
         }

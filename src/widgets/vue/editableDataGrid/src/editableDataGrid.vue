@@ -29,14 +29,18 @@
                 </div>
                 <div style='display:flex; flex-direction:row;'>
                     <div style="width:30%; display:flex;">
-                        <!-- <template v-if="gridSettings.general.addNewRecord.showAddNewRecord">
-                            <component :is="components[gridSettings.general.addNewRecord.componentToRender]" :params="{...gridApi}" ></component>
-                        </template> -->
+                        <template v-if="gridSettings.slots.LeftSideOfTitle">
+                            <component :is="components[gridSettings.slots.LeftSideOfTitle]" :params="{...gridApi}" ></component>
+                        </template>
                         <div style="margin-left:30px;" @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :color="gridSettings.colorScheme.ActiveIndicatorColor" :height='25'/></div>
                         <div style="margin-left:30px;" @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /></div>
                     </div>
                     <div ref="title" style="width:40%;"><span class='title' :style="`color:${gridSettings.colorScheme.GridTitleColor}`" v-if="gridSettings.title.Enabled" >{{gridSettings.title.Text}}</span></div>
-                    <div style="width:30%;"></div>
+                    <div style="width:30%;">
+                        <template v-if="gridSettings.slots.RightSideOfTitle">
+                            <component :is="components[gridSettings.slots.RightSideOfTitle]" :params="{...gridApi}" ></component>
+                        </template>
+                    </div>
                 </div>
                 <div ref="headerRow" v-if="gridSettings.header.Enabled" :style="`width:100%;`">
                 <HeaderRow 
@@ -67,7 +71,7 @@
                         `"
                         :class="`row`" 
                         v-for="(item) in data" :key="item.rowIndex">
-                        <div
+                        <div @click="()=>{gridSettings.columns[index].CellClicked={clicked:true,rowIndex:item.rowIndex}}"
                             @mouseleave="()=>{cellHoverIndex=null}" 
                             @mouseenter="()=>{cellHoverIndex=index}"
                             v-for="(col,index) in item.data" :key="index"
@@ -75,6 +79,7 @@
                                         width:${gridSettings.columns[index].Width};
                                         justify-content:${gridSettings.columns[index].Alignment};
                                         background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
+                                        cursor:${gridSettings.columns[index].OnCellClick?'zoom-in':'arrow'}
                                 `">
                             <template v-if="gridSettings.columns[index].IsUsingCustomComponent">
                                 <component :is="components[gridSettings.columns[index].CustomComponentName]" :params="{...item, ...gridApi}" ></component>
@@ -87,6 +92,9 @@
                                             `" 
                                     > {{col}}</span>
                             </template>    
+                            <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" style="position:absolute; z-index:8888;" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
+                                <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
+                            </div>
                         </div>
                     </div>
                     <div :style="`height:${bottomPaddingHeight}px;`"></div>
@@ -200,7 +208,9 @@ export default {
                 IsPreSortEnabled:false,
                 ChkAuto:true,
                 IsUsingCustomComponent:false,
-                CustomComponentName:''
+                CustomComponentName:'',
+                OnCellClick:'',
+                CellClicked:false
 
             },
             headerHeight:0, //calculated total of the header use to dictate the height of datarow.
@@ -265,6 +275,8 @@ export default {
                 pagination:{
                 },
                 slots:{
+                },
+                events:{
                 }
             },
             components:{},
@@ -352,7 +364,7 @@ export default {
             const min = this.gridSettings.pagination.MinRecordsViewable
             this.setGridState(min, max)
             this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
-            this.runScroller({target:{scrollTop:0}},true)   
+            this.runScroller({target:{scrollTop:0}})   
             this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollHeight;
         },
         refreshRow(rowId,data){
@@ -485,8 +497,6 @@ export default {
             this.bufferedItems =Math.floor(this.boolGridWillScroll?amount + 2 * tolerance:amount)
             // 6) how many items will be virtualized above (pcs)
             this.itemsAbove = startIndex - tolerance - minIndex
-            // this.topPaddingHeight = this.boolGridWillScroll?this.itemsAbove * itemHeight:0
-            // this.bottomPaddingHeight = this.boolGridWillScroll?this.totalHeight - this.topPaddingHeight:0
             // initial state object
             this.data = []
         },
@@ -504,7 +514,7 @@ export default {
             const bottomPad = Math.max(this.totalHeight - topPaddingHeight - (data.length * this.settings.itemHeight), 0)
             this.bottomPaddingHeight= this.boolGridWillScroll?bottomPad:0
             this.topPaddingHeight = topPaddingHeight
-            if(!scrollToBottom){
+            if(scrollToBottom){
                 this.$refs.viewportElement.scrollTop = this.$refs.viewportElement.scrollHeight
                 this.topPaddingHeight = this.bottomPaddingHeight
                 this.bottomPaddingHeight = 0

@@ -1,13 +1,6 @@
 let shiftSettings = {
     developmentMode:{
-        Enabled:true
-    },
-    slots:{
-        LeftOfTitle:'',
-        RightOfTitle:''
-    },
-    events:{
-        cellClick:''
+        Enabled:false
     },
     size:{
         GridWidth:'1000px', //px value of width
@@ -62,9 +55,13 @@ let shiftSettings = {
         RowHighlightActiveCell:'#dbdbdc',
 
     },
+    slots:{
+        LeftSideOfTitle:'AddRecord',
+        RightSideOfTitle:''
+    },
     columns:[
         {
-            ColumnHeader:'Column',
+            ColumnHeader:'Address',
             Index:0,
             Width:'216px',
             WidthValue:216,
@@ -73,8 +70,9 @@ let shiftSettings = {
             DataType:'string',
             IsPreSortEnabled:true,
             IsUsingCustomComponent:false,
-            CustomComponentName:''
-
+            CustomComponentName:'',
+            OnCellClick:'EditDataInline',
+            CellClicked:false,
         },
         {
             ColumnHeader:'Column',
@@ -86,8 +84,9 @@ let shiftSettings = {
             DataType:'string',
             IsPreSortEnabled:true,
             IsUsingCustomComponent:false,
-            CustomComponentName:''
-
+            CustomComponentName:'',
+            OnCellClick:'EditDataInline',
+            CellClicked:false,
         },
         {
             ColumnHeader:'Column',
@@ -99,8 +98,9 @@ let shiftSettings = {
             DataType:'string',
             IsPreSortEnabled:true,
             IsUsingCustomComponent:false,
-            CustomComponentName:''
-
+            CustomComponentName:'',
+            OnCellClick:'EditDataInline',
+            CellClicked:false,
         },
         {
             ColumnHeader:'Actions',
@@ -112,8 +112,9 @@ let shiftSettings = {
             DataType:'string',
             IsPreSortEnabled:true,
             IsUsingCustomComponent:false,
-            CustomComponentName:''
-
+            CustomComponentName:'',
+            OnCellClick:'EditDataInline',
+            CellClicked:false,
         },
         {
             ColumnHeader:'More Actions',
@@ -125,8 +126,9 @@ let shiftSettings = {
             DataType:'string',
             IsPreSortEnabled:false,
             IsUsingCustomComponent:true,
-            CustomComponentName:'HelloWorld'
-
+            CustomComponentName:'HelloWorld',
+            OnCellClick:'',
+            CellClicked:false,
         },
 
     ]

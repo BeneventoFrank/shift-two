@@ -29,9 +29,9 @@
                 </div>
                 <div style='display:flex; flex-direction:row;'>
                     <div style="width:30%; display:flex;">
-                        <template v-if="gridSettings.general.addNewRecord.showAddNewRecord">
+                        <!-- <template v-if="gridSettings.general.addNewRecord.showAddNewRecord">
                             <component :is="components[gridSettings.general.addNewRecord.componentToRender]" :params="{...gridApi}" ></component>
-                        </template>
+                        </template> -->
                         <div style="margin-left:30px;" @mouseenter="handleShowCancelEye" class='pointer eye'  v-show="!isHovering&&(filterStrategy.isCurrentlyFiltering||sortStrategy.isCurrentlySorting)"><Eye :color="gridSettings.colorScheme.ActiveIndicatorColor" :height='25'/></div>
                         <div style="margin-left:30px;" @mouseleave="handleShowCancelEye" @click="handleClearAllFilters" class='pointer tooltip eye' v-show="isHovering" ><CancelEye :height='25' /></div>
                     </div>
@@ -76,8 +76,8 @@
                                         justify-content:${gridSettings.columns[index].Alignment};
                                         background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
                                 `">
-                            <template v-if="gridSettings.columns[index].IsCustomComponent">
-                                <component :is="components[gridSettings.columns[index].CustomComponent]" :params="{...item, ...gridApi}" ></component>
+                            <template v-if="gridSettings.columns[index].IsUsingCustomComponent">
+                                <component :is="components[gridSettings.columns[index].CustomComponentName]" :params="{...item, ...gridApi}" ></component>
                             </template>
                             <template v-else>
                                 <span 
@@ -106,6 +106,7 @@
                 :activeColorScheme="activeColorScheme"
                 :activeColumnEdit="activeColumnEdit"
                 :fullDS="fullDS"
+                :componentList="componentList"
             />
     </div>
 </div>
@@ -197,7 +198,10 @@ export default {
                 DataType:'',
                 IsUsingACustomWidth:false,
                 IsPreSortEnabled:false,
-                ChkAuto:true            
+                ChkAuto:true,
+                IsUsingCustomComponent:false,
+                CustomComponentName:''
+
             },
             headerHeight:0, //calculated total of the header use to dictate the height of datarow.
             fullDS:[],
@@ -244,9 +248,7 @@ export default {
             gridSettings:{
                 developmentMode:{
                 },
-                general:{
-                    addNewRecord:{
-                    }
+                column:{
                 },
                 rows:{
                 },
@@ -261,6 +263,8 @@ export default {
                 slider:{
                 },
                 pagination:{
+                },
+                slots:{
                 }
             },
             components:{},

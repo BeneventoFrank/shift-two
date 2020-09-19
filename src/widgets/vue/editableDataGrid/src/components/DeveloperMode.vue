@@ -13,6 +13,7 @@
                     <div @click="setCurrentTab('rows')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='rows'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='rows'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Rows</span></div>
                     <div @click="setCurrentTab('columns')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='columns'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='columns'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Columns</span></div>
                     <div @click="setCurrentTab('paging')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='paging'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='paging'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Slider/Paging</span></div>
+                    <div @click="setCurrentTab('slots')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='slots'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='slots'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Slots/Events</span></div>
                     <div @click="setCurrentTab('generate')" class='tab'  :style="`box-shadow: 0 6px 5px -8px black; cursor:pointer; background-color:${currentTab==='generate'?'#f2ecdc':'#dbd9d3'}; border-right:1px solid ${currentTab==='generate'?'#f2ecdc':'slateGrey'}; slateGrey; height:35px; width:100%; border-bottom:1px solid slateGrey; display:flex; ;`"><span style="width:100%">Generate Config</span></div>
                     <div :style="`background-color:#dbd9d3; border-right:1px solid slateGrey;flex-grow:1;`">
                     </div>
@@ -183,18 +184,33 @@
                             <hr v-show="columnSelected!==-1" style="width:100%; margin-bottom:10px; height:1px;">
                             <div v-show="columnSelected!==-1" style='width:100%; display:flex; flex-direction:column; align-items:center;'>
                                 <div style="display:flex; width:100%;">
-                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span class="mediumText">Column Header</span></div>
+                                    <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Column Header</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;"><input @input="(event)=>handleUpdateGridColumns(event,'ColumnHeader')" type='text' v-model="localActiveColumnEdit.ColumnHeader" style='width:100%'></div>
                                 </div>
-                                <div style="display:flex; width:100%; margin-top:15px;">
-                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span class="mediumText">Custom Width</span></div>
+                                <div style="display:flex; width:100%; margin-top:10px;">
+                                    <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Use Custom Component?</span></div>
+                                    <div style="width:50%; display:flex;justify-content:flex-start;">
+                                        <input @change="handleIsCustomComponent" v-model="localActiveColumnEdit.IsUsingCustomComponent" style="margin:0;" type="checkbox" id="enablePresort" name="enablePresort" value="true">
+                                    </div>
+                                </div>
+                                <div v-show="localActiveColumnEdit.IsUsingCustomComponent" style="display:flex; width:100%; margin-top:10px;">
+                                    <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Select The Component</span></div>
+                                    <div style="width:50%; display:flex;justify-content:flex-start;">
+                                        <select @change="(event)=>handleUpdateGridColumns(event,'CustomComponentName')" style="width:200px;" name="columns" id="columns">
+                                            <option :value="-1">Select Component</option>
+                                            <option v-for="(comp, index) in componentList" :key="index" :value="comp.name">{{comp.name}}</option>
+                                        </select>                                                                      
+                                    </div>
+                                </div>
+                                <div style="display:flex; width:100%; margin-top:10px;">
+                                    <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Custom Width</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start; align-items:center;">
                                         <input @input="debounceHandleCustomWidth" type='number' min="0" v-model="localActiveColumnEdit.WidthValue" style='width:100px;'><span class='smallerText'> px</span>
                                         <span style="margin-left:10px; margin-right:10px;" class="mediumText">auto</span><input @change="handleAutoSize" v-model="localActiveColumnEdit.ChkAuto" style="margin:0;" type="checkbox" id="enablePresort" name="enablePresort" value="true">
                                     </div>
                                 </div>
-                                <div style="display:flex; width:100%; margin-top:15px;">
-                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span class="mediumText">Data Alignment</span></div>
+                                <div v-show="!localActiveColumnEdit.IsUsingCustomComponent" style="display:flex; width:100%; margin-top:10px;">
+                                    <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Data Alignment</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
                                         <select @input="(event)=>handleUpdateGridColumns(event,'Alignment')" v-model="localActiveColumnEdit.Alignment" style="width:100px;" name="alignment" id="alignment">
                                             <option value='flex-start'>left</option>
@@ -203,8 +219,8 @@
                                         </select>                                        
                                     </div>
                                 </div>
-                                <div style="display:flex; width:100%; margin-top:15px;">
-                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span class="mediumText">Data Type</span></div>
+                                <div v-show="!localActiveColumnEdit.IsUsingCustomComponent" style="display:flex; width:100%; margin-top:10px;">
+                                    <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Data Type</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
                                         <select @input="(event)=>handleUpdateGridSettings(event.target.value,'DataType')" v-model="localActiveColumnEdit.DataType" style="width:100px;" name="dataType" id="dataType">
                                             <option value='string'>string</option>
@@ -212,8 +228,8 @@
                                         </select>                                        
                                     </div>
                                 </div>
-                                <div style="display:flex; width:100%; margin-top:15px;">
-                                    <div style="width:50%; display:flex;justify-content:flex-start;"><span class="mediumText">Enable Pre-sort</span></div>
+                                <div v-show="!localActiveColumnEdit.IsUsingCustomComponent" style="display:flex; width:100%; margin-top:10px;">
+                                    <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Enable Pre-sort</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
                                         <input @change="(event)=>handleUpdateGridColumns(event,'IsPreSortEnabled')" v-model="localActiveColumnEdit.IsPreSortEnabled" style="margin:0;" type="checkbox" id="enablePresort" name="enablePresort" value="true">
                                     </div>
@@ -256,6 +272,32 @@
                                 </div>
                             </div>   
                         </div>
+                    </div>
+                </div>
+                <div v-show="currentTab==='slots'" style="width:75%; background-color:#f2ecdc; display:flex; padding:35px; flex-direction:column; align-items:center; justify-content:center;">
+                    <div style="display:flex; flex-direction:column; justify-content:flex-start;">
+                        <div style="display:flex; width:100%; justify-content:flex-start;">
+                            <div style="width:150px; display:flex; justify-content:flex-start"><span class='mediumText'>Slot Left Of Title</span></div>
+                            <select @change="(event)=>handleUpdateGridSettings(event,'LeftSlotComponent')" style="width:200px;">
+                                <option :value="-1">Select Component</option>
+                                <option v-for="(comp, index) in componentList" :key="index" :value="comp.name">{{comp.name}}</option>
+                            </select>                                                                      
+                        </div>   
+                        <div style="display:flex; width:100%; margin-top:15px; justify-content:flex-start;">
+                            <div style="width:150px; display:flex; justify-content:flex-start"><span class='mediumText'>Slot Right Of Title</span></div>
+                            <select @change="(event)=>handleUpdateGridSettings(event,'LeftSlotComponent')" style="width:200px;">
+                                <option :value="-1">Select Component</option>
+                                <option v-for="(comp, index) in componentList" :key="index" :value="comp.name">{{comp.name}}</option>
+                            </select>                                                                      
+                        </div>   
+                        <div style="display:flex; width:100%; margin-top:15px; justify-content:flex-start;">
+                            <div style="width:150px; display:flex; justify-content:flex-start"><span class='mediumText'>Data Cell Click </span></div>
+                            <select @change="(event)=>handleUpdateGridSettings(event,'LeftSlotComponent')" style="width:200px;">
+                                <option :value="-1">Select Component</option>
+                                <option v-for="(comp, index) in componentList" :key="index" :value="comp.name">{{comp.name}}</option>
+                            </select>                                                                      
+                        </div>   
+
                     </div>
                 </div>
                 <div v-show="currentTab==='generate'" style="width:75%; background-color:#f2ecdc; display:flex; padding:35px; flex-direction:column; align-items:center; justify-content:center;">
@@ -347,11 +389,15 @@ export default {
                 },
                 title:{
                 },
+                columns:{
+                },
                 header:{
                 },
                 slider:{
                 },
                 pagination:{
+                },
+                slots:{
                 }
             },          
             localActiveColumnEdit:{
@@ -363,7 +409,9 @@ export default {
                 DataType:'',
                 IsUsingACustomWidth:false,
                 IsPreSortEnabled:false,
-                ChkAuto:true            
+                ChkAuto:true,                     
+                IsUsingCustomComponent:false,
+                CustomComponentName:''
             },   
             localFullDS:[]
         };
@@ -401,6 +449,19 @@ export default {
 //////End Size Tab///////
 
 //////Columns Tab/////////
+        handleUpdateGridColumns(event,property){
+            this.localGridSettings.columns[this.localActiveColumnEdit.Index][property] = event.target.value
+            this.pushGridChange()
+        },
+        handleIsCustomComponent(event){
+            console.log("event", event.target.value)
+            if (event.target.value == true) {
+                this.handleUpdateGridColumns({target:{value:true}},'IsUsingCustomComponent')
+            } else {
+                this.handleUpdateGridColumns({target:{value:''}},'CustomComponentName')
+                this.handleUpdateGridColumns({target:{value:false}},'IsUsingCustomComponent')
+            }
+        },
         handleColumnEdit(event){
             if (event.target.value>-1) {
             this.columnSelected=event.target.value;
@@ -413,7 +474,10 @@ export default {
                     DataType:this.localGridSettings.columns[event.target.value].DataType,
                     IsUsingACustomWidth:this.localGridSettings.columns[event.target.value].IsUsingACustomWidth,
                     IsPreSortEnabled:this.localGridSettings.columns[event.target.value].IsPreSortEnabled,
-                    ChkAuto:this.localGridSettings.columns[event.target.value].IsUsingACustomWidth?false:true
+                    ChkAuto:this.localGridSettings.columns[event.target.value].IsUsingACustomWidth?false:true,
+                    IsUsingCustomComponent:this.localGridSettings.columns[event.target.value].IsUsingCustomComponent?true:false,
+                    CustomComponentName:this.localGridSettings.columns[event.target.value].CustomComponentName?this.localGridSettings.columns[event.target.value].CustomComponentName:''
+
                 }            
                 
             } else {
@@ -600,7 +664,10 @@ let config = `let shiftSettings = {
             IsUsingACustomWidth:${this.localGridSettings.columns[i].IsUsingACustomWidth?this.localGridSettings.columns[i].IsUsingACustomWidth:false},
             Alignment:'${this.localGridSettings.columns[i].Alignment}',
             DataType:'${this.localGridSettings.columns[i].DataType}',
-            IsPreSortEnabled:${this.localGridSettings.columns[i].IsPreSortEnabled}                            
+            IsPreSortEnabled:${this.localGridSettings.columns[i].IsPreSortEnabled},
+            IsUsingCustomComponent:${this.localGridSettings.columns[i].IsUsingCustomComponent!==undefined?this.localGridSettings.columns[i].IsUsingCustomComponent:false},
+            CustomComponentName:'${this.localGridSettings.columns[i].CustomComponentName!=='undefined'?this.localGridSettings.columns[i].CustomComponentName:''}'
+
         },
 `                
             config += column
@@ -677,10 +744,6 @@ export default shiftSettings
         },
         setCurrentTab(tab){
             this.currentTab = tab
-        },
-        handleUpdateGridColumns(event,property){
-            this.localGridSettings.columns[this.localActiveColumnEdit.Index][property] = event.target.value
-            this.pushGridChange()
         },
         calculateColumnWidths(){
             let tmp = 0
@@ -765,6 +828,9 @@ export default shiftSettings
             type:Object
         }, 
         fullDS:{
+            type:Array
+        },
+        componentList:{
             type:Array
         }
 

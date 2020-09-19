@@ -1,12 +1,13 @@
 let shiftSettings = {
     developmentMode:{
-        Enabled:false
+        Enabled:true
     },
-    general:{
-        addNewRecord:{
-            showAddNewRecord:true,
-            componentToRender:'AddRecord'
-        }
+    slots:{
+        LeftOfTitle:'',
+        RightOfTitle:''
+    },
+    events:{
+        cellClick:''
     },
     size:{
         GridWidth:'1000px', //px value of width
@@ -65,54 +66,66 @@ let shiftSettings = {
         {
             ColumnHeader:'Column',
             Index:0,
-            Width:'200px',
-            WidthValue:200,
+            Width:'216px',
+            WidthValue:216,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:true,
+            IsUsingCustomComponent:false,
+            CustomComponentName:''
+
         },
         {
             ColumnHeader:'Column',
             Index:1,
-            Width:'200px',
-            WidthValue:200,
+            Width:'216px',
+            WidthValue:216,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:true,
+            IsUsingCustomComponent:false,
+            CustomComponentName:''
+
         },
         {
             ColumnHeader:'Column',
             Index:2,
-            Width:'200px',
-            WidthValue:200,
+            Width:'216px',
+            WidthValue:216,
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:true,
+            IsUsingCustomComponent:false,
+            CustomComponentName:''
+
         },
         {
-            ColumnHeader:'Column',
+            ColumnHeader:'Actions',
             Index:3,
-            Width:'200px',
-            WidthValue:200,
-            IsUsingACustomWidth:false,
+            Width:'150px',
+            WidthValue:150,
+            IsUsingACustomWidth:true,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true                            
+            IsPreSortEnabled:true,
+            IsUsingCustomComponent:false,
+            CustomComponentName:''
+
         },
         {
-            ColumnHeader:'Column',
+            ColumnHeader:'More Actions',
             Index:4,
             Width:'200px',
             WidthValue:200,
             IsUsingACustomWidth:true,
-            Alignment:'right',
+            Alignment:'center',
             DataType:'string',
             IsPreSortEnabled:false,
-            IsCustomComponent:true,
-            CustomComponent:'HelloWorld'
+            IsUsingCustomComponent:true,
+            CustomComponentName:'HelloWorld'
 
         },
 

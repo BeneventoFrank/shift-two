@@ -8,7 +8,7 @@
 
 <script>
     export default {
-        name:'HelloWorld',
+        name:'EditAndDelete',
         props:{
             params:{}
         },
@@ -17,7 +17,7 @@
                 this.params.deleteRow(this.params.rowIndex)
             },
             handleEditClick(){
-                const data = ['hello World', 'hello world', 'HELLO WORLD', 'Hello world','']
+                const data = ['hello World', 'hello world', 'HELLO WORLD', 'Hello world','hello World', 'hello world', 'HELLO WORLD', 'Hello world','GoodBye World','']
                 this.params.refreshRow(this.params.rowIndex,data)
             }
         },

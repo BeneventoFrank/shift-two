@@ -1,6 +1,6 @@
 let shiftSettings = {
     developmentMode:{
-        Enabled:true
+        Enabled:false
     },
     size:{
         GridWidth:'1400px', //px value of width
@@ -56,7 +56,7 @@ let shiftSettings = {
 
     },
     slots:{
-        LeftSideOfTitle:'',
+        LeftSideOfTitle:'AddRecord',
         RightSideOfTitle:''
     },
     columns:[
@@ -68,7 +68,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true,
+            IsPreSortEnabled:false,
             IsUsingCustomComponent:false,
             CustomComponentName:'',
             OnCellClick:'EditDataInline',
@@ -82,7 +82,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true,
+            IsPreSortEnabled:false,
             IsUsingCustomComponent:false,
             CustomComponentName:'',
             OnCellClick:'EditDataInline',
@@ -96,7 +96,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true,
+            IsPreSortEnabled:false,
             IsUsingCustomComponent:false,
             CustomComponentName:'',
             OnCellClick:'EditDataInline',
@@ -110,7 +110,7 @@ let shiftSettings = {
             IsUsingACustomWidth:true,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true,
+            IsPreSortEnabled:false,
             IsUsingCustomComponent:false,
             CustomComponentName:'',
             OnCellClick:'EditDataInline',
@@ -124,7 +124,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true,
+            IsPreSortEnabled:false,
             IsUsingCustomComponent:false,
             CustomComponentName:'',
             OnCellClick:'EditDataInline',
@@ -138,7 +138,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true,
+            IsPreSortEnabled:false,
             IsUsingCustomComponent:false,
             CustomComponentName:'',
             OnCellClick:'EditDataInline',
@@ -152,7 +152,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true,
+            IsPreSortEnabled:false,
             IsUsingCustomComponent:false,
             CustomComponentName:'',
             OnCellClick:'EditDataInline',
@@ -166,7 +166,7 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true,
+            IsPreSortEnabled:false,
             IsUsingCustomComponent:false,
             CustomComponentName:'',
             OnCellClick:'EditDataInline',
@@ -194,10 +194,10 @@ let shiftSettings = {
             IsUsingACustomWidth:false,
             Alignment:'center',
             DataType:'string',
-            IsPreSortEnabled:true,
-            IsUsingCustomComponent:false,
-            CustomComponentName:'',
-            OnCellClick:'EditDataInline',
+            IsPreSortEnabled:false,
+            IsUsingCustomComponent:true,
+            CustomComponentName:'EditAndDelete',
+            OnCellClick:'',
             CellClicked:false,
         },
 

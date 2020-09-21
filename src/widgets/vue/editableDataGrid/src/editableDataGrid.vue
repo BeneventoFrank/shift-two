@@ -96,11 +96,11 @@
                                     :style="` white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
                                             color:${item.rowRules&&item.rowRules.textColor};
                                             vertical-align:center;
-                                            font-size:15px;
+                                            font-size:14px;
                                             `" 
                                     > {{item.rowIndex+1 +''+ col}}</span>
                             </template>    
-                            <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" style="position:absolute; z-index:8888;" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
+                            <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" :style="`position:absolute; top:${item.viewPortRowId*settings.itemHeight}px; z-index:8888;`" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
                                 <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
                             </div>
                         </div>
@@ -686,11 +686,13 @@ export default {
             const data = []
             const start = offset
             let end = Math.min(offset + limit, this.settings.maxIndex)
+            let viewPortRowId = 1;
             console.log('end = ', offset + limit, this.settings.maxIndex)
             if (start <= end) {
                 for (let i = start; i < end; i++) {
                     if (this.cmpDataSet[i]){
-                        data.push({ rowIndex: this.cmpDataSet[i].rowIndex, data: this.cmpDataSet[i].data, rowRules: this.cmpDataSet[i].rowRules})
+                        data.push({ rowIndex: this.cmpDataSet[i].rowIndex, data: this.cmpDataSet[i].data, rowRules: this.cmpDataSet[i].rowRules, viewPortRowId:viewPortRowId})
+                        viewPortRowId++
                     }
                 }
             }

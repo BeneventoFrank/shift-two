@@ -1,6 +1,6 @@
 <template>
   <div id="app" style='width:100%;'>
-    <EditableDataGrid :componentList="components" :rowRules="rowRules" :gridConfig="localConfig"/>
+    <EditableDataGrid :navigateToRow="15763" :componentList="components" :rowRules="rowRules" :gridConfig="localConfig"/>
     
   </div>
 </template>

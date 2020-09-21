@@ -396,7 +396,8 @@ export default {
 
 ///////Helper Functions////////
         verifyNavigateToRow(){
-            return this.navigateToRow&&this.navigateToRow>=0&&this.navigateToRow<=this.fullDS.length?this.navigateToRow:0
+            const nav30 = this.navigateToRow-1 
+            return nav30&&nav30>=0&&nav30<=this.fullDS.length?nav30:0
         },
         navigateDataToRow(rowIndex){
             //we need to call the paging with the row number
@@ -600,12 +601,12 @@ export default {
             if (scrollToRow){
                 index = this.gridSettings.pagination.MinRecordsViewable
                 data = this.getData(index, this.bufferedItems) 
-                topPad = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
+                console.log('scrollToRow?', scrollToRow)
+                topPad = Math.ceil((scrollToRow-index) * this.settings.itemHeight)
                 const topPaddingHeight = this.boolGridWillScroll?topPad:0
                 const bottomPad = Math.max(this.totalHeight - topPaddingHeight - (data.length * this.settings.itemHeight), 0)
                 this.bottomPaddingHeight= this.boolGridWillScroll?bottomPad:0
                 this.topPaddingHeight = topPaddingHeight
-                console.log("this.$refs.viewportElement.scrollTopthis.$refs.viewportElement.scrollTopthis.$refs.viewportElement.scrollTopthis.$refs.viewportElement.scrollTopthis.$refs.viewportElement.scrollTop", this.$refs.viewportElement.scrollTop)
 
             } else {
                 if(this.gridSettings.pagination.Enabled){

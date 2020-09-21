@@ -96,6 +96,7 @@
                                     :style="` white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
                                             color:${item.rowRules&&item.rowRules.textColor};
                                             vertical-align:center;
+                                            font-size:15px;
                                             `" 
                                     > {{item.rowIndex+1 +''+ col}}</span>
                             </template>    
@@ -174,7 +175,7 @@ export default {
                 minIndex: 0,
                 maxIndex: 0,
                 startIndex: 0,
-                itemHeight: 30,
+                itemHeight: 25,
                 amount: 0, //number of items in the viewport
                 tolerance: 2 //outlet size - rendered but not visible
             },
@@ -1143,7 +1144,7 @@ export default {
         }
         .row{
             height:auto;
-            max-height:30px;
+            max-height:25px;
         }
         .dataRow{
             width:100%; 

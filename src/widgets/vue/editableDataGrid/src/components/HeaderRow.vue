@@ -36,7 +36,7 @@
                         <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].Width}; overflow:hidden; white-space:nowrap; text-overflow:ellipsis`"> 
                             {{gridSettings.columns[index].ColumnHeader}}
                         </span>
-                        <div :ref="`flyout-${index}`" class='flyout' v-if="showAFilter&&showFilter[index]===true" :style="`right:${wouldCauseAScroll(index)?wouldCauseAScroll(index):null};`">
+                        <div :ref="`flyout-${index}`" class='flyout' v-if="!gridSettings.columns[index].IsUsingCustomComponent&&showAFilter&&showFilter[index]===true" :style="`right:${wouldCauseAScroll(index)?wouldCauseAScroll(index):null};`">
                             <div class='innerDiv' :style="`background-color:${gridSettings.colorScheme.FlyoutBackgroundColor}`">
                                 <div class='flyoutHeader'>
                                     <div class='headerItem sort'> 

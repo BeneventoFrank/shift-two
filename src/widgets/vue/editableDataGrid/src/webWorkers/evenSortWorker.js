@@ -31,7 +31,7 @@ export default () => {
         let copy = []
         for (let i = 0; i <= columns.length; i=i+2) {
             
-            if(columns[i]&&columns[i].IsPreSortEnabled){
+            if(columns[i]&&!columns[i].IsUsingCustomComponent&&columns[i].IsPreSortEnabled){
                 sortedData[columns[i].Index]= {}
                 sortedData[columns[i].Index].asc = sortDataset(`${columns[i].Index}^^asc`, columns[i].DataType)
                 copy = sortedData[columns[i].Index].asc.slice()

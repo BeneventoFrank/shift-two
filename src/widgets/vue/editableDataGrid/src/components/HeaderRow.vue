@@ -24,7 +24,7 @@
             <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
                     <div :id="`header-${index}`" :ref="`header-${index}`" 
-                        :style="`width:${gridSettings.columns[index].Width}; display:flex; flex-direction:row; 
+                        :style="`width:${gridWillScroll?gridSettings.columns[index].WidthValue-1.7:gridSettings.columns[index].Width}px; display:flex; flex-direction:row; 
                                 justify-content:${gridSettings.columns[index].DataAlignment}; 
                                 height:30px; 
                                 background-color:${((currentFilters.columnsBeingFiltered.includes(index.toString()))) || ((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted.toString() === index.toString()))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor};`"

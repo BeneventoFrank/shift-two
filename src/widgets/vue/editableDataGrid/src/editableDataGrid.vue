@@ -66,7 +66,7 @@
                     <div class='item'
                         @mouseleave="()=>{hoverIndex=null}" 
                         @mouseenter="()=>{hoverIndex=item.rowIndex}"     
-                        :style="`height:32px; display:flex; justify-content:center; 
+                        :style="`height:32px; display:flex;  
                                     background-color:${
                                         gridSettings.rows.HighlightRowEnabled&&item.rowIndex===hoverIndex?
                                                     gridSettings.colorScheme.RowHighlightBackground:
@@ -98,7 +98,7 @@
                                             vertical-align:center;
                                             font-size:14px;
                                             `" 
-                                    > {{item.rowIndex+1 +''+ col}}</span>
+                                    > {{col}}</span>
                             </template>    
                             <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" :style="`position:absolute; top:${item.viewPortRowId*settings.itemHeight}px; z-index:8888;`" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
                                 <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
@@ -519,7 +519,7 @@ export default {
             }
            const numColumns = numCols-custCols.length
            let widthOfGrid = this.gridSettings.size.GridWidthValue - tmp
-           widthOfGrid = this.boolGridWillScroll?(widthOfGrid-17):widthOfGrid //17 is the px width of the scrollbar
+           widthOfGrid = this.boolGridWillScroll?(widthOfGrid):widthOfGrid //17 is the px width of the scrollbar
            const eachColumn = Math.floor(widthOfGrid/numColumns)
             for (let i = 0; i < numCols; i++) {
                 if (!custCols.includes(i)) {

@@ -59,7 +59,7 @@
                 </div>
             </div>
             
-            <div class='fade-in' v-show="gridLoaded" id='viewport' @scroll='runScroller' :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:auto; overflow-x:hidden; scroll-behavior:smooth;`">
+            <div class='fade-in' v-show="gridLoaded" id='viewport' @scroll='runScroller' :ref="`viewportElement`" :style="`height:${viewportHeight}px; overflow-y:auto  ; overflow-x:hidden; scroll-behavior:smooth;`">
                 <div :style="`display:flex; flex-direction:column;`">
 
                     <div :style="`height:${topPaddingHeight}px; `"></div>
@@ -70,7 +70,7 @@
                                     background-color:${
                                         gridSettings.rows.HighlightRowEnabled&&item.rowIndex===hoverIndex?
                                                     gridSettings.colorScheme.RowHighlightBackground:
-                                                            item.rowRules&&item.rowRules.backgroundColor?item.rowRules.backgroundColor:
+                                                            item.rowRules&&item.rowRules.backgroundColor?item.rowRules.backgroundColor: //this should be using row rules object
                                                                     item.rowIndex%2===0?
                                                                             gridSettings.colorScheme.GridRowEvenBackgroundColor:    
                                                                                     gridSettings.colorScheme.GridRowOddBackgroundColor} ;
@@ -92,13 +92,16 @@
                                 <component :is="components[gridSettings.columns[index].CustomComponentName]" :params="{returnToRow:{page:gridSettings.pagination.PageNumberCurrentlyViewing,rowIndex:item.rowIndex}, ...item, ...gridApi}" ></component>
                             </template>
                             <template v-else>
+                                
                                 <span 
-                                    :style="` white-space:nowrap; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; overflow:hidden; display:block;  
-                                            color:${item.rowRules&&item.rowRules.textColor};
+                                    :style="`text-overflow:ellipsis; overflow:hidden; white-space:nowrap; display:block;  
+                                            color:${item.rowRules.textColor?item.rowRules.textColor:'black'};
                                             vertical-align:center;
                                             font-size:14px;
+                                            width:${gridSettings.columns[index].WidthValue-3}px;    
+
                                             `" 
-                                    > {{col}}</span>
+                                    > {{item.rowIndex+1+ ' ' +col}}</span>
                             </template>    
                             <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" :style="`position:absolute; top:${item.viewPortRowId*settings.itemHeight}px; z-index:8888;`" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
                                 <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
@@ -175,7 +178,7 @@ export default {
                 minIndex: 0,
                 maxIndex: 0,
                 startIndex: 0,
-                itemHeight: 25,
+                itemHeight: 26, //min seems to be 26 or it puts a scrollbar
                 amount: 0, //number of items in the viewport
                 tolerance: 2 //outlet size - rendered but not visible
             },
@@ -305,7 +308,6 @@ export default {
             return (this.gridSettings.pagination.MaxPageNumberPossible>1?true:false)&&(this.gridSettings.pagination.PageNumberCurrentlyViewing<this.gridSettings.pagination.MaxPageNumberPossible)
         },
         cmpDataSet:function(){
-            console.log('compDataset which one? ', this.filterStrategy.isCurrentlyFiltering, this.sortStrategy.isCurrentlySorting)
             if(this.filterStrategy.isCurrentlyFiltering||this.sortStrategy.isCurrentlySorting) return this.workingDataSet
             return this.fullDS
         }
@@ -340,6 +342,7 @@ export default {
             if(isDevMode){
                 return tmp.splice(1,2)
             }
+            console.log(tmp)
             return tmp
         },
         processGridUpdate(eventData){
@@ -358,13 +361,9 @@ export default {
         processRowRules(){
             if (Object.keys(this.rowRules)>0) {return}
             for (let i = 0; i < this.rowRules.length; i++) {
-                this.rowRulesObj[this.rowRules[i].columnToCompare] = {
-                    compareFunction:this.rowRules[i].compareFunction,
-                    stylesToApply:{
-                        backgroundColor:this.rowRules[i].stylesToApply.backgroundColor,
-                        textColor:this.rowRules[i].stylesToApply.textColor
-                    }
-                }
+                this.rowRulesObj[this.rowRules[i].columnToCompare] = {}
+                this.rowRulesObj[this.rowRules[i].columnToCompare].compareFunction = this.rowRules[i].compareFunction,
+                this.rowRulesObj[this.rowRules[i].columnToCompare].stylesToApply= {backgroundColor:this.rowRules[i].stylesToApply.backgroundColor, textColor:this.rowRules[i].stylesToApply.textColor }
             }
         },
         processDataIntoPages(){
@@ -408,6 +407,7 @@ export default {
         },
         applyRowRules(data){
             let rows = []
+
             for (let i = 0; i < data.length; i++) {
                 rows[i] = {
                     data: data[i].data,
@@ -415,7 +415,9 @@ export default {
                     rowRules: {}
                 }
                 for (let j = 0; j < data[i].data.length; j++) {
+                    
                     if (this.rowRulesObj[j]&&this.rowRulesObj[j].compareFunction(data[i].data[j])) {
+                        console.log('found one')
                         rows[i].rowRules.textColor=this.rowRulesObj[j].stylesToApply.textColor
                         rows[i].rowRules.backgroundColor=this.rowRulesObj[j].stylesToApply.backgroundColor
                         break;
@@ -503,7 +505,6 @@ export default {
             {
                 retVal=true
             }
-            console.log('returning retval', retVal)
             return retVal
         
         },
@@ -514,16 +515,19 @@ export default {
             for (let i = 0; i < numCols; i++) {
                 if (this.gridSettings.columns[i].IsUsingACustomWidth) {
                     custCols.push(i)
-                    tmp = tmp + this.gridSettings.columns[i].WidthValue
+                    tmp += this.boolGridWillScroll?this.gridSettings.columns[i].WidthValue+1.61:this.gridSettings.columns[i].WidthValue
                 }
             }
            const numColumns = numCols-custCols.length
            let widthOfGrid = this.gridSettings.size.GridWidthValue - tmp
-           widthOfGrid = this.boolGridWillScroll?(widthOfGrid):widthOfGrid //17 is the px width of the scrollbar
-           const eachColumn = Math.floor(widthOfGrid/numColumns)
+           let eachColumn = Math.floor(widthOfGrid/numColumns)
+           if(!this.boolGridWillScroll){
+               eachColumn+=.5
+           }
+           
             for (let i = 0; i < numCols; i++) {
                 if (!custCols.includes(i)) {
-                    this.gridSettings.columns[i].Width = `${eachColumn}px`
+                    this.gridSettings.columns[i].Width = `${eachColumn}px `
                     this.gridSettings.columns[i].WidthValue = eachColumn
                 }
             }
@@ -602,7 +606,6 @@ export default {
             if (scrollToRow){
                 index = this.gridSettings.pagination.MinRecordsViewable
                 data = this.getData(index, this.bufferedItems) 
-                console.log('scrollToRow?', scrollToRow)
                 topPad = Math.ceil((scrollToRow-index) * this.settings.itemHeight)
                 const topPaddingHeight = this.boolGridWillScroll?topPad:0
                 const bottomPad = Math.max(this.totalHeight - topPaddingHeight - (data.length * this.settings.itemHeight), 0)
@@ -687,7 +690,6 @@ export default {
             const start = offset
             let end = Math.min(offset + limit, this.settings.maxIndex)
             let viewPortRowId = 1;
-            console.log('end = ', offset + limit, this.settings.maxIndex)
             if (start <= end) {
                 for (let i = start; i < end; i++) {
                     if (this.cmpDataSet[i]){
@@ -752,7 +754,6 @@ export default {
                 }
 
             }
-            console.log("setting it to ", paging)
             this.gridSettings.pagination = paging
         },
         handlePreviousClick(isASingleMove){
@@ -941,7 +942,6 @@ export default {
 ///////Worker Messaging Code/////////
         handleMessage(message){
             const setMinAndScroll = (count) => {
-                console.log("count received  ", count)
                 this.reConfigurePagination(count)
                 const min = this.gridSettings.pagination.MinRecordsViewable
                 const max = this.gridSettings.pagination.MaxRecordsViewable
@@ -991,7 +991,6 @@ export default {
                     this.numberOfTerminatedSorts = this.numberOfTerminatedSorts +1                      
                     if(this.numberOfTerminatedSorts===2)    
                     {
-                        console.log('sorting finished')
                         this.sortedData = this.tmpResultsSort
                         this.isDonePreSorting = true
                         this.ww_oddSortWorker.terminate()
@@ -1123,6 +1122,7 @@ export default {
         this.configureWebWorkers(this.cmpDataSet)
         this.processComponents();
         this.processRowRules();
+        console.log('this... ', this.rowRulesObj)
         this.gridApi.refreshRow = this.refreshRow
         this.gridApi.deleteRow = this.deleteRow
         this.gridApi.addNewRow = this.addNewRow

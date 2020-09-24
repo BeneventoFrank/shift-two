@@ -1,7 +1,7 @@
 <template>
   <div id="app" style='width:100%;'>
     <EditableDataGrid 
-      
+      :navigateToRow="9956"
       :componentList="components" 
       :rowRules="rowRules" 
       :gridConfig="localConfig"
@@ -36,7 +36,7 @@ export default {
     this.rowRules = [
                       {
                         columnToCompare:0,
-                        compareFunction:(value)=>{return value.toLowerCase()==="milford"},
+                        compareFunction:(value)=>{console.log('value -', value); return value.toLowerCase()==="milford"},
                         stylesToApply:{
                           textColor:'red'
                         }

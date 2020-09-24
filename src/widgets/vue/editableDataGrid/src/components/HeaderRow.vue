@@ -24,7 +24,7 @@
             <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
                     <div :id="`header-${index}`" :ref="`header-${index}`" 
-                        :style="`width:${gridWillScroll?gridSettings.columns[index].WidthValue-1.7:gridSettings.columns[index].Width}px; display:flex; flex-direction:row; 
+                        :style="`width:${gridWillScroll?gridSettings.columns[index].WidthValue-1.5:gridSettings.columns[index].WidthValue}px; min-width:${gridWillScroll?gridSettings.columns[index].WidthValue-1.5:gridSettings.columns[index].WidthValue}px;  display:flex; flex-direction:row; 
                                 justify-content:${gridSettings.columns[index].DataAlignment}; 
                                 height:30px; 
                                 background-color:${((currentFilters.columnsBeingFiltered.includes(index.toString()))) || ((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted.toString() === index.toString()))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor};`"
@@ -33,7 +33,7 @@
                         @mouseleave="()=>{handleFlyout(index,false)}"
                         
                         v-for="(header,index) in gridSettings.columns" :key="header.Index">
-                        <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].Width}; overflow:hidden; white-space:nowrap; text-overflow:ellipsis`"> 
+                        <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].WidthValue-3}px; min-width:${gridSettings.columns[index].WidthValue-3}px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis`"> 
                             {{gridSettings.columns[index].ColumnHeader}}
                         </span>
                         <div :ref="`flyout-${index}`" class='flyout' v-if="!gridSettings.columns[index].IsUsingCustomComponent&&showAFilter&&showFilter[index]===true" :style="`right:${wouldCauseAScroll(index)?wouldCauseAScroll(index):null};`">
@@ -213,10 +213,6 @@ export default {
                                  ||((this.currentFilters.columnsBeingFiltered.includes((this.gridSettings.columns.length-1).toString()))&&(index !== this.gridSettings.columns.length-1))?true:false
            }
        }, 100),
-       getBorder(usersBorderWidth, usersBorderColor, columnIndex){
-           if(columnIndex===this.gridSettings.columns.length-1){return null} //no left border on the first column or the last one 
-           return `1px solid ${this.gridSettings.colorScheme.GridHeaderBorderColor}`
-       },
     },
     mounted(){
   }

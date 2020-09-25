@@ -19,7 +19,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div :style="`width: 100%; position: relative; background-color:${gridSettings.colorScheme.GridHeaderBackgroundColor}; z-index: 77; box-shadow: 0 6px 6px -5px black;`">
             <div class='headerRow' :style="`width:100%`">
                 <div class="headerWrapper">
@@ -27,14 +27,17 @@
                         :style="`width:${gridWillScroll?gridSettings.columns[index].WidthValue-1.5:gridSettings.columns[index].WidthValue}px; min-width:${gridWillScroll?gridSettings.columns[index].WidthValue-1.5:gridSettings.columns[index].WidthValue}px;  display:flex; flex-direction:row; 
                                 justify-content:${gridSettings.columns[index].DataAlignment}; 
                                 height:30px; 
-                                background-color:${((currentFilters.columnsBeingFiltered.includes(index.toString()))) || ((currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted.toString() === index.toString()))?gridSettings.colorScheme.ActiveIndicatorColor:gridSettings.colorScheme.GridHeaderBackgroundColor};`"
+                                background-color:${((currentFilters.columnsBeingFiltered.includes(index.toString()))) 
+                                                    || ((currentSort&&currentSort.columnBeingSorted>=0&&currentSort.columnBeingSorted == header.Index))?
+                                                            gridSettings.colorScheme.ActiveIndicatorColor:
+                                                                    gridSettings.colorScheme.GridHeaderBackgroundColor};`"
                         :class="`headerCell`" 
                         @mouseenter="()=>{handleFlyout(index,true)}"  
                         @mouseleave="()=>{handleFlyout(index,false)}"
                         
                         v-for="(header,index) in gridSettings.columns" :key="header.Index">
                         <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].WidthValue-3}px; min-width:${gridSettings.columns[index].WidthValue-3}px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis`"> 
-                            {{gridSettings.columns[index].ColumnHeader}}
+                            {{header.Index}}
                         </span>
                         <div :ref="`flyout-${index}`" class='flyout' v-if="!gridSettings.columns[index].IsUsingCustomComponent&&showAFilter&&showFilter[index]===true" :style="`right:${wouldCauseAScroll(index)?wouldCauseAScroll(index):null};`">
                             <div class='innerDiv' :style="`background-color:${gridSettings.colorScheme.FlyoutBackgroundColor}`">
@@ -92,6 +95,10 @@ export default {
         };
     },
     watch:{
+        currentSort:function(val){
+            console.log(val)
+        }
+
     },
     computed: {
     },

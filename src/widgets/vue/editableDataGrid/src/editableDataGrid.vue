@@ -70,7 +70,7 @@
                                     background-color:${
                                         gridSettings.rows.HighlightRowEnabled&&item.rowIndex===hoverIndex?
                                                     gridSettings.colorScheme.RowHighlightBackground:
-                                                            item.rowRules&&item.rowRules.backgroundColor?item.rowRules.backgroundColor: //this should be using row rules object
+                                                            item.rowRules&&item.rowRules.backgroundColor?item.rowRules.backgroundColor: 
                                                                     item.rowIndex%2===0?
                                                                             gridSettings.colorScheme.GridRowEvenBackgroundColor:    
                                                                                     gridSettings.colorScheme.GridRowOddBackgroundColor} ;
@@ -84,7 +84,13 @@
                             :style="`display:flex; align-items:center; height:100%;
                                         width:${gridSettings.columns[index].Width};
                                         justify-content:${gridSettings.columns[index].Alignment};
-                                        background-color: ${gridSettings.rows.HighlightRowEnabled?item.rowIndex===hoverIndex&&index===cellHoverIndex?gridSettings.colorScheme.RowHighlightActiveCell:index===cellHoverIndex?gridSettings.colorScheme.RowHighlightBackground:'':''};
+                                        background-color: ${
+                                                gridSettings.rows.HighlightRowEnabled?
+                                                    item.rowIndex===hoverIndex&&index===cellHoverIndex?
+                                                            gridSettings.colorScheme.RowHighlightActiveCell:
+                                                                index===cellHoverIndex?
+                                                                    gridSettings.colorScheme.RowHighlightBackground:''
+                                                                        :''};
                                         cursor:${gridSettings.columns[index].OnCellClick?'zoom-in':'arrow'}
                                         
                                 `">
@@ -95,13 +101,13 @@
                                 
                                 <span 
                                     :style="`text-overflow:ellipsis; overflow:hidden; white-space:nowrap; display:block;  
-                                            color:${item.rowRules.textColor?item.rowRules.textColor:'black'};
+                                            color:${item.rowRules.textColor?item.rowRules.textColor:'#082347'};
                                             vertical-align:center;
                                             font-size:14px;
                                             width:${gridSettings.columns[index].WidthValue-3}px;    
 
                                             `" 
-                                    > {{item.rowIndex+1+ ' ' +col}}</span>
+                                    > {{col}}</span>
                             </template>    
                             <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" :style="`position:absolute; top:${item.viewPortRowId*settings.itemHeight}px; z-index:8888;`" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
                                 <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
@@ -359,12 +365,15 @@ export default {
             }
         },
         processRowRules(){
-            if (Object.keys(this.rowRules)>0) {return}
+            let tmp = {}
             for (let i = 0; i < this.rowRules.length; i++) {
-                this.rowRulesObj[this.rowRules[i].columnToCompare] = {}
-                this.rowRulesObj[this.rowRules[i].columnToCompare].compareFunction = this.rowRules[i].compareFunction,
-                this.rowRulesObj[this.rowRules[i].columnToCompare].stylesToApply= {backgroundColor:this.rowRules[i].stylesToApply.backgroundColor, textColor:this.rowRules[i].stylesToApply.textColor }
+                tmp[this.rowRules[i].columnToCompare] = 
+                                                    {
+                                                        'compareFunction':this.rowRules[i].compareFunction,
+                                                        'stylesToApply':{backgroundColor:this.rowRules[i].stylesToApply.backgroundColor, textColor:this.rowRules[i].stylesToApply.textColor }
+                                                    }
             }
+            return tmp
         },
         processDataIntoPages(){
             let dataPages = {}
@@ -407,7 +416,6 @@ export default {
         },
         applyRowRules(data){
             let rows = []
-
             for (let i = 0; i < data.length; i++) {
                 rows[i] = {
                     data: data[i].data,
@@ -415,9 +423,7 @@ export default {
                     rowRules: {}
                 }
                 for (let j = 0; j < data[i].data.length; j++) {
-                    
                     if (this.rowRulesObj[j]&&this.rowRulesObj[j].compareFunction(data[i].data[j])) {
-                        console.log('found one')
                         rows[i].rowRules.textColor=this.rowRulesObj[j].stylesToApply.textColor
                         rows[i].rowRules.backgroundColor=this.rowRulesObj[j].stylesToApply.backgroundColor
                         break;
@@ -1115,14 +1121,12 @@ export default {
         }
     },
     created(){
-        //we need to map the components to an object for easy use
         this.gridSettings = this.processConfig()
+        this.rowRulesObj = this.processRowRules();
         this.fullDS = this.processData(this.gridSettings.developmentMode.Enabled)
         this.verifiedNavigateToRow = this.verifyNavigateToRow()
         this.configureWebWorkers(this.cmpDataSet)
         this.processComponents();
-        this.processRowRules();
-        console.log('this... ', this.rowRulesObj)
         this.gridApi.refreshRow = this.refreshRow
         this.gridApi.deleteRow = this.deleteRow
         this.gridApi.addNewRow = this.addNewRow

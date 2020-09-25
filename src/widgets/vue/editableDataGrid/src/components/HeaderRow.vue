@@ -37,7 +37,7 @@
                         
                         v-for="(header,index) in gridSettings.columns" :key="header.Index">
                         <span :style="`display:block; color:${gridSettings.colorScheme.GridHeaderTextColor}; width:${gridSettings.columns[index].WidthValue-3}px; min-width:${gridSettings.columns[index].WidthValue-3}px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis`"> 
-                            {{header.Index}}
+                            {{header.ColumnHeader}}
                         </span>
                         <div :ref="`flyout-${index}`" class='flyout' v-if="!gridSettings.columns[index].IsUsingCustomComponent&&showAFilter&&showFilter[index]===true" :style="`right:${wouldCauseAScroll(index)?wouldCauseAScroll(index):null};`">
                             <div class='innerDiv' :style="`background-color:${gridSettings.colorScheme.FlyoutBackgroundColor}`">
@@ -93,14 +93,6 @@ export default {
             isSearching:false,
             applyBGColor:false,
         };
-    },
-    watch:{
-        currentSort:function(val){
-            console.log(val)
-        }
-
-    },
-    computed: {
     },
     props:{
         gridSettings:{

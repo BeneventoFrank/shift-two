@@ -56,7 +56,7 @@ let shiftSettings = {
 
     },
     slots:{
-        LeftSideOfTitle:'AddRecord',
+        LeftSideOfTitle:'',
         RightSideOfTitle:''
     },
     columns:[
@@ -195,8 +195,8 @@ let shiftSettings = {
             Alignment:'center',
             DataType:'string',
             IsPreSortEnabled:false,
-            IsUsingCustomComponent:true,
-            CustomComponentName:'EditAndDelete',
+            IsUsingCustomComponent:false,
+            CustomComponentName:'',
             OnCellClick:'',
             CellClicked:false,
         },

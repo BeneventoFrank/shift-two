@@ -107,7 +107,7 @@
                                             width:${gridSettings.columns[index].WidthValue-3}px;    
 
                                             `" 
-                                    > {{col}}</span>
+                                    > {{item.rowIndex+1}}</span>
                             </template>    
                             <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" :style="`position:absolute; top:${item.viewPortRowId*settings.itemHeight}px; z-index:8888;`" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
                                 <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
@@ -348,7 +348,6 @@ export default {
             if(isDevMode){
                 return tmp.splice(1,2)
             }
-            console.log(tmp)
             return tmp
         },
         processGridUpdate(eventData){
@@ -389,7 +388,7 @@ export default {
                     rowCounter=-1;
                     dataPages[counter].endIndex=i;
                     counter++;
-                    if(i < this.cmpDataSet.length-1){
+                    if(i < this.cmpDataSet.length){
                         dataPages[counter]={
                             startIndex:i+1
                         }
@@ -399,20 +398,25 @@ export default {
 
             } 
             dataPages[counter].endIndex=this.cmpDataSet.length;
+
             return dataPages           
         },
 ///////End Processors////////    
 
 ///////Helper Functions////////
-        verifyNavigateToRow(){
-            const nav30 = this.navigateToRow-1 
-            return nav30&&nav30>=0&&nav30<=this.fullDS.length?nav30:0
+        verifyNavigateToRow(rowToNavigateTo){
+            const nav30 = rowToNavigateTo 
+            return nav30&&nav30>=0&&nav30<=this.cmpDataSet.length?nav30:0
         },
         navigateDataToRow(rowIndex){
             //we need to call the paging with the row number
-            this.pageDataForward(false,rowIndex)
+            if(this.gridSettings.pagination.PageNumberCurrentlyViewing !== this.gridSettings.pagination.MaxPageNumberPossible)
+            {
+                this.pageDataForward(false,rowIndex)
+            }
+            
             this.setGridState(this.gridSettings.pagination.MinRecordsViewable, this.gridSettings.pagination.MaxRecordsViewable)
-            this.runScroller({target:{scrollTop:0}},null,rowIndex) 
+            this.runScroller({target:{scrollTop:0}},rowIndex) 
         },
         applyRowRules(data){
             let rows = []
@@ -444,31 +448,22 @@ export default {
             return itemData
         },
         scrollToNewRow(){
-            this.pageDataForward(false)
-            const max = this.gridSettings.pagination.MaxRecordsViewable
-            const min = this.gridSettings.pagination.MinRecordsViewable
-            this.setGridState(min, max)            
-            this.runScroller({target:{scrollTop:0}},true)   
+            this.navigateDataToRow(this.gridSettings.pagination.TotalNumberOfRecords)
+            this.$refs.viewportElement.scrollTop = this.$refs.viewportElement.scrollHeight
         },
         addNewRow(data){
-            this.fullDS = [...this.fullDS, {
+            this.fullDS.push({
                 data:data,
-                rowIndex:this.fullDS.length
-            }]
-            this.gridSettings.pagination.TotalNumberOfRecords = this.gridSettings.pagination.TotalNumberOfRecords+1
+                rowIndex:this.fullDS.length,
+                rowRules: {}
+            })
             this.configureWebWorkers(this.cmpDataSet)
-            this.headerHeight = this.calculateHeightOfHeaderRow()
+            this.dataPages = this.processDataIntoPages()
             this.boolGridWillScroll = this.gridWillScroll(this.headerHeight)
             const rows = this.getRowsPerPage()
             this.initializeSlider(rows) //init before paging b/c paging uses the slider values
             this.initializePaging(rows)            
-            this.settings.maxIndex = this.gridSettings.pagination.Enabled?rows:this.cmpDataSet.length
             this.settings.amount = this.calculateNumRows()
-            const max = this.gridSettings.pagination.MaxRecordsViewable
-            const min = this.gridSettings.pagination.MinRecordsViewable
-            this.setGridState(min, max)
-            this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
-            this.runScroller({target:{scrollTop:0}})   
         },
         refreshRow(rowId,data){
             this.fullDS[rowId].data=data
@@ -589,11 +584,29 @@ export default {
         calculateNumRows(){
             return this.boolGridWillScroll?Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/this.settings.itemHeight):this.cmpDataSet.length 
         },
+        calculateStartingPoint(scrollTop){
+                if(this.gridSettings.pagination.Enabled){
+                    console.log('what do you got', this.settings.minIndex , scrollTop-1 , this.settings.itemHeight)
+                    return Math.max(this.settings.minIndex + Math.floor((scrollTop) / this.settings.itemHeight),0)
+                } else {
+                    return Math.max(this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight),0)
+                }
+        },
+        calculateTopPad(startingPoint,minIndex,itemHeight){
+            return Math.max((startingPoint - minIndex) * itemHeight, 0)
+        },
+        calculateBottomPad(totalHeight,topPaddingHeight,lengthOfData,itemHeight,gridwillScroll){
+            if(!gridwillScroll){return 0}
+            return Math.max(totalHeight - topPaddingHeight - (lengthOfData * itemHeight), 0)
+        },
+        setGridState(min, max){
+            this.settings.minIndex = min
+            this.settings.maxIndex = max
+            this.totalHeight = (this.settings.maxIndex - this.settings.minIndex ) * this.settings.itemHeight
+        },        
         setInitialState(minIndex, maxIndex, startIndex, itemHeight, amount, tolerance){
             // 1) height of the visible part of the viewport (px)
             this.viewportHeight = amount * itemHeight
-            // 2) total height of rendered and virtualized items (px)
-            this.totalHeight = (maxIndex - minIndex ) * itemHeight
             // 3) single viewport outlet height, filled with rendered but invisible rows (px)
             this.toleranceHeight = tolerance * itemHeight
             // 4) all rendered rows height, visible part + invisible outlets (px)
@@ -605,38 +618,19 @@ export default {
             // initial state object
             this.data = []
         },
-        runScroller({target:{scrollTop}},scrollToBottom,scrollToRow){
-            let index
-            let data 
-            let topPad
+        runScroller({target:{scrollTop}},scrollToRow){
+            let startingPoint
             if (scrollToRow){
-                index = this.gridSettings.pagination.MinRecordsViewable
-                data = this.getData(index, this.bufferedItems) 
-                topPad = Math.ceil((scrollToRow-index) * this.settings.itemHeight)
-                const topPaddingHeight = this.boolGridWillScroll?topPad:0
-                const bottomPad = Math.max(this.totalHeight - topPaddingHeight - (data.length * this.settings.itemHeight), 0)
-                this.bottomPaddingHeight= this.boolGridWillScroll?bottomPad:0
-                this.topPaddingHeight = topPaddingHeight
-
+                startingPoint = this.gridSettings.pagination.MinRecordsViewable
             } else {
-                if(this.gridSettings.pagination.Enabled){
-                    index = Math.max(this.settings.minIndex + Math.floor((scrollTop -1) / this.settings.itemHeight),0)
-                } else {
-                    index = Math.max(this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight),0)
-                }
-
-                topPad = Math.max((index - this.settings.minIndex) * this.settings.itemHeight, 0)
-                data = this.getData(index, this.bufferedItems)
-                const topPaddingHeight = this.boolGridWillScroll?topPad:0
-                const bottomPad = Math.max(this.totalHeight - topPaddingHeight - (data.length * this.settings.itemHeight), 0)
-                this.bottomPaddingHeight= this.boolGridWillScroll?bottomPad:0
-                this.topPaddingHeight = topPaddingHeight
-                if(scrollToBottom){
-                    this.$refs.viewportElement.scrollTop = this.$refs.viewportElement.scrollHeight
-                    // this.topPaddingHeight = this.bottomPaddingHeight
-                    // this.bottomPaddingHeight = 0
-                }
+                startingPoint = this.calculateStartingPoint(this.$refs.viewportElement.scrollTop)
             }
+            console.log('scrolltop", ', scrollTop)
+            const data = this.getData(startingPoint-1, this.bufferedItems) //buffered items = num per page + outlets
+            const topPad = this.calculateTopPad(startingPoint, this.settings.minIndex,this.settings.itemHeight)
+            const topPaddingHeight = this.boolGridWillScroll?topPad:0
+            this.bottomPaddingHeight = this.calculateBottomPad(this.totalHeight, topPaddingHeight, data.length, this.settings.itemHeight, this.boolGridWillScroll)
+            this.topPaddingHeight = topPaddingHeight
             this.data = data
         },
         configureFilterWorkers(dataSet){
@@ -706,11 +700,6 @@ export default {
             }
             return data
         },
-        setGridState(min, max){
-            this.settings.minIndex = min
-            this.settings.maxIndex = max
-            this.totalHeight = (this.settings.maxIndex - this.settings.minIndex ) * this.settings.itemHeight
-        },
         handleNextClick(isASingleMove){
             this.pageDataForward(isASingleMove.isASinglePageMove)
             let max = 0
@@ -741,7 +730,7 @@ export default {
 
             } else {
                 if(verifiedNavigateToRow){
-                    for (let i = 1; i < Object.keys(this.dataPages).length; i++) {
+                    for (let i = 1; i <= Object.keys(this.dataPages).length; i++) {
                         if(verifiedNavigateToRow >=this.dataPages[i].startIndex && verifiedNavigateToRow <=this.dataPages[i].endIndex){
                             paging.MinRecordsViewable=this.dataPages[i].startIndex
                             paging.MaxRecordsViewable=this.dataPages[i].endIndex
@@ -794,16 +783,21 @@ export default {
             const isTheLastPage = ()=>{
                 return this.gridSettings.pagination.PageNumberCurrentlyViewing === this.gridSettings.pagination.MaxPageNumberPossible
             }
-
+            const newSliderValue = parseInt(event.target.value) //comes in from the control as a string
+            let setZero = false;
+            if(this.sliderCount>newSliderValue){
+                setZero=true;
+            }
             if(this.gridSettings.developmentMode.Enabled){return} 
             this.weAreUsingTheSlider=true
-            this.sliderCount = parseInt(event.target.value) //comes in from the control as a string
+            this.sliderCount = newSliderValue
             this.reConfigurePagination(this.sliderCount);
             const min = this.gridSettings.pagination.MinRecordsViewable
             const max = isTheLastPage()?this.gridSettings.pagination.TotalNumberOfRecords:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
-            this.setGridState(min,max)            
-            this.runScroller({target:{scrollTop:0}})
-            this.$refs.viewportElement.scrollTop = this.$refs.viewportElement.scrollTop-1
+            this.setGridState(min,max)     
+            this.resetScroll(setZero)       
+            this.runScroller()
+            
 
         },            
         reConfigurePagination(count){
@@ -818,8 +812,13 @@ export default {
             }
             this.gridSettings.pagination = paging          
         },
-        resetScroll(){
-            this.$refs.viewportElement.scrollTop=0;
+        resetScroll(shouldGoToZero){
+            if (shouldGoToZero) {
+                this.$refs.viewportElement.scrollTop=0;
+            } else {
+                this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollTop-1;
+                this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollTop+1;
+            }
         },
         handleShowCancelEye(){
             this.isHovering = !this.isHovering
@@ -1109,9 +1108,8 @@ export default {
         setTimeout(() => {
             this.loadingMsg = 'Finishing Up, Just A Sec..'
         }, 2500);        
-        this.settings.maxIndex = this.gridSettings.pagination.Enabled?rows:this.cmpDataSet.length
-        
         this.settings.amount = this.calculateNumRows()
+        this.setGridState(this.gridSettings.pagination.MinRecordsViewable,this.gridSettings.pagination.MaxRecordsViewable) 
         this.setInitialState(this.settings.minIndex,this.settings.maxIndex,this.settings.startIndex,this.settings.itemHeight,this.settings.amount,this.settings.tolerance)
         this.dataPages = this.processDataIntoPages()
         if(this.verifiedNavigateToRow){
@@ -1124,7 +1122,7 @@ export default {
         this.gridSettings = this.processConfig()
         this.rowRulesObj = this.processRowRules();
         this.fullDS = this.processData(this.gridSettings.developmentMode.Enabled)
-        this.verifiedNavigateToRow = this.verifyNavigateToRow()
+        this.verifiedNavigateToRow = this.verifyNavigateToRow(this.navigateToRow-1) 
         this.configureWebWorkers(this.cmpDataSet)
         this.processComponents();
         this.gridApi.refreshRow = this.refreshRow

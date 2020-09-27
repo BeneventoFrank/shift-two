@@ -416,7 +416,7 @@ export default {
             }
             
             this.setGridState(this.gridSettings.pagination.MinRecordsViewable, this.gridSettings.pagination.MaxRecordsViewable)
-            this.runScroller({target:{scrollTop:0}},rowIndex) 
+            this.runScroller(null,rowIndex) 
         },
         applyRowRules(data){
             let rows = []
@@ -447,10 +447,6 @@ export default {
             }
             return itemData
         },
-        scrollToNewRow(){
-            this.navigateDataToRow(this.gridSettings.pagination.TotalNumberOfRecords)
-            this.$refs.viewportElement.scrollTop = this.$refs.viewportElement.scrollHeight
-        },
         addNewRow(data){
             this.fullDS.push({
                 data:data,
@@ -467,7 +463,7 @@ export default {
         },
         refreshRow(rowId,data){
             this.fullDS[rowId].data=data
-            this.runScroller({target:{scrollTop:0}})
+            this.runScroller()
         },
         refreshGrid(){
             //not sure... somehow update the grid as a whole
@@ -481,7 +477,7 @@ export default {
                 }
             }
             this.fullDS = tmp
-            this.runScroller({target:{scrollTop:0}})
+            this.runScroller()
         },
         getRowsPerPage(){
             if (this.gridSettings.pagination.Enabled) {
@@ -586,7 +582,6 @@ export default {
         },
         calculateStartingPoint(scrollTop){
                 if(this.gridSettings.pagination.Enabled){
-                    console.log('what do you got', this.settings.minIndex , scrollTop-1 , this.settings.itemHeight)
                     return Math.max(this.settings.minIndex + Math.floor((scrollTop) / this.settings.itemHeight),0)
                 } else {
                     return Math.max(this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight),0)
@@ -618,14 +613,14 @@ export default {
             // initial state object
             this.data = []
         },
-        runScroller({target:{scrollTop}},scrollToRow){
+        runScroller(event,scrollToRow){
             let startingPoint
             if (scrollToRow){
                 startingPoint = this.gridSettings.pagination.MinRecordsViewable
             } else {
                 startingPoint = this.calculateStartingPoint(this.$refs.viewportElement.scrollTop)
             }
-            console.log('scrolltop", ', scrollTop)
+            console.log('scrolltop", ', event)
             const data = this.getData(startingPoint-1, this.bufferedItems) //buffered items = num per page + outlets
             const topPad = this.calculateTopPad(startingPoint, this.settings.minIndex,this.settings.itemHeight)
             const topPaddingHeight = this.boolGridWillScroll?topPad:0
@@ -756,8 +751,8 @@ export default {
             const min = (this.gridSettings.pagination.PageNumberCurrentlyViewing*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
             const max = ((this.gridSettings.pagination.PageNumberCurrentlyViewing+1)*this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)-(this.gridSettings.pagination.NumberOfApplicibleRowsPerPage)
             this.setGridState(min,max)
+            this.runScroller()
             this.resetScroll()
-            this.runScroller({target:{scrollTop:0}})   
         },
         pageDataBackward(isASinglePageMove){
             let paging ={
@@ -795,10 +790,8 @@ export default {
             const min = this.gridSettings.pagination.MinRecordsViewable
             const max = isTheLastPage()?this.gridSettings.pagination.TotalNumberOfRecords:this.gridSettings.pagination.NumberOfApplicibleRowsPerPage
             this.setGridState(min,max)     
-            this.resetScroll(setZero)       
             this.runScroller()
-            
-
+            this.resetScroll(setZero)                   
         },            
         reConfigurePagination(count){
             let paging = {
@@ -814,7 +807,8 @@ export default {
         },
         resetScroll(shouldGoToZero){
             if (shouldGoToZero) {
-                this.$refs.viewportElement.scrollTop=0;
+               console.log('should go ot szerrroroorooorororoor')
+               this.$refs.viewportElement.scrollTop=0;
             } else {
                 this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollTop-1;
                 this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollTop+1;
@@ -907,7 +901,7 @@ export default {
                 const min = this.gridSettings.pagination.MinRecordsViewable
                 const max = this.cmpDataSet.length>this.sliderCount?this.sliderCount:this.cmpDataSet.length
                 this.setGridState(min,max)
-                this.runScroller({target:{scrollTop:0}})
+                this.runScroller()
                 this.resetScroll();
             } else {
                 //then clear a filter was called on a column but other filters are applied. 
@@ -935,7 +929,7 @@ export default {
             const max = this.cmpDataSet.length>this.sliderCount?this.sliderCount:this.cmpDataSet.length
             this.reConfigurePagination(max)                    
             this.setGridState(min,max)
-            this.runScroller({target:{scrollTop:0}})
+            this.runScroller()
             this.resetScroll();            
         },
         handleFilterClosed(){
@@ -951,7 +945,7 @@ export default {
                 const min = this.gridSettings.pagination.MinRecordsViewable
                 const max = this.gridSettings.pagination.MaxRecordsViewable
                 this.setGridState(min,max)
-                this.runScroller({target:{scrollTop:0}})
+                this.runScroller()
                 this.resetScroll()
             }
 
@@ -985,7 +979,7 @@ export default {
                         this.reConfigurePagination(this.sliderCount) //I AM NOT SURE THIS SHOULD BE SLIDER COUNT?? WHY?
                         this.sortStrategy.columnBeingSorted = message.data.Column
                         this.setGridState(this.gridSettings.pagination.MinRecordsViewable,this.gridSettings.pagination.MaxRecordsViewable)
-                        this.runScroller({target:{scrollTop:0}})
+                        this.runScroller()
                         this.resetScroll()
                         this.isDoneSorting = true
                     break;
@@ -1032,8 +1026,8 @@ export default {
                             const min = this.gridSettings.pagination.MinRecordsViewable;
                             const max = this.gridSettings.pagination.MaxRecordsViewable;
                             this.setGridState(min,max)
+                            this.runScroller()
                             this.resetScroll()
-                            this.runScroller({target:{scrollTop:0}})
                             this.isDoneSorting = true;
                         } else {
                             this.ww_sortWorker.postMessage({'MessageType':'applySort','SortStrategy':strategy})
@@ -1051,8 +1045,8 @@ export default {
                     const min = this.gridSettings.pagination.MinRecordsViewable;
                     const max = this.gridSettings.pagination.MaxRecordsViewable;
                     this.setGridState(min,max)
-                    this.resetScroll()
-                    this.runScroller({target:{scrollTop:0}})                    
+                    this.runScroller()
+                    this.resetScroll()                    
                 }
             }
         },
@@ -1115,7 +1109,7 @@ export default {
         if(this.verifiedNavigateToRow){
             this.navigateDataToRow(this.verifiedNavigateToRow)
         } else {
-            this.runScroller({target:{scrollTop:0}})   
+            this.runScroller()   
         }
     },
     created(){
@@ -1128,8 +1122,6 @@ export default {
         this.gridApi.refreshRow = this.refreshRow
         this.gridApi.deleteRow = this.deleteRow
         this.gridApi.addNewRow = this.addNewRow
-        this.gridApi.scrollToNewRow = this.scrollToNewRow
-
     }
 };
 </script>

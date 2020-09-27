@@ -14,7 +14,6 @@
             handleAddRecordClick(){
                 const data = ['hello World', 'hello world', 'HELLO WORLD', 'Hello world','hello World', 'hello world', 'HELLO WORLD', 'Hello world','GoodBye World','']
                 this.params.addNewRow(data)
-                this.params.scrollToNewRow()
             }
         },
     }

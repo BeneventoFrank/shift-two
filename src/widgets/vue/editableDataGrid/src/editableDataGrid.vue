@@ -616,12 +616,11 @@ export default {
         runScroller(event,scrollToRow){
             let startingPoint
             if (scrollToRow){
-                startingPoint = this.gridSettings.pagination.MinRecordsViewable
+                startingPoint = this.gridSettings.pagination.MinRecordsViewable-1
             } else {
-                startingPoint = this.calculateStartingPoint(this.$refs.viewportElement.scrollTop)
+                startingPoint = this.calculateStartingPoint(this.$refs.viewportElement.scrollTop)-1
             }
-            console.log('scrolltop", ', event)
-            const data = this.getData(startingPoint-1, this.bufferedItems) //buffered items = num per page + outlets
+            const data = this.getData(startingPoint, this.bufferedItems) //buffered items = num per page + outlets
             const topPad = this.calculateTopPad(startingPoint, this.settings.minIndex,this.settings.itemHeight)
             const topPaddingHeight = this.boolGridWillScroll?topPad:0
             this.bottomPaddingHeight = this.calculateBottomPad(this.totalHeight, topPaddingHeight, data.length, this.settings.itemHeight, this.boolGridWillScroll)

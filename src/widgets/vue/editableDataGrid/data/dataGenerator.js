@@ -22,7 +22,7 @@ const generateData = (numCols)=>{
         return data
     }
 
-     let rows = Math.floor(Math.random() * 150000) + 1 
+     let rows = Math.floor(Math.random() * 150045) + 1 
     
     console.log('hey we are generatng -----------------------------------------',rows)  
     let cols = numCols

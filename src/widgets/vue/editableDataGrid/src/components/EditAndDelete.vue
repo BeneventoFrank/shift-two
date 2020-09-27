@@ -18,7 +18,7 @@
             },
             handleEditClick(){
                 const data = ['hello World', 'hello world', 'HELLO WORLD', 'Hello world','hello World', 'hello world', 'HELLO WORLD', 'Hello world','GoodBye World','']
-                this.params.refreshRow(this.params.rowIndex,data)
+                this.params.updateRow(this.params.rowIndex,data)
             }
         },
     }

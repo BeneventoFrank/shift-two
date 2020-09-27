@@ -107,7 +107,7 @@
                                             width:${gridSettings.columns[index].WidthValue-3}px;    
 
                                             `" 
-                                    > {{col}}</span>
+                                    > {{item.rowIndex+1}}</span>
                             </template>    
                             <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" :style="`position:absolute; top:${item.viewPortRowId*settings.itemHeight}px; z-index:8888;`" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
                                 <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
@@ -302,7 +302,8 @@ export default {
             currentColor:'',
             hasAlredyProcessed:false,
             dataPages:{},
-            verifiedNavigateToRow:0
+            verifiedNavigateToRow:0,
+            nextRowIndex:0
             
         };
     },
@@ -423,7 +424,7 @@ export default {
             for (let i = 0; i < data.length; i++) {
                 rows[i] = {
                     data: data[i].data,
-                    rowIndex: i,
+                    rowIndex: this.nextRowIndex,
                     rowRules: {}
                 }
                 for (let j = 0; j < data[i].data.length; j++) {
@@ -433,6 +434,7 @@ export default {
                         break;
                     }
                 }
+                this.nextRowIndex = this.nextRowIndex+1
             }
             return rows
         },
@@ -450,27 +452,28 @@ export default {
         addNewRow(data){
             this.fullDS.push({
                 data:data,
-                rowIndex:this.fullDS.length,
+                rowIndex:this.nextRowIndex,
                 rowRules: {}
             })
             this.boolGridWillScroll = this.gridWillScroll(this.headerHeight)
             const beforeLen = Object.keys(this.dataPages).length
-            this.settings.amount = this.calculateNumRows()
             this.dataPages = this.processDataIntoPages()
             const afterLen = Object.keys(this.dataPages).length
             if(beforeLen<afterLen){
                 this.gridSettings.pagination.MaxPageNumberPossible++
             }
             this.gridSettings.pagination.TotalNumberOfRecords++
+            this.settings.amount = this.calculateNumRows()
+            this.bufferedItems = Math.floor(this.boolGridWillScroll?this.settings.amount + 2 * this.settings.tolerance:this.settings.amount)
+            this.viewportHeight = this.settings.amount * this.settings.itemHeight
+            this.gridSettings.pagination.MaxRecordsViewable++
+            this.nextRowIndex = this.nextRowIndex+1
+            this.setGridState(this.gridSettings.pagination.MinRecordsViewable, this.gridSettings.pagination.MaxRecordsViewable)
+            this.runScroller()
+            this.resetScroll()                
             this.configureWebWorkers(this.cmpDataSet,false)
-            
-            if(!this.boolGridWillScroll){
-                this.setGridState(this.gridSettings.pagination.MinRecordsViewable, this.gridSettings.pagination.MaxRecordsViewable)
-                this.runScroller()
-                this.resetScroll()                
-            }
         },
-        refreshRow(rowId,data){
+        updateRow(rowId,data){
             this.fullDS[rowId].data=data
             this.runScroller()
             this.configureWebWorkers(this.cmpDataSet,false)
@@ -481,13 +484,29 @@ export default {
         deleteRow(rowId){
             let tmp = []
             for (let i = 0; i < this.fullDS.length; i++) {
-                if(i!==rowId)
+                if(rowId !==this.fullDS[i].rowIndex)
                 {
                     tmp.push(this.fullDS[i])
                 }
             }
             this.fullDS = tmp
+
+            this.boolGridWillScroll = this.gridWillScroll(this.headerHeight)
+            const beforeLen = Object.keys(this.dataPages).length
+            this.dataPages = this.processDataIntoPages()
+            const afterLen = Object.keys(this.dataPages).length
+            if(beforeLen<afterLen){
+                this.gridSettings.pagination.MaxPageNumberPossible--
+            }
+            this.gridSettings.pagination.TotalNumberOfRecords--
+            this.settings.amount = this.calculateNumRows()
+            this.bufferedItems = Math.floor(this.boolGridWillScroll?this.settings.amount + 2 * this.settings.tolerance:this.settings.amount)
+            this.viewportHeight = this.settings.amount * this.settings.itemHeight
+            this.gridSettings.pagination.MaxRecordsViewable--
+            this.setGridState(this.gridSettings.pagination.MinRecordsViewable, this.gridSettings.pagination.MaxRecordsViewable)
             this.runScroller()
+            this.resetScroll()                
+            this.configureWebWorkers(this.cmpDataSet,false)
         },
         getRowsPerPage(){
             if (this.gridSettings.pagination.Enabled) {
@@ -693,6 +712,7 @@ export default {
             this.ww_sortWorker.postMessage({'MessageType':'data','Data':dataSet, 'Columns':this.gridSettings.columns})
         },
         getData(offset, limit){
+            console.log('offset and limit', offset, limit)
             const data = []
             const start = offset
             let end = Math.min(offset + limit, this.settings.maxIndex)
@@ -1131,7 +1151,7 @@ export default {
         this.verifiedNavigateToRow = this.verifyNavigateToRow(this.navigateToRow-1) 
         this.configureWebWorkers(this.cmpDataSet)
         this.processComponents();
-        this.gridApi.refreshRow = this.refreshRow
+        this.gridApi.updateRow = this.updateRow
         this.gridApi.deleteRow = this.deleteRow
         this.gridApi.addNewRow = this.addNewRow
     }

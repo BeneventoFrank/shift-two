@@ -107,7 +107,7 @@
                                             width:${gridSettings.columns[index].WidthValue-3}px;    
 
                                             `" 
-                                    > {{item.rowIndex+1}}</span>
+                                    > {{col}}</span>
                             </template>    
                             <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" :style="`position:absolute; top:${item.viewPortRowId*settings.itemHeight}px; z-index:8888;`" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
                                 <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
@@ -453,17 +453,27 @@ export default {
                 rowIndex:this.fullDS.length,
                 rowRules: {}
             })
-            this.configureWebWorkers(this.cmpDataSet)
-            this.dataPages = this.processDataIntoPages()
             this.boolGridWillScroll = this.gridWillScroll(this.headerHeight)
-            const rows = this.getRowsPerPage()
-            this.initializeSlider(rows) //init before paging b/c paging uses the slider values
-            this.initializePaging(rows)            
+            const beforeLen = Object.keys(this.dataPages).length
             this.settings.amount = this.calculateNumRows()
+            this.dataPages = this.processDataIntoPages()
+            const afterLen = Object.keys(this.dataPages).length
+            if(beforeLen<afterLen){
+                this.gridSettings.pagination.MaxPageNumberPossible++
+            }
+            this.gridSettings.pagination.TotalNumberOfRecords++
+            this.configureWebWorkers(this.cmpDataSet,false)
+            
+            if(!this.boolGridWillScroll){
+                this.setGridState(this.gridSettings.pagination.MinRecordsViewable, this.gridSettings.pagination.MaxRecordsViewable)
+                this.runScroller()
+                this.resetScroll()                
+            }
         },
         refreshRow(rowId,data){
             this.fullDS[rowId].data=data
             this.runScroller()
+            this.configureWebWorkers(this.cmpDataSet,false)
         },
         refreshGrid(){
             //not sure... somehow update the grid as a whole
@@ -632,16 +642,17 @@ export default {
             let tmpFor2 = []
             let tmpRev1 = []
             let tmpRev2 = []
-            let firstHalf = Math.ceil(Math.ceil(dataSet.length/2)/2)
+            const length = Math.ceil(dataSet.length/2)
+            let firstHalf = Math.ceil(length/2)
             let counter = 0
-            for (let i = 0; i < (Math.ceil(dataSet.length/2)); i++) {
+            for (let i = 0; i < length; i++) {
                 if(i<firstHalf){
                     tmpFor1.push(dataSet[i])
                 }else{
                     tmpFor2.push(dataSet[i])
                 }
             }
-            for (let i = Math.ceil(dataSet.length/2); i < dataSet.length; i++) {
+            for (let i = length; i < dataSet.length; i++) {
                 counter++
                 if(counter<=firstHalf){
                     tmpRev1.push(dataSet[i])
@@ -665,15 +676,17 @@ export default {
             this.ww_reverseWorker2.addEventListener('message',event =>{this.handleMessage(event)})
             this.ww_reverseWorker2.postMessage({'MessageType':'data','Data':tmpRev2, 'Columns':this.gridSettings.columns})    
         },
-        configureWebWorkers(dataSet){
+        configureWebWorkers(dataSet,preProcess){
             this.configureFilterWorkers(dataSet)
-            this.ww_evenSortWorker = new evenSortWorkerSetup(evenSortWorker)
-            this.ww_evenSortWorker.addEventListener('message',event => {this.handleMessage(event)})
-            this.ww_evenSortWorker.postMessage({'MessageType':'data','Data':dataSet, 'Columns':this.gridSettings.columns})
+            if(preProcess !== false){
+                this.ww_evenSortWorker = new evenSortWorkerSetup(evenSortWorker)
+                this.ww_evenSortWorker.addEventListener('message',event => {this.handleMessage(event)})
+                this.ww_evenSortWorker.postMessage({'MessageType':'data','Data':dataSet, 'Columns':this.gridSettings.columns})
 
-            this.ww_oddSortWorker = new oddSortWorkerSetup(oddSortWorker)
-            this.ww_oddSortWorker.addEventListener('message',event => {this.handleMessage(event)})
-            this.ww_oddSortWorker.postMessage({'MessageType':'data','Data':dataSet, 'Columns':this.gridSettings.columns})
+                this.ww_oddSortWorker = new oddSortWorkerSetup(oddSortWorker)
+                this.ww_oddSortWorker.addEventListener('message',event => {this.handleMessage(event)})
+                this.ww_oddSortWorker.postMessage({'MessageType':'data','Data':dataSet, 'Columns':this.gridSettings.columns})
+            }
 
             this.ww_sortWorker = new sortWorkerSetup(sortWorker)
             this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
@@ -704,8 +717,8 @@ export default {
                 max = this.gridSettings.pagination.TotalNumberOfRecords  
             }
             this.setGridState(min, max)
+            this.runScroller() 
             this.resetScroll()
-            this.runScroller({target:{scrollTop:0}}) 
         },
         pageDataForward(isASinglePageMove, verifiedNavigateToRow){
             let paging = {

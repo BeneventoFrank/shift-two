@@ -179,7 +179,7 @@ let shiftSettings = {
             WidthValue:138.5,
             IsUsingACustomWidth:false,
             Alignment:'center',
-            DataType:'string',
+            DataType:'number',
             IsPreSortEnabled:false,
             IsUsingCustomComponent:false,
             CustomComponentName:'',

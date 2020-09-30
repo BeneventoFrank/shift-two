@@ -12,7 +12,7 @@
         },
         methods:{
             handleAddRecordClick(){
-                const data = ['milford', 'hello world', 'milford', 'Hello world','hello World', 'hello world', 'HELLO WORLD', 'Hello world','GoodBye World','']
+                const data = ['aapples', 'hello world', 'milford', 'aapplesauce','hello World', 'hello world', 'HELLO WORLD', 'Hello world','GoodBye World','']
                 this.params.addNewRow(data)
             }
         },

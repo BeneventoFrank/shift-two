@@ -8,14 +8,12 @@ export default () => {
         const col = strat[0]
         const keyword = strat[1]
         let tmp = []
-        console.log("temp?", tmp)
         for (let i = ds.length-1; i >= 0 ; i--) {
             if(ds[i].data[col].toString().toLowerCase().includes(keyword.toLowerCase())){
                 console.log('hit - pushing')
                 tmp.push(ds[i])
             } 
         }
-        console.log("temp?", tmp)
         if(runningMode!='silent'){
             filteredData = []
             filteredData = tmp
@@ -39,8 +37,7 @@ export default () => {
                 } else {
                     tmp = originalData
                 }
-                console.log("calling filter DS with ", tmp, message.Strategy)                
-                filterDS(tmp, message.Strategy)
+                 filterDS(tmp, message.Strategy)
                  break;
             case 'applyAllFilters':
                 filterStrategy = message.Strategy

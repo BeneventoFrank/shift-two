@@ -23,7 +23,7 @@ const generateData = (numCols)=>{
     }
 
      let rows = Math.floor(Math.random() * 170000) + 1 
-     rows = 15
+     //rows = 15
     console.log('hey we are generatng -----------------------------------------',rows)  
     let cols = numCols
     let data = []
@@ -40,14 +40,18 @@ const generateData = (numCols)=>{
             }
         )
     }
-    let fakeRow = []
-    for (let j = 0; j < cols; j++) {
-        fakeRow.push('HiddensVille')
-    }
-    data.push( {rowIndex:data.length, data:fakeRow} )
-    data.push( {rowIndex:data.length, data:fakeRow} )
-    data.push( {rowIndex:data.length, data:fakeRow} )
-
+    // for (let x = 0; x < rows; x++) {
+    //     let fakeRow = []
+    //     for (let j = 0; j < cols; j++) {
+    //         fakeRow.push(Math.floor(Math.random() * 1700) + 1)
+    //     }
+    //     data.push( {rowIndex:data.length, data:fakeRow} )
+    // }
+    
+    
+    
+    
+    
     return data
 }
 

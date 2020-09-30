@@ -222,7 +222,7 @@
                                 <div v-show="!localActiveColumnEdit.IsUsingCustomComponent" style="display:flex; width:100%; margin-top:10px;">
                                     <div style="width:50%; height:16px; display:flex;justify-content:flex-start;"><span class="mediumText">Data Type</span></div>
                                     <div style="width:50%; display:flex;justify-content:flex-start;">
-                                        <select @input="(event)=>handleUpdateGridSettings(event.target.value,'DataType')" v-model="localActiveColumnEdit.DataType" style="width:100px;" name="dataType" id="dataType">
+                                        <select @input="(event)=>handleUpdateGridSettings(event.target.value,'columns','DataType',columnSelected)" v-model="localActiveColumnEdit.DataType" style="width:100px;" name="dataType" id="dataType">
                                             <option value='string'>string</option>
                                             <option value='number'>number</option>
                                         </select>                                        
@@ -741,8 +741,13 @@ export default shiftSettings
 //////End Generate Config Tab/////////
 
 //////Common Functions///////
-        handleUpdateGridSettings(value,object,property){
-            this.localGridSettings[object][property] = value
+        handleUpdateGridSettings(value,object,property,index){
+            console.log('.....................................', value, object, property)
+            if(index){
+                this.localGridSettings[object][index][property] = value
+            } else {
+                this.localGridSettings[object][property] = value
+            }
             this.pushGridChange()
         },
         debounceColorChange: debounce(function (event, property){

@@ -12,7 +12,7 @@
                         </div>
                     </span>
                     <span v-else>&nbsp;</span>
-                    <span v-if="currentSort&&currentSort.columnBeingSorted&&currentSort.columnBeingSorted.toString() === index.toString()">
+                    <span v-if="currentSort.columnBeingSorted>=0&&currentSort.columnBeingSorted === index">
                         <SortSVG style="padding-right:20px" :color="gridSettings.colorScheme.ActiveIndicatorColor" :height="11"></SortSVG>
                     </span>
                     <span v-else>&nbsp;</span>

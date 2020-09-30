@@ -349,6 +349,7 @@ export default {
         },
         processGridUpdate(eventData){
             this.gridSettings = eventData.gridSettings;
+            console.log(this.gridSettings)
             this.activeColorScheme = eventData.activeColorScheme;
             this.activeColumnEdit = eventData.activeColumnEdit;
             this.fullDS = eventData.fullDS
@@ -417,7 +418,6 @@ export default {
         },
         applyRowRules(data,currentRowId){
             let rows = []
-            console.log("data?', '", data)
             for (let i = 0; i < data.length; i++) {
                 rows[i] = {
                     data: data[i].data,
@@ -425,10 +425,14 @@ export default {
                     rowRules: {}
                 }
                 for (let j = 0; j < data[i].data.length; j++) {
-                    if (this.rowRulesObj[j]&&this.rowRulesObj[j].compareFunction(data[i].data[j])) {
-                        rows[i].rowRules.textColor=this.rowRulesObj[j].stylesToApply.textColor
-                        rows[i].rowRules.backgroundColor=this.rowRulesObj[j].stylesToApply.backgroundColor
-                        break;
+                    try {
+                        if (this.rowRulesObj[j]&&this.rowRulesObj[j].compareFunction(data[i].data[j])) {
+                            rows[i].rowRules.textColor=this.rowRulesObj[j].stylesToApply.textColor
+                            rows[i].rowRules.backgroundColor=this.rowRulesObj[j].stylesToApply.backgroundColor
+                            break;
+                        }
+                    } catch (error) {
+                        throw new Error(`Error evaluating row rules compare function: ${error}`)
                     }
                 }
 
@@ -448,8 +452,23 @@ export default {
             return itemData
         },
         addNewRow(data){
+            this.sortedData={} //clearing the presorted data b/c its not valid anymore.
             const row = this.applyRowRules([{data}])
             this.fullDS = [...this.fullDS, ...row]
+            this.configureWebWorkers(this.fullDS,false,false)            
+            this.settings.amount = this.calculateNumRows()
+            this.gridSettings.pagination.MaxRecordsViewable++
+            let amt = this.gridSettings.pagination.MaxRecordsViewable
+            if(this.filterStrategy.isCurrentlyFiltering){
+                amt = this.settings.amount
+                this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})      
+            }
+            if(this.sortStrategy.isCurrentlySorting){
+                this.ww_sortWorker.postMessage({'MessageType':'applySort', 'SortStrategy':this.sortStrategy.strategy})
+            }
             this.boolGridWillScroll = this.gridWillScroll(this.headerHeight)
             const beforeLen = Object.keys(this.dataPages).length
             this.dataPages = this.processDataIntoPages()
@@ -458,24 +477,28 @@ export default {
                 this.gridSettings.pagination.MaxPageNumberPossible++
             }
             this.gridSettings.pagination.TotalNumberOfRecords++
-            this.settings.amount = this.calculateNumRows()
             this.bufferedItems = Math.floor(this.boolGridWillScroll?this.settings.amount + 2 * this.settings.tolerance:this.settings.amount)
             this.viewportHeight = this.settings.amount * this.settings.itemHeight
-            this.gridSettings.pagination.MaxRecordsViewable++
             this.nextRowIndex = this.nextRowIndex+1
-            this.setGridState(this.gridSettings.pagination.MinRecordsViewable, this.gridSettings.pagination.MaxRecordsViewable)
+            this.setGridState(this.gridSettings.pagination.MinRecordsViewable, amt)
             this.runScroller()
-            this.resetScroll()                
-            this.configureWebWorkers(this.cmpDataSet,false)
-            this.sortedData={} //clearing the presorted data b/c its not valid anymore.
-
+            //  this.resetScroll()                
+            
         },
         updateRow(rowId,data){
             const row = this.applyRowRules([{data}],rowId)
-            console.log("upated row is", row)
             this.fullDS[rowId] = row[0]
+            this.configureWebWorkers(this.fullDS,false,false) //you have to use fullDS here b/c if your filtering it won't have the updates
+            if(this.filterStrategy.isCurrentlyFiltering){
+                this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})      
+            }            
+            if(this.sortStrategy.isCurrentlySorting){
+                this.ww_sortWorker.postMessage({'MessageType':'applySort', 'SortStrategy':this.sortStrategy.strategy})
+            }
             this.runScroller()
-            this.configureWebWorkers(this.cmpDataSet,false)
             this.sortedData={} //clearing the presorted data b/c its not valid anymore.
         },
         refreshGrid(){
@@ -506,7 +529,7 @@ export default {
             this.setGridState(this.gridSettings.pagination.MinRecordsViewable, this.gridSettings.pagination.MaxRecordsViewable)
             this.runScroller()
             this.resetScroll()                
-            this.configureWebWorkers(this.cmpDataSet,false)
+            this.configureWebWorkers(this.cmpDataSet,false,false)
             this.sortedData={} //clearing the presorted data b/c its not valid anymore.
         },
         getRowsPerPage(){
@@ -608,7 +631,8 @@ export default {
             return tmp
         },        
         calculateNumRows(){
-            return this.boolGridWillScroll?Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/this.settings.itemHeight):this.cmpDataSet.length 
+            //return this.boolGridWillScroll?Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/this.settings.itemHeight):this.cmpDataSet.length 
+            return Math.floor((this.gridSettings.size.GridHeightValue - this.headerHeight)/this.settings.itemHeight) //fb - made this change but i want to test before removing
         },
         calculateStartingPoint(scrollTop){
                 if(this.gridSettings.pagination.Enabled){
@@ -657,7 +681,7 @@ export default {
             this.topPaddingHeight = topPaddingHeight
             this.data = data
         },
-        configureFilterWorkers(dataSet){
+        configureFilterWorkers(dataSet,init){
             let tmpFor1 = []
             let tmpFor2 = []
             let tmpRev1 = []
@@ -680,24 +704,24 @@ export default {
                     tmpRev2.push(dataSet[i])
                 }
             }
-            this.ww_forwardWorker1 = new forwardWorkerSetup(forwardWorker)
-            this.ww_forwardWorker1.addEventListener('message',event =>{this.handleMessage(event)})
+
+            if(init!==false){
+                this.ww_forwardWorker1 = new forwardWorkerSetup(forwardWorker)
+                this.ww_forwardWorker1.addEventListener('message',event =>{this.handleMessage(event)})
+                this.ww_forwardWorker2 = new forwardWorkerSetup(forwardWorker)
+                this.ww_forwardWorker2.addEventListener('message',event =>{this.handleMessage(event)})
+                this.ww_reverseWorker1 = new reverseWorkerSetup(reverseWorker)
+                this.ww_reverseWorker1.addEventListener('message',event =>{this.handleMessage(event)})
+                this.ww_reverseWorker2 = new reverseWorkerSetup(reverseWorker)
+                this.ww_reverseWorker2.addEventListener('message',event =>{this.handleMessage(event)})
+            }
             this.ww_forwardWorker1.postMessage({'MessageType':'data','Data':tmpFor1, 'Columns':this.gridSettings.columns})
-            
-            this.ww_forwardWorker2 = new forwardWorkerSetup(forwardWorker)
-            this.ww_forwardWorker2.addEventListener('message',event =>{this.handleMessage(event)})
             this.ww_forwardWorker2.postMessage({'MessageType':'data','Data':tmpFor2, 'Columns':this.gridSettings.columns})
-
-            this.ww_reverseWorker1 = new reverseWorkerSetup(reverseWorker)
-            this.ww_reverseWorker1.addEventListener('message',event =>{this.handleMessage(event)})
             this.ww_reverseWorker1.postMessage({'MessageType':'data','Data':tmpRev1, 'Columns':this.gridSettings.columns})
-
-            this.ww_reverseWorker2 = new reverseWorkerSetup(reverseWorker)
-            this.ww_reverseWorker2.addEventListener('message',event =>{this.handleMessage(event)})
             this.ww_reverseWorker2.postMessage({'MessageType':'data','Data':tmpRev2, 'Columns':this.gridSettings.columns})    
         },
-        configureWebWorkers(dataSet,preProcess){
-            this.configureFilterWorkers(dataSet)
+        configureWebWorkers(dataSet,preProcess,init){
+            this.configureFilterWorkers(dataSet,init)
             if(preProcess !== false){
                 this.ww_evenSortWorker = new evenSortWorkerSetup(evenSortWorker)
                 this.ww_evenSortWorker.addEventListener('message',event => {this.handleMessage(event)})
@@ -708,9 +732,12 @@ export default {
                 this.ww_oddSortWorker.postMessage({'MessageType':'data','Data':dataSet, 'Columns':this.gridSettings.columns})
             }
 
-            this.ww_sortWorker = new sortWorkerSetup(sortWorker)
-            this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
+            if(init!==false){
+                this.ww_sortWorker = new sortWorkerSetup(sortWorker)
+                this.ww_sortWorker.addEventListener('message',event => {this.handleMessage(event)})
+            }
             this.ww_sortWorker.postMessage({'MessageType':'data','Data':dataSet, 'Columns':this.gridSettings.columns})
+                
         },
         getData(offset, limit){
             console.log('offset and limit', offset, limit)
@@ -840,7 +867,6 @@ export default {
         },
         resetScroll(shouldGoToZero){
             if (shouldGoToZero) {
-               console.log('should go ot szerrroroorooorororoor')
                this.$refs.viewportElement.scrollTop=0;
             } else {
                 this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollTop-1;
@@ -882,7 +908,7 @@ export default {
                         this.ww_forwardWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                         this.ww_forwardWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
                         this.ww_reverseWorker1.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
-                        this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})
+                        this.ww_reverseWorker2.postMessage({'MessageType':'applyAllFilters','Strategy':this.filterStrategy})                        
                     } 
                     if(this.filterStrategy.columnsBeingFiltered.length===1){ 
                         this.ww_forwardWorker1.postMessage({'MessageType':'filter','Strategy':strategy,'IsCurrentlyFiltering':false})  

@@ -19,7 +19,6 @@ export default () => {
             postMessage({'MessageType':'filterResults', 'Column':col, 'Filter':strategy, 'Data':filteredData})
             postMessage({'MessageType':'filterTerminated'})
         } else {
-            console.log("waht the fuck are you doing here!?")
             return tmp
         }
     }
@@ -37,7 +36,6 @@ export default () => {
                 } else {
                     tmp = originalData
                 }
-                console.log("calling filter DS with ", tmp, message.Strategy)
                 filterDS(tmp, message.Strategy)
                 break;
             case 'applyAllFilters':

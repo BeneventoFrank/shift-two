@@ -15,7 +15,7 @@ export default () => {
             switch (dataType) {
                 case 'string':
                     copy = originalData.slice()
-                    tmp = copy.sort(function (a, b) {return ('' + a.data[index].toLowerCase().localeCompare(b.data[index].toLowerCase()))})
+                    tmp = copy.sort(function (a, b) {return ('' + a.data[index].toString().toLowerCase().localeCompare(b.data[index].toString().toLowerCase()))})
                     break;
                 case 'number':
                     copy = originalData.slice()

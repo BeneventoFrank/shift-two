@@ -53,7 +53,6 @@
                                 :isDoneFiltering="isDoneFiltering"
                                 :isDoneSorting="isDoneSorting" 
                                 :currentFilters="filterStrategy" 
-                                :clearAllFilters="clearAllFilters"
                                 :gridSettings="gridSettings">
                 </HeaderRow>
                 </div>
@@ -107,7 +106,7 @@
                                             width:${gridSettings.columns[index].WidthValue-3}px;    
 
                                             `" 
-                                    > {{item.rowIndex+1}}</span>
+                                    > {{col}}</span>
                             </template>    
                             <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" :style="`position:absolute; top:${item.viewPortRowId*settings.itemHeight}px; z-index:8888;`" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
                                 <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
@@ -244,14 +243,11 @@ export default {
             highestCountLoaded:0,
             numberOfTerminatedFilters:0,
             numberOfTerminatedSorts:0,
-            dataSlice:[],
             isHovering:false,
             isHoverOverCell:true,
             rowCurrentlyHoveringOver:null,
             cellCurrentlyHoveringOver:null,
-            clearAllFilters:false,
             curentlyHovering:0,
-            filteredData:[],
             userHasHeaders:false,
             isDoneFiltering:true,
             isDoneSorting:true,
@@ -419,12 +415,13 @@ export default {
             this.setGridState(this.gridSettings.pagination.MinRecordsViewable, this.gridSettings.pagination.MaxRecordsViewable)
             this.runScroller(null,rowIndex) 
         },
-        applyRowRules(data){
+        applyRowRules(data,currentRowId){
             let rows = []
+            console.log("data?', '", data)
             for (let i = 0; i < data.length; i++) {
                 rows[i] = {
                     data: data[i].data,
-                    rowIndex: this.nextRowIndex,
+                    rowIndex: currentRowId>0?currentRowId:this.nextRowIndex,
                     rowRules: {}
                 }
                 for (let j = 0; j < data[i].data.length; j++) {
@@ -434,7 +431,8 @@ export default {
                         break;
                     }
                 }
-                this.nextRowIndex = this.nextRowIndex+1
+
+                this.nextRowIndex = currentRowId>0?this.nextRowIndex:this.nextRowIndex+1
             }
             return rows
         },
@@ -450,11 +448,8 @@ export default {
             return itemData
         },
         addNewRow(data){
-            this.fullDS.push({
-                data:data,
-                rowIndex:this.nextRowIndex,
-                rowRules: {}
-            })
+            const row = this.applyRowRules([{data}])
+            this.fullDS = [...this.fullDS, ...row]
             this.boolGridWillScroll = this.gridWillScroll(this.headerHeight)
             const beforeLen = Object.keys(this.dataPages).length
             this.dataPages = this.processDataIntoPages()
@@ -472,11 +467,16 @@ export default {
             this.runScroller()
             this.resetScroll()                
             this.configureWebWorkers(this.cmpDataSet,false)
+            this.sortedData={} //clearing the presorted data b/c its not valid anymore.
+
         },
         updateRow(rowId,data){
-            this.fullDS[rowId].data=data
+            const row = this.applyRowRules([{data}],rowId)
+            console.log("upated row is", row)
+            this.fullDS[rowId] = row[0]
             this.runScroller()
             this.configureWebWorkers(this.cmpDataSet,false)
+            this.sortedData={} //clearing the presorted data b/c its not valid anymore.
         },
         refreshGrid(){
             //not sure... somehow update the grid as a whole
@@ -507,6 +507,7 @@ export default {
             this.runScroller()
             this.resetScroll()                
             this.configureWebWorkers(this.cmpDataSet,false)
+            this.sortedData={} //clearing the presorted data b/c its not valid anymore.
         },
         getRowsPerPage(){
             if (this.gridSettings.pagination.Enabled) {
@@ -828,11 +829,11 @@ export default {
         reConfigurePagination(count){
             let paging = {
                 Enabled:this.gridSettings.pagination.Enabled,
-                MinRecordsViewable:1,
+                MinRecordsViewable:this.cmpDataSet.length>0?1:0,
                 MaxRecordsViewable:this.cmpDataSet.length<count?this.cmpDataSet.length:count,
                 TotalNumberOfRecords:this.cmpDataSet.length,
-                PageNumberCurrentlyViewing:1,        
-                MaxPageNumberPossible:Math.ceil(this.cmpDataSet.length/count),
+                PageNumberCurrentlyViewing:this.cmpDataSet.length>0?1:0,
+                MaxPageNumberPossible:this.cmpDataSet.length>0?Math.ceil(this.cmpDataSet.length/count):0,
                 NumberOfApplicibleRowsPerPage:count,
             }
             this.gridSettings.pagination = paging          
@@ -953,10 +954,9 @@ export default {
             this.sortStrategy = { //todo. refactor this into a function 
                 isCurrentlySorting:false,
                 strategy:'',
-                columnBeingSorted:''
+                columnBeingSorted:null
             }
             this.clearFilters();
-            this.clearAllFilters = true //TODO. follow this down and see if its needed
             const min = this.gridSettings.pagination.MinRecordsViewable
             const max = this.cmpDataSet.length>this.sliderCount?this.sliderCount:this.cmpDataSet.length
             this.reConfigurePagination(max)                    
@@ -1009,7 +1009,7 @@ export default {
                         this.sortStrategy.strategy = message.data.Strategy
                         this.sortStrategy.isCurrentlySorting = true
                         this.reConfigurePagination(this.sliderCount) //I AM NOT SURE THIS SHOULD BE SLIDER COUNT?? WHY?
-                        this.sortStrategy.columnBeingSorted = message.data.Column
+                        this.sortStrategy.columnBeingSorted = parseInt(message.data.Column)
                         this.setGridState(this.gridSettings.pagination.MinRecordsViewable,this.gridSettings.pagination.MaxRecordsViewable)
                         this.runScroller()
                         this.resetScroll()
@@ -1048,12 +1048,12 @@ export default {
                     } else {
                         const split = strategy.split('^^')
                         const tmp = parseInt(split[0])
-                        if(this.isDonePreSorting&&this.gridSettings.columns[tmp].IsPreSortEnabled)
+                        if(this.isDonePreSorting&&this.gridSettings.columns[tmp].IsPreSortEnabled&&this.sortedData[tmp])
                         {
                             this.sortStrategy = {}
                             this.sortStrategy.strategy = strategy
                             this.sortStrategy.isCurrentlySorting = true
-                            this.sortStrategy.columnBeingSorted = tmp
+                            this.sortStrategy.columnBeingSorted = parseInt(tmp)
                             this.workingDataSet = this.sortedData[tmp][split[1]]
                             const min = this.gridSettings.pagination.MinRecordsViewable;
                             const max = this.gridSettings.pagination.MaxRecordsViewable;

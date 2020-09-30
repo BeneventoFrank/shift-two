@@ -17,7 +17,7 @@
                 this.params.deleteRow(this.params.rowIndex)
             },
             handleEditClick(){
-                const data = ['hello World', 'hello world', 'HELLO WORLD', 'Hello world','hello World', 'hello world', 'HELLO WORLD', 'Hello world','GoodBye World','']
+                const data = ['milford', 'hello world', 'milford', 'Hello world','hello World', 'hello world', 'HELLO WORLD', 'Hello world','GoodBye World','']
                 this.params.updateRow(this.params.rowIndex,data)
             }
         },

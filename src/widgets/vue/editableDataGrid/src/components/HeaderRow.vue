@@ -28,7 +28,7 @@
                                 justify-content:${gridSettings.columns[index].DataAlignment}; 
                                 height:30px; 
                                 background-color:${((currentFilters.columnsBeingFiltered.includes(index.toString()))) 
-                                                    || ((currentSort&&currentSort.columnBeingSorted>=0&&currentSort.columnBeingSorted == header.Index))?
+                                                    || ((currentSort.columnBeingSorted>=0&&currentSort.columnBeingSorted === index))?
                                                             gridSettings.colorScheme.ActiveIndicatorColor:
                                                                     gridSettings.colorScheme.GridHeaderBackgroundColor};`"
                         :class="`headerCell`" 
@@ -118,10 +118,6 @@ export default {
         }, 
         colorScheme:{
             type:Object
-        },
-        clearAllFilters:{
-            type:Boolean,
-            default:true
         }
     },        
     methods: {
@@ -138,8 +134,8 @@ export default {
 
        },
        handleSortClick(index, direction){
-
-            if(this.currentSort.isCurrentlySorting){
+            console.log('sent in', index , direction)
+            if(this.currentSort.isCurrentlySorting>=0){
                 if (index === this.currentSort.columnBeingSorted) {
                         if(this.isActiveSort === direction){
                             this.$emit('columnSort','')

@@ -22,13 +22,13 @@ const generateData = (numCols)=>{
         return data
     }
 
-     let rows = Math.floor(Math.random() * 170000) + 1 
-     //rows = 15
+     let rows = Math.floor(Math.random() * 150000) + 1 
+     rows = 100000
     console.log('hey we are generatng -----------------------------------------',rows)  
     let cols = numCols
     let data = []
     let dataArray = []
-    for (let i = 1; i <=rows; i++) {
+    for (let i = 0; i <rows; i++) {
         dataArray= []
         for (let j = 0; j < cols; j++) {
             dataArray.push(getRandomData())

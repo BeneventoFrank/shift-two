@@ -106,7 +106,7 @@
                                             width:${gridSettings.columns[index].WidthValue-3}px;    
 
                                             `" 
-                                    > {{col}}</span>
+                                    > {{item.rowIndex+1}}</span>
                             </template>    
                             <div @mouseleave="()=>{gridSettings.columns[index].CellClicked.clicked=false}" :style="`position:absolute; top:${item.viewPortRowId*settings.itemHeight}px; z-index:8888;`" v-show="(gridSettings.columns[index].CellClicked.clicked===true) && (item.rowIndex === gridSettings.columns[index].CellClicked.rowIndex)">
                                 <component :is="components[gridSettings.columns[index].OnCellClick]" :params="{UserInteractingWithComponent:gridSettings.columns[index].CellClicked.clicked, columnBeingEdited:index, ...item, ...gridApi}" ></component>
@@ -227,7 +227,6 @@ export default {
                 CustomComponentName:'',
                 OnCellClick:'',
                 CellClicked:false
-
             },
             headerHeight:0, //calculated total of the header use to dictate the height of datarow.
             fullDS:[],
@@ -427,6 +426,7 @@ export default {
                 for (let j = 0; j < data[i].data.length; j++) {
                     try {
                         if (this.rowRulesObj[j]&&this.rowRulesObj[j].compareFunction(data[i].data[j])) {
+                            console.log("here...")
                             rows[i].rowRules.textColor=this.rowRulesObj[j].stylesToApply.textColor
                             rows[i].rowRules.backgroundColor=this.rowRulesObj[j].stylesToApply.backgroundColor
                             break;
@@ -438,6 +438,7 @@ export default {
 
                 this.nextRowIndex = currentRowId>0?this.nextRowIndex:this.nextRowIndex+1
             }
+            console.log('returning ', rows)
             return rows
         },
         generateRows(data){
@@ -479,11 +480,8 @@ export default {
             this.gridSettings.pagination.TotalNumberOfRecords++
             this.bufferedItems = Math.floor(this.boolGridWillScroll?this.settings.amount + 2 * this.settings.tolerance:this.settings.amount)
             this.viewportHeight = this.settings.amount * this.settings.itemHeight
-            this.nextRowIndex = this.nextRowIndex+1
             this.setGridState(this.gridSettings.pagination.MinRecordsViewable, amt)
             this.runScroller()
-            //  this.resetScroll()                
-            
         },
         updateRow(rowId,data){
             const row = this.applyRowRules([{data}],rowId)
@@ -638,7 +636,7 @@ export default {
                 if(this.gridSettings.pagination.Enabled){
                     return Math.max(this.settings.minIndex + Math.floor((scrollTop) / this.settings.itemHeight),0)
                 } else {
-                    return Math.max(this.settings.minIndex + Math.floor((scrollTop - this.toleranceHeight) / this.settings.itemHeight),0)
+                    return Math.max(this.settings.minIndex + Math.floor((scrollTop) / this.settings.itemHeight),0)
                 }
         },
         calculateTopPad(startingPoint,minIndex,itemHeight){
@@ -670,9 +668,9 @@ export default {
         runScroller(event,scrollToRow){
             let startingPoint
             if (scrollToRow){
-                startingPoint = this.gridSettings.pagination.MinRecordsViewable-1
+                startingPoint = Math.max(this.gridSettings.pagination.MinRecordsViewable-1,0)
             } else {
-                startingPoint = this.calculateStartingPoint(this.$refs.viewportElement.scrollTop)-1
+                startingPoint = Math.max(this.calculateStartingPoint(this.$refs.viewportElement.scrollTop)-1,0)
             }
             const data = this.getData(startingPoint, this.bufferedItems) //buffered items = num per page + outlets
             const topPad = this.calculateTopPad(startingPoint, this.settings.minIndex,this.settings.itemHeight)
@@ -869,8 +867,8 @@ export default {
             if (shouldGoToZero) {
                this.$refs.viewportElement.scrollTop=0;
             } else {
-                this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollTop-1;
-                this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollTop+1;
+                //this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollTop-1; //TODO- refactor this function call out the grid runs exponentially smoother with out this.
+                //this.$refs.viewportElement.scrollTop=this.$refs.viewportElement.scrollTop+1;
             }
         },
         handleShowCancelEye(){
@@ -1169,6 +1167,7 @@ export default {
         } else {
             this.runScroller()   
         }
+        this.nextRowIndex = this.cmpDataSet.length
     },
     created(){
         this.gridSettings = this.processConfig()

@@ -42,22 +42,21 @@
                         <div :ref="`flyout-${index}`" class='flyout' v-if="!gridSettings.columns[index].IsUsingCustomComponent&&showAFilter&&showFilter[index]===true" :style="`right:${wouldCauseAScroll(index)?wouldCauseAScroll(index):null};`">
                             <div class='innerDiv' :style="`background-color:${gridSettings.colorScheme.FlyoutBackgroundColor}`">
                                 <div class='flyoutHeader'>
-                                    <div class='headerItem sort'> 
+                                    <div class='sort'> 
                                         <span @click="()=>{handleSortClick(index,'asc')}"><UpArrow :color="gridSettings.colorScheme.ActiveIndicatorColor" :isActiveColumn="currentSort.columnBeingSorted!==null&&header.Index.toString()===currentSort.columnBeingSorted.toString()" :isActiveSort="isActiveSort==='asc'?'asc':''" class="sortButton" :height='15'/></span>
                                         <span @click="()=>{handleSortClick(index,'desc')}"><DownArrow :color="gridSettings.colorScheme.ActiveIndicatorColor" :isActiveColumn="currentSort.columnBeingSorted!==null&&header.Index.toString()===currentSort.columnBeingSorted.toString()" :isActiveSort="isActiveSort==='desc'?'desc':''" class="sortButton rightButton" :height='15'/></span>
                                     </div>
-                                    <div class='headerItem'>
+                                    <div style="width:70%">
                                         <label class='filterHeader' :style="`color:${gridSettings.colorScheme.FlyoutTextColor};`">{{gridSettings.columns[index].ColumnHeader}}</label>
                                     </div>
-                                    <div class='headerItem'>
+                                    <div class='sort'>
                                         &nbsp;
                                     </div>       
                                 </div>
                                 <br>
                                 <FilterInput :defaultValue="cmpFilter(index)" :ref="`filterInput-${index}`" @filterInputChanged="(evt)=>{debounceInput(evt,index)}" :columnIndex="index"></FilterInput>
-                                <br>
-                                <img v-show="(!isDoneFiltering)||(!isDoneSorting)" src='../images/loader.gif' style='height:auto; width:50px;'>
-                                <br>
+                                <img v-show="(!isDoneFiltering)||(!isDoneSorting)" src='../images/loader.gif' style='height:auto; width:50px; margin-top:15px; padding-bottom:20px;'>
+                                
                             </div>
                         </div> 
                     </div>
@@ -267,13 +266,11 @@ export default {
         flex-direction: row;
         justify-content: space-evenly
     }
-    .headerItem{
-        width:30%;
-    }
     .sort{
         display: flex;
         flex-direction: row;
         justify-content: flex-start;
+        width:15%;
     }
     .sortButton{
         margin-top: 4px;

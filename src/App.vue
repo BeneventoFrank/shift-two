@@ -2,7 +2,6 @@
   <div id="app" style='width:100%;'>
     <EditableDataGrid 
       :componentList="components" 
-      :rowRules="rowRules" 
       :gridConfig="localConfig"
     />
     
@@ -13,10 +12,7 @@
 //import Slider from './widgets/vue/slider/Slider'
 import EditableDataGrid from './widgets/vue/editableDataGrid/src/editableDataGrid'
 import gridConfig from './widgets/vue/editableDataGrid/settings/custom/shift-grid-config'
-import EditAndDelete from './widgets/vue/editableDataGrid/src/components/EditAndDelete'
-import AddRecord from './widgets/vue/editableDataGrid/src/components/AddRecord'
-import EditDataInline  from './widgets/vue/editableDataGrid/src/components/EditDataInline'
-
+import Nav from './widgets/vue/editableDataGrid/src/components/Nav.vue'
 export default {
   name: 'App',
   components: {
@@ -25,33 +21,12 @@ export default {
   },
   data(){
     return {
-       localConfig:gridConfig,
        components:[],
-       rowRules:[]
+       localConfig:gridConfig,
     }
   },
   created(){
-    this.components = [EditAndDelete,AddRecord,EditDataInline]
-    this.rowRules = [
-                      {
-                        columnToCompare:0,
-                        compareFunction:(value)=>{return typeof value === 'string'&&value.toLowerCase()==="milford"},
-                        stylesToApply:{
-                          textColor:'#082347',
-                          backgroundColor:'#ffebea'
-                        }
-                      },
-                      {
-                        columnToCompare:2,
-                        compareFunction:(value)=>{return typeof value === 'string'&&value.toLowerCase()==="milford"},
-                        stylesToApply:{
-                          textColor:'#082347',
-                          backgroundColor:'#fef4e2'
-
-                        }
-                      }
-
-                    ]
+   this.components = [Nav]    
   }
 }
 </script>
